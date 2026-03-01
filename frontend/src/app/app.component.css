@@ -1,0 +1,17 @@
+/* App component styles */
+:host {
+  display: block;
+  height: 100%;
+}
+
+main {
+  min-height: calc(100vh - 64px - 140px);
+}
+:host {
+  display: block;
+  height: 100%;
+}
+
+main {
+  min-height: calc(100vh - 64px - 140px);
+}

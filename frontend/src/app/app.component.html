@@ -1,0 +1,96 @@
+<div class="min-h-screen transition-colors duration-300"
+     [ngClass]="currentTheme === 'dark' ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'">
+  <!-- Navigation Bar -->
+  <nav [ngClass]="currentTheme === 'dark' ? 'bg-slate-900 border-b border-slate-800' : 'bg-white shadow'"
+       class="sticky top-0 z-40 transition-colors duration-300">
+    <div class="container mx-auto px-4">
+      <div class="flex items-center justify-between h-16">
+        <!-- Logo -->
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">📚</span>
+          <a routerLink="/books" 
+             [ngClass]="currentTheme === 'dark' ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'"
+             class="text-2xl font-bold transition">
+            {{ title }}
+          </a>
+        </div>
+
+        <!-- Navigation Links -->
+        <div class="hidden md:flex items-center gap-1">
+          <a routerLink="/books" 
+             routerLinkActive="border-b-2"
+             [routerLinkActiveOptions]="{'exact': true}"
+             [ngClass]="currentTheme === 'dark' 
+               ? 'text-slate-400 hover:text-blue-400 routerLinkActive:text-blue-400 border-blue-400' 
+               : 'text-slate-700 hover:text-blue-600 routerLinkActive:text-blue-600 border-blue-600'"
+             class="px-4 py-2 transition">
+            📖 Read
+          </a>
+          <a routerLink="/vocabulary" 
+             routerLinkActive="border-b-2"
+             [ngClass]="currentTheme === 'dark' 
+               ? 'text-slate-400 hover:text-blue-400 routerLinkActive:text-blue-400 border-blue-400' 
+               : 'text-slate-700 hover:text-blue-600 routerLinkActive:text-blue-600 border-blue-600'"
+             class="px-4 py-2 transition">
+            📝 Vocab
+          </a>
+          <a routerLink="/review" 
+             routerLinkActive="border-b-2"
+             [ngClass]="currentTheme === 'dark' 
+               ? 'text-slate-400 hover:text-blue-400 routerLinkActive:text-blue-400 border-blue-400' 
+               : 'text-slate-700 hover:text-blue-600 routerLinkActive:text-blue-600 border-blue-600'"
+             class="px-4 py-2 transition relative">
+            🎴 Review
+            <span *ngIf="dueCount > 0" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+              {{ dueCount }}
+            </span>
+          </a>
+          <a routerLink="/kanji" 
+             routerLinkActive="border-b-2"
+             [ngClass]="currentTheme === 'dark' 
+               ? 'text-slate-400 hover:text-blue-400 routerLinkActive:text-blue-400 border-blue-400' 
+               : 'text-slate-700 hover:text-blue-600 routerLinkActive:text-blue-600 border-blue-600'"
+             class="px-4 py-2 transition">
+            漢字 Kanji
+          </a>
+          <a routerLink="/grammar" 
+             routerLinkActive="border-b-2"
+             [ngClass]="currentTheme === 'dark' 
+               ? 'text-slate-400 hover:text-blue-400 routerLinkActive:text-blue-400 border-blue-400' 
+               : 'text-slate-700 hover:text-blue-600 routerLinkActive:text-blue-600 border-blue-600'"
+             class="px-4 py-2 transition">
+            📚 Grammar
+          </a>
+        </div>
+
+        <!-- Theme Toggle & Mobile Toggle -->
+        <div class="flex items-center gap-4">
+          <button (click)="toggleTheme()"
+                  [ngClass]="currentTheme === 'dark' ? 'text-yellow-400 hover:text-yellow-300' : 'text-gray-600 hover:text-gray-800'"
+                  class="text-xl transition"
+                  [title]="currentTheme === 'dark' ? 'Light Mode' : 'Dark Mode'">
+            {{ currentTheme === 'dark' ? '☀️' : '🌙' }}
+          </button>
+          <div class="md:hidden">
+            <button [ngClass]="currentTheme === 'dark' ? 'text-slate-400 hover:text-slate-300' : 'text-gray-600 hover:text-gray-800'"
+                    class="transition">☰</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main>
+    <router-outlet></router-outlet>
+  </main>
+
+  <!-- Footer -->
+  <footer [ngClass]="currentTheme === 'dark' ? 'bg-slate-900 text-slate-400 border-t border-slate-800' : 'bg-gray-900 text-gray-400'"
+          class="py-6 mt-12 transition-colors duration-300">
+    <div class="container mx-auto px-4 text-center">
+      <p>Learn Japanese through reading • Minimalist • Systematic • Deep Learning</p>
+      <p class="text-sm mt-2">Spaced Repetition SRS • N5 Focus • Real Context</p>
+    </div>
+  </footer>
+</div>
