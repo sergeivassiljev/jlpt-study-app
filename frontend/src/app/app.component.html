@@ -1,7 +1,8 @@
 <div class="min-h-screen transition-colors duration-300"
      [ngClass]="currentTheme === 'dark' ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'">
-  <!-- Navigation Bar -->
-  <nav [ngClass]="currentTheme === 'dark' ? 'bg-slate-900 border-b border-slate-800' : 'bg-white shadow'"
+  <!-- Navigation Bar (only for authenticated users) -->
+  <nav *ngIf="currentUserEmail"
+       [ngClass]="currentTheme === 'dark' ? 'bg-slate-900 border-b border-slate-800' : 'bg-white shadow'"
        class="sticky top-0 z-40 transition-colors duration-300">
     <div class="container mx-auto px-4">
       <div class="flex items-center justify-between h-16">
@@ -65,6 +66,24 @@
 
         <!-- Theme Toggle & Mobile Toggle -->
         <div class="flex items-center gap-4">
+          <ng-container *ngIf="currentUserEmail; else loginLink">
+            <span [ngClass]="currentTheme === 'dark' ? 'text-slate-300' : 'text-slate-700'" class="text-sm">
+              {{ currentUserEmail }}
+            </span>
+            <button (click)="logout()"
+                    [ngClass]="currentTheme === 'dark' ? 'text-red-300 hover:text-red-200' : 'text-red-600 hover:text-red-700'"
+                    class="transition text-sm font-medium">
+              Logout
+            </button>
+          </ng-container>
+          <ng-template #loginLink>
+            <a routerLink="/auth"
+               [ngClass]="currentTheme === 'dark' ? 'text-blue-300 hover:text-blue-200' : 'text-blue-600 hover:text-blue-700'"
+               class="transition text-sm font-medium">
+              Login
+            </a>
+          </ng-template>
+
           <button (click)="toggleTheme()"
                   [ngClass]="currentTheme === 'dark' ? 'text-yellow-400 hover:text-yellow-300' : 'text-gray-600 hover:text-gray-800'"
                   class="text-xl transition"
@@ -85,12 +104,16 @@
     <router-outlet></router-outlet>
   </main>
 
-  <!-- Footer -->
-  <footer [ngClass]="currentTheme === 'dark' ? 'bg-slate-900 text-slate-400 border-t border-slate-800' : 'bg-gray-900 text-gray-400'"
+  <!-- Footer (only for authenticated users) -->
+  <footer *ngIf="currentUserEmail"
+          [ngClass]="currentTheme === 'dark' ? 'bg-slate-900 text-slate-400 border-t border-slate-800' : 'bg-gray-900 text-gray-400'"
           class="py-6 mt-12 transition-colors duration-300">
     <div class="container mx-auto px-4 text-center">
       <p>Learn Japanese through reading • Minimalist • Systematic • Deep Learning</p>
       <p class="text-sm mt-2">Spaced Repetition SRS • N5 Focus • Real Context</p>
     </div>
   </footer>
+
+  <!-- Pomodoro Timer Widget (only for authenticated users) -->
+  <app-pomodoro-timer *ngIf="currentUserEmail"></app-pomodoro-timer>
 </div>

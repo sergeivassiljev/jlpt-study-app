@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clear Old Cache</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        button:hover {
+            background: #b91c1c;
+        }
+        .success {
+            color: #16a34a;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+        .info {
+            background: #dbeafe;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3b82f6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧹 Clear Old Cache Data</h1>
+        <div class="info">
+            <strong>Why do this?</strong><br>
+            After implementing user authentication, old vocabulary and flashcard data stored in localStorage needs to be cleared. Each user now has their own separate data.
+        </div>
+        <p>This will remove the following old localStorage keys:</p>
+        <ul>
+            <li><code>vocabulary</code> (old global vocabulary)</li>
+            <li><code>flashcards</code> (old global flashcards)</li>
+        </ul>
+        <p><strong>Note:</strong> Your user-specific data (vocabulary_user-XXX, flashcards_user-XXX) will NOT be deleted.</p>
+        <button onclick="clearOldCache()">Clear Old Cache Now</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        function clearOldCache() {
+            const result = document.getElementById('result');
+            const removed = [];
+            
+            // Remove old global keys
+            if (localStorage.getItem('vocabulary')) {
+                localStorage.removeItem('vocabulary');
+                removed.push('vocabulary');
+            }
+            if (localStorage.getItem('flashcards')) {
+                localStorage.removeItem('flashcards');
+                removed.push('flashcards');
+            }
+            
+            if (removed.length > 0) {
+                result.innerHTML = `<p class="success">✓ Successfully removed: ${removed.join(', ')}</p><p>You can now close this page and reload your application.</p>`;
+            } else {
+                result.innerHTML = `<p class="success">✓ No old cache data found. You're all set!</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

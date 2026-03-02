@@ -24,7 +24,10 @@ import { VocabularyItem, Word } from '../../core/models/index';
             </h1>
             <p [ngClass]="currentTheme === 'dark' ? 'text-slate-400' : 'text-slate-600'" 
                class="transition-colors">
-              {{ vocabulary.length }} words saved
+              {{ vocabulary.length }} / 10,000 words saved
+              <span *ngIf="vocabulary.length >= 10000" class="text-red-500 font-semibold ml-2">
+                (Limit reached)
+              </span>
             </p>
           </div>
           <!-- View Mode Toggle -->
@@ -146,7 +149,7 @@ import { VocabularyItem, Word } from '../../core/models/index';
 
           <div class="flex items-center gap-3">
             <button (click)="addCustomWord()"
-                    [disabled]="!customWordText.trim() || !customWordMeaning.trim()"
+                    [disabled]="!customWordText.trim() || !customWordMeaning.trim() || vocabulary.length >= 10000"
                     class="px-4 py-2 rounded-lg transition font-semibold bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed">
               ➕ Add Word
             </button>
@@ -154,6 +157,11 @@ import { VocabularyItem, Word } from '../../core/models/index';
                [ngClass]="currentTheme === 'dark' ? 'text-green-400' : 'text-green-700'"
                class="text-sm transition-colors">
               {{ customWordAddedMessage }}
+            </p>
+            <p *ngIf="customWordErrorMessage"
+               [ngClass]="currentTheme === 'dark' ? 'text-red-400' : 'text-red-600'"
+               class="text-sm transition-colors">
+              {{ customWordErrorMessage }}
             </p>
           </div>
         </div>
@@ -332,6 +340,7 @@ export class VocabularyListComponent implements OnInit {
   customPartOfSpeech: string = '';
   customExampleSentence: string = '';
   customWordAddedMessage: string = '';
+  customWordErrorMessage: string = '';
   showAddWordForm: boolean = false;
   currentTheme: Theme = 'light';
   showDeleteConfirm: boolean = false;
@@ -460,6 +469,10 @@ export class VocabularyListComponent implements OnInit {
       return;
     }
 
+    // Clear previous messages
+    this.customWordAddedMessage = '';
+    this.customWordErrorMessage = '';
+
     const word: Word = {
       id: `word-custom-${Date.now()}`,
       text,
@@ -469,18 +482,32 @@ export class VocabularyListComponent implements OnInit {
     };
 
     const exampleSentence = this.customExampleSentence.trim() || `Added manually: ${text}`;
-    this.vocabularyService.addWord(word, exampleSentence);
+    
+    this.vocabularyService.addWord(word, exampleSentence).subscribe({
+      next: () => {
+        this.customWordText = '';
+        this.customWordReading = '';
+        this.customWordMeaning = '';
+        this.customPartOfSpeech = '';
+        this.customExampleSentence = '';
+        this.customWordAddedMessage = `Added "${word.text}" to your vocabulary`;
+        this.showAddWordForm = false;
 
-    this.customWordText = '';
-    this.customWordReading = '';
-    this.customWordMeaning = '';
-    this.customPartOfSpeech = '';
-    this.customExampleSentence = '';
-    this.customWordAddedMessage = `Added "${word.text}" to your vocabulary`;
-    this.showAddWordForm = false;
+        setTimeout(() => {
+          this.customWordAddedMessage = '';
+        }, 2500);
+      },
+      error: (err: any) => {
+        if (err.error) {
+          this.customWordErrorMessage = err.error;
+        } else {
+          this.customWordErrorMessage = 'Failed to add word. Please try again.';
+        }
 
-    setTimeout(() => {
-      this.customWordAddedMessage = '';
-    }, 2500);
+        setTimeout(() => {
+          this.customWordErrorMessage = '';
+        }, 5000);
+      }
+    });
   }
 }

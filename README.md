@@ -137,16 +137,30 @@ The frontend uses Tailwind CSS for styling. Configuration is in `frontend/tailwi
 ### Angular Material
 Angular Material components are available for enhanced UI elements. Import from `@angular/material` as needed.
 
-## 🔄 API Endpoints (TBD)
+## � Authentication
 
-Backend API endpoints will be implemented as follows:
+The app now uses JWT-based authentication:
+
+- `POST /auth/register` — create account (`email`, `password`)
+- `POST /auth/login` — sign in and receive `accessToken`
+- Protected endpoints (`/vocabulary`, `/flashcards`) require `Authorization: Bearer <token>`
+
+`JWT_SECRET` can be configured as an environment variable for backend runtime. If not provided, a local development fallback secret is used.
+
+## 🔄 API Endpoints
+
+Current backend endpoints include:
 
 ```
-GET    /api/kanji       - Retrieve kanji list
-GET    /api/books       - Retrieve books list
-GET    /api/grammar     - Retrieve grammar lessons
-POST   /api/users       - Create user account
-GET    /api/users/:id   - Get user profile
+POST   /auth/register
+POST   /auth/login
+GET    /books
+GET    /books/:bookId/chapters
+GET    /kanji
+GET    /vocabulary            (auth required)
+POST   /vocabulary            (auth required)
+GET    /flashcards            (auth required)
+GET    /flashcards/due        (auth required)
 ```
 
 ## 📦 Build & Deployment

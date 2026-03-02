@@ -151,8 +151,6 @@ import { Book, Chapter, Word } from '../../core/models/index';
     </div>
   `,
   styles: [`
-    @import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&display=swap');
-
     .book-text {
       font-family: 'Merriweather', 'Georgia', serif;
       color: #3f3f46;

@@ -203,8 +203,7 @@ export class FlashcardReviewComponent implements OnInit, OnDestroy {
       difficulty
     });
     
-    // Update services - this will trigger subscription updates which handle currentIndex
+    // Update flashcard service (backend also syncs vocabulary review state)
     this.srsService.reviewCard(cardId, difficulty);
-    this.vocabularyService.updateReviewStatus(vocabularyId, difficulty);
   }
 }

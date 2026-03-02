@@ -1,31 +1,56 @@
-# Ignore dependencies
+# Dependencies
 node_modules/
 npm-debug.log
 yarn-error.log
+package-lock.json
+yarn.lock
 
-# Angular build outputs
+# Build outputs
 dist/
+build/
 .angular/
 
-# NestJS build outputs
-build/
+# NestJS
+dist/
+*.js
+*.d.ts
+!nest-cli.json
 
-# IDE
+# Databases
+*.sqlite
+*.db
+*.sqlite3
+data/
+
+# IDEs
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
 .DS_Store
+*.sublime-workspace
 
-# Environment
+# Environment & Secrets
 .env
 .env.local
 .env.*.local
+.env.production.local
+.env.development.local
 
 # Testing
 coverage/
 .nyc_output/
+.jest/
 
-# OS
+# OS files
 Thumbs.db
+.DS_Store
+
+# IDE settings (user-specific)
+.vscode/settings.json
+
+# Temp files
+*.tmp
+*.temp
+*.log
