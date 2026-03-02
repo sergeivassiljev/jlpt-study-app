@@ -9,44 +9,36 @@ import { GrammarItem } from '../../core/models/index';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div [ngClass]="currentTheme === 'dark' ? 'bg-slate-950' : 'bg-slate-50'" 
-         class="min-h-screen transition-colors duration-300">
+    <div class="min-h-screen transition-colors duration-300 bg-light-bg dark:bg-dark-bg text-light-paragraph dark:text-dark-paragraph">
       <div class="container mx-auto px-4 py-8">
-        <h1 [ngClass]="currentTheme === 'dark' ? 'text-blue-400' : 'text-blue-600'" 
-            class="text-4xl font-bold mb-2 transition-colors">
+        <h1 class="text-4xl font-bold mb-2 transition-colors text-primary dark:text-primary-dark">
           N5 Grammar
         </h1>
-        <p [ngClass]="currentTheme === 'dark' ? 'text-slate-400' : 'text-slate-600'" 
-           class="mb-8 transition-colors">
+        <p class="mb-8 transition-colors text-light-paragraph dark:text-dark-paragraph">
           Master {{ grammarItems.length }} essential N5 grammar patterns
         </p>
 
         <div class="space-y-6">
           <div *ngFor="let item of grammarItems; let i = index"
                (click)="expandedId = expandedId === item.id ? undefined : item.id"
-               [ngClass]="currentTheme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'"
-               class="rounded-lg shadow hover:shadow-lg transition cursor-pointer border">
+               class="rounded-lg shadow hover:shadow-lg transition cursor-pointer border border-secondary dark:border-success bg-white dark:bg-slate-800">
             
             <!-- Header -->
             <div class="p-6 flex justify-between items-start">
               <div class="flex-1">
                 <div class="flex items-center gap-3 mb-2">
-                  <span [ngClass]="currentTheme === 'dark' ? 'text-blue-400' : 'text-blue-600'" 
-                        class="text-2xl font-bold transition-colors">
+                  <span class="text-2xl font-bold transition-colors text-primary dark:text-primary-dark">
                     {{ item.pattern }}
                   </span>
-                  <span [ngClass]="currentTheme === 'dark' ? 'bg-blue-900 text-blue-200' : 'bg-blue-100 text-blue-800'"
-                        class="px-3 py-1 rounded-full text-sm transition-colors">
+                  <span class="px-3 py-1 rounded-full text-sm transition-colors bg-primary text-white">
                     {{ item.level }}
                   </span>
                 </div>
-                <p [ngClass]="currentTheme === 'dark' ? 'text-slate-400' : 'text-slate-600'" 
-                   class="transition-colors">
+                <p class="transition-colors text-light-paragraph dark:text-dark-paragraph">
                   {{ item.explanation }}
                 </p>
               </div>
-              <span [ngClass]="currentTheme === 'dark' ? 'text-slate-500' : 'text-slate-400'" 
-                    class="text-2xl transform transition" 
+              <span class="text-2xl transform transition text-light-paragraph dark:text-dark-paragraph" 
                     [class.rotate-180]="expandedId == item.id">
                 ▼
               </span>
@@ -54,38 +46,30 @@ import { GrammarItem } from '../../core/models/index';
 
             <!-- Details -->
             <div *ngIf="expandedId == item.id" 
-                 [ngClass]="currentTheme === 'dark' ? 'border-slate-700 bg-slate-700 bg-opacity-50' : 'border-slate-200 bg-slate-50'"
-                 class="px-6 pb-6 border-t transition-colors">
+                 class="px-6 pb-6 border-t border-secondary dark:border-success transition-colors bg-light-bg dark:bg-slate-700">
               <div class="mb-6">
-                <p [ngClass]="currentTheme === 'dark' ? 'text-slate-400' : 'text-slate-500'" 
-                   class="text-sm mb-2 transition-colors">
+                <p class="text-sm mb-2 transition-colors text-light-paragraph dark:text-dark-paragraph">
                   Structure
                 </p>
-                <p [ngClass]="currentTheme === 'dark' ? 'bg-slate-900 text-slate-200' : 'bg-slate-100 text-slate-800'"
-                   class="p-3 rounded font-mono text-sm transition-colors">
+                <p class="p-3 rounded font-mono text-sm transition-colors bg-white dark:bg-slate-900 text-light-headline dark:text-dark-headline border border-secondary">
                   {{ item.structure }}
                 </p>
               </div>
 
               <div>
-                <p [ngClass]="currentTheme === 'dark' ? 'text-slate-400' : 'text-slate-500'" 
-                   class="text-sm mb-3 transition-colors">
+                <p class="text-sm mb-3 transition-colors text-light-paragraph dark:text-dark-paragraph">
                   Examples
                 </p>
                 <div class="space-y-4">
                   <div *ngFor="let example of item.examples" 
-                       [ngClass]="currentTheme === 'dark' ? 'bg-slate-900 border-slate-700' : 'bg-slate-100 border-slate-200'"
-                       class="p-4 rounded border">
-                    <p [ngClass]="currentTheme === 'dark' ? 'text-slate-100' : 'text-slate-800'" 
-                       class="text-lg font-semibold mb-1 transition-colors">
+                       class="p-4 rounded border border-secondary bg-white dark:bg-slate-900">
+                    <p class="text-lg font-semibold mb-1 transition-colors text-light-headline dark:text-dark-headline">
                       {{ example.japanese }}
                     </p>
-                    <p [ngClass]="currentTheme === 'dark' ? 'text-slate-400' : 'text-slate-600'" 
-                       class="text-sm mb-2 transition-colors">
+                    <p class="text-sm mb-2 transition-colors text-light-paragraph dark:text-dark-paragraph">
                       {{ example.furigana }}
                     </p>
-                    <p [ngClass]="currentTheme === 'dark' ? 'text-blue-400' : 'text-blue-600'" 
-                       class="transition-colors">
+                    <p class="transition-colors text-primary dark:text-primary-dark">
                       {{ example.english }}
                     </p>
                   </div>

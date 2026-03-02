@@ -6,52 +6,65 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { BookService } from '../../core/services/book.service';
 import { VocabularyService } from '../../core/services/vocabulary.service';
 import { ThemeService, Theme } from '../../core/services/theme.service';
-import { Book, Chapter, Word } from '../../core/models/index';
+import { KanjiService } from '../../core/services/kanji.service';
+import { Book, Chapter, Word, Kanji } from '../../core/models/index';
 
 @Component({
   selector: 'app-book-reader',
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div [ngClass]="currentTheme === 'dark' ? 'bg-slate-900' : 'bg-slate-50'" 
-         class="min-h-screen transition-colors duration-300"
+    <div class="min-h-screen transition-colors duration-300 bg-light-bg dark:bg-dark-bg text-light-paragraph dark:text-dark-paragraph"
          *ngIf="book && chapter">
-      <div class="max-w-2xl mx-auto px-6 py-12">
+      <div class="max-w-4xl mx-auto px-6 py-12">
         <!-- Header -->
         <div class="mb-10">
           <button (click)="goBack()" 
-                  [ngClass]="currentTheme === 'dark' ? 'text-slate-400 hover:text-slate-300' : 'text-slate-600 hover:text-slate-800'"
-                  class="mb-8 font-medium text-sm transition-colors uppercase tracking-wide">
+                  class="mb-8 font-medium text-sm transition-colors uppercase tracking-wide text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark">
             ← Back to Books
           </button>
-          <h1 [ngClass]="currentTheme === 'dark' ? 'text-slate-100' : 'text-slate-800'" 
-              class="text-5xl font-semibold mb-3 transition-colors" 
+          <h1 class="text-5xl font-semibold mb-3 transition-colors text-light-headline dark:text-dark-headline" 
               style="font-family: 'Merriweather', serif;">
             {{ book.title }}
           </h1>
-          <h2 [ngClass]="currentTheme === 'dark' ? 'text-slate-300' : 'text-slate-700'" 
-              class="text-2xl font-light mb-3 transition-colors"
+          <h2 class="text-2xl font-light mb-3 transition-colors text-light-paragraph dark:text-dark-paragraph"
               style="font-family: 'Merriweather', serif;">
             {{ chapter.title }}
           </h2>
-          <p [ngClass]="currentTheme === 'dark' ? 'text-slate-400' : 'text-slate-500'" 
-             class="text-xs uppercase tracking-widest transition-colors">
-            Chapter {{ chapter.number }} of {{ totalChapters }}
-          </p>
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <p class="text-xs uppercase tracking-widest transition-colors text-light-paragraph dark:text-dark-paragraph">
+              Chapter {{ chapter.number }} of {{ totalChapters }}
+            </p>
+            <div class="w-full md:w-64">
+              <div class="flex items-center justify-between mb-1">
+                <label for="textSizeSlider" class="text-[11px] font-semibold uppercase tracking-wide transition-colors text-light-paragraph dark:text-dark-paragraph">
+                  Text Size
+                </label>
+                <span class="text-xs font-medium text-primary dark:text-primary-dark">{{ textSizeRem | number:'1.1-1' }}rem</span>
+              </div>
+              <input
+                id="textSizeSlider"
+                type="range"
+                min="0"
+                max="100"
+                step="1"
+                [(ngModel)]="textSize"
+                class="w-full accent-primary dark:accent-primary-dark"
+              />
+            </div>
+          </div>
         </div>
 
         <!-- Progress Bar -->
-        <div [ngClass]="currentTheme === 'dark' ? 'bg-slate-700' : 'bg-slate-200'" 
-             class="w-full h-1 rounded-full mb-12 overflow-hidden transition-colors">
-          <div [ngClass]="currentTheme === 'dark' ? 'bg-gradient-to-r from-blue-400 to-blue-500' : 'bg-gradient-to-r from-slate-400 to-slate-500'" 
-               class="h-1 rounded-full transition-all duration-500" 
+        <div class="w-full h-1 rounded-full mb-12 overflow-hidden transition-colors bg-secondary/20 dark:bg-success/20">
+          <div class="h-1 rounded-full transition-all duration-500 bg-gradient-to-r from-primary to-primary-dark" 
                [style.width.%]="(chapter.number / totalChapters) * 100"></div>
         </div>
 
         <!-- Book Content -->
-        <article [ngClass]="currentTheme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-300'" 
-             class="rounded-lg shadow-sm p-16 mb-12 transition-colors"
-             style="border: 1px solid; box-shadow: 0 2px 8px rgba(0,0,0,0.04);"
+        <article class="rounded-lg shadow-sm p-20 mb-12 transition-colors bg-white dark:bg-slate-800 border border-secondary dark:border-success" 
+             style="box-shadow: 0 2px 8px rgba(0,0,0,0.04);"
+             [style.--reader-font-size.rem]="textSizeRem"
              #contentContainer
              (click)="onContentClick($event)">
           <div *ngFor="let paragraph of chapter.content; let i = index" 
@@ -60,91 +73,99 @@ import { Book, Chapter, Word } from '../../core/models/index';
           </div>
         </article>
 
-        <!-- Navigation -->
-        <div class="flex gap-6 justify-center mb-8">
-          <button *ngIf="chapter.number > 1"
-                  (click)="previousChapter()"
-                  [ngClass]="currentTheme === 'dark' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-slate-600 hover:bg-slate-700'"
-                  class="px-7 py-3 text-white rounded-md transition-all font-medium shadow-sm hover:shadow-md">
-            ← Previous
-          </button>
-          <button *ngIf="chapter.number < totalChapters"
-                  (click)="nextChapter()"
-                  [ngClass]="currentTheme === 'dark' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-slate-600 hover:bg-slate-700'"
-                  class="px-7 py-3 text-white rounded-md transition-all font-medium shadow-sm hover:shadow-md">
-            Next →
-          </button>
+        <!-- Navigation + Reader Controls -->
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-5 mb-8">
+          <div class="flex gap-6 justify-center md:justify-end w-full">
+            <button *ngIf="chapter.number > 1"
+                    (click)="previousChapter()"
+                    class="px-7 py-3 bg-light-button dark:bg-dark-button hover:opacity-90 text-white rounded-md transition-all font-medium shadow-sm hover:shadow-md">
+              ← Previous
+            </button>
+            <button *ngIf="chapter.number < totalChapters"
+                    (click)="nextChapter()"
+                    class="px-7 py-3 bg-light-button dark:bg-dark-button hover:opacity-90 text-white rounded-md transition-all font-medium shadow-sm hover:shadow-md">
+              Next →
+            </button>
+          </div>
         </div>
 
         <!-- Word Details Modal -->
         <div *ngIf="selectedWord" 
-             [ngClass]="currentTheme === 'dark' ? 'bg-black bg-opacity-60' : 'bg-black bg-opacity-40'" 
-             class="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm transition-colors"
-             (click)="selectedWord = null">
-          <div [ngClass]="currentTheme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'" 
-               class="rounded-lg shadow-lg p-10 max-w-md w-full mx-4 transition-colors"
-               style="border: 1px solid;"
+             class="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm transition-colors bg-black/40 dark:bg-black/60"
+             (click)="closeWordModal()">
+          <div class="rounded-lg shadow-lg p-10 max-w-md w-full mx-4 transition-colors bg-white dark:bg-slate-800 border border-secondary dark:border-success" 
                (click)="$event.stopPropagation()">
             <!-- Close Button -->
-            <button (click)="selectedWord = null" 
-                    [ngClass]="currentTheme === 'dark' ? 'text-slate-500 hover:text-slate-300' : 'text-slate-400 hover:text-slate-600'"
-                    class="float-right text-2xl font-light transition-colors">
+            <button (click)="closeWordModal()" 
+                    class="float-right text-2xl font-light transition-colors text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark">
               ×
             </button>
             
             <!-- Word Display -->
             <div class="text-center mb-8 pt-2">
-              <div [ngClass]="currentTheme === 'dark' ? 'text-slate-100' : 'text-slate-800'" 
-                   class="text-6xl font-semibold mb-3 transition-colors">
+              <div class="text-6xl font-semibold mb-3 transition-colors text-light-headline dark:text-dark-headline">
                 {{ selectedWord.kanji }}
               </div>
-              <div [ngClass]="currentTheme === 'dark' ? 'text-blue-400' : 'text-slate-600'" 
-                   class="text-2xl mb-2 font-medium transition-colors"
+              <div class="text-2xl mb-2 font-medium transition-colors text-primary dark:text-primary-dark"
                    style="font-family: 'Merriweather', serif;">
                 {{ selectedWord.reading }}
               </div>
             </div>
 
             <!-- Details -->
-            <div [ngClass]="currentTheme === 'dark' ? 'border-slate-700' : 'border-slate-200'" 
-                 class="border-t border-b py-6 mb-8 space-y-4 transition-colors">
+            <div class="border-t border-b border-secondary dark:border-success py-6 mb-8 space-y-4 transition-colors">
               <div>
-                <p [ngClass]="currentTheme === 'dark' ? 'text-slate-400' : 'text-slate-500'" 
-                   class="text-xs font-semibold uppercase tracking-wide mb-1 transition-colors">
+                <p class="text-xs font-semibold uppercase tracking-wide mb-1 transition-colors text-light-paragraph dark:text-dark-paragraph">
                   Reading
                 </p>
-                <p [ngClass]="currentTheme === 'dark' ? 'text-slate-100' : 'text-slate-800'" 
-                   class="text-lg transition-colors">
+                <p class="text-lg transition-colors text-light-headline dark:text-dark-headline">
                   {{ selectedWord.reading }}
                 </p>
               </div>
               <div>
-                <p [ngClass]="currentTheme === 'dark' ? 'text-slate-400' : 'text-slate-500'" 
-                   class="text-xs font-semibold uppercase tracking-wide mb-1 transition-colors">
+                <p class="text-xs font-semibold uppercase tracking-wide mb-1 transition-colors text-light-paragraph dark:text-dark-paragraph">
                   Meaning
                 </p>
-                <p [ngClass]="currentTheme === 'dark' ? 'text-slate-100' : 'text-slate-800'" 
-                   class="text-lg transition-colors">
+                <p class="text-lg transition-colors text-light-headline dark:text-dark-headline">
                   {{ selectedWord.meaning }}
                 </p>
               </div>
               <div>
-                <p [ngClass]="currentTheme === 'dark' ? 'text-slate-400' : 'text-slate-500'" 
-                   class="text-xs font-semibold uppercase tracking-wide mb-1 transition-colors">
+                <p class="text-xs font-semibold uppercase tracking-wide mb-1 transition-colors text-light-paragraph dark:text-dark-paragraph">
                   Type
                 </p>
-                <p [ngClass]="currentTheme === 'dark' ? 'text-slate-100' : 'text-slate-800'" 
-                   class="text-lg transition-colors">
+                <p class="text-lg transition-colors text-light-headline dark:text-dark-headline">
                   {{ selectedWord.pos }}
                 </p>
               </div>
             </div>
 
-            <!-- Save Button -->
-            <button (click)="saveToVocabulary()"
-                    class="w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-md transition-all font-medium shadow-sm hover:shadow-md">
+            <!-- Save Actions -->
+            <button *ngIf="!showSaveConfirm"
+                    (click)="showSaveConfirm = true"
+                    class="w-full px-4 py-3 bg-success hover:opacity-90 text-white rounded-md transition-all font-medium shadow-sm hover:shadow-md">
               💾 Save to Vocabulary
             </button>
+
+            <div *ngIf="showSaveConfirm" class="space-y-3">
+              <p class="text-sm text-center transition-colors text-light-paragraph dark:text-dark-paragraph">
+                Save this word to vocabulary?
+              </p>
+              <div class="flex gap-2">
+                <button (click)="showSaveConfirm = false"
+                        class="flex-1 px-4 py-2 rounded-md font-medium transition bg-light-bg dark:bg-slate-700 text-light-headline dark:text-dark-headline hover:opacity-80">
+                  Cancel
+                </button>
+                <button (click)="saveToVocabulary()"
+                        class="flex-1 px-4 py-2 bg-success hover:opacity-90 text-white rounded-md transition-all font-medium shadow-sm hover:shadow-md">
+                  Confirm Save
+                </button>
+              </div>
+            </div>
+
+            <p *ngIf="saveErrorMessage" class="text-sm text-center mt-3 text-red-600 dark:text-red-400">
+              {{ saveErrorMessage }}
+            </p>
           </div>
         </div>
       </div>
@@ -153,15 +174,20 @@ import { Book, Chapter, Word } from '../../core/models/index';
   styles: [`
     .book-text {
       font-family: 'Merriweather', 'Georgia', serif;
-      color: #3f3f46;
+      color: var(--paragraph-color);
       line-height: 2.2;
-      font-size: 1.5rem;
+      font-size: var(--reader-font-size, 2rem);
       font-weight: 400;
       letter-spacing: 0.02em;
     }
 
-    :host-context(.dark) .book-text {
-      color: #e4e4e7;
+    ::ng-deep .book-text p,
+    ::ng-deep .book-text span,
+    ::ng-deep .book-text div,
+    ::ng-deep .book-text ruby,
+    ::ng-deep .book-text rb {
+      font-size: inherit !important;
+      line-height: inherit;
     }
 
     .book-text p {
@@ -181,7 +207,7 @@ import { Book, Chapter, Word } from '../../core/models/index';
       top: -1.2em;
       left: 50%;
       transform: translateX(-50%);
-      font-size: 0.5em;
+      font-size: 0.5em !important;
       line-height: 1;
       font-weight: 400;
       color: #7c3aed;
@@ -233,12 +259,22 @@ export class BookReaderComponent implements OnInit, AfterViewInit {
   book?: Book;
   chapter?: Chapter;
   totalChapters = 0;
+  textSize = 50;
   currentTheme: Theme = 'light';
   selectedWord: { id: string; kanji: string; reading: string; meaning: string; pos: string } | null = null;
+  showSaveConfirm = false;
+  saveErrorMessage = '';
 
   private hiddenFurigana = new Set<string>();
+  private kanjiByCharacter = new Map<string, Kanji>();
 
-  private kanji: { [key: string]: { meaning: string; pos: string } } = {
+  get textSizeRem(): number {
+    const minRem = 1.2;
+    const maxRem = 4;
+    return minRem + ((maxRem - minRem) * this.textSize) / 100;
+  }
+
+  private wordMetadata: { [key: string]: { meaning: string; pos: string } } = {
     '小': { meaning: 'small', pos: 'kanji' },
     '猫': { meaning: 'cat', pos: 'noun' },
     '名前': { meaning: 'name', pos: 'noun' },
@@ -275,13 +311,19 @@ export class BookReaderComponent implements OnInit, AfterViewInit {
     private bookService: BookService,
     private vocabularyService: VocabularyService,
     private sanitizer: DomSanitizer,
-    private themeService: ThemeService
+    private themeService: ThemeService,
+    private kanjiService: KanjiService
   ) { }
 
   ngOnInit(): void {
     // Subscribe to theme changes
     this.themeService.theme$.subscribe(theme => {
       this.currentTheme = theme;
+    });
+
+    this.kanjiService.getKanji().subscribe(kanjiList => {
+      this.kanjiByCharacter.clear();
+      kanjiList.forEach(item => this.kanjiByCharacter.set(item.character, item));
     });
 
     this.route.paramMap.subscribe(params => {
@@ -364,19 +406,55 @@ export class BookReaderComponent implements OnInit, AfterViewInit {
       const kanji = rubyElement.textContent?.replace(rtElement?.textContent || '', '').trim() || '';
       const reading = rtElement?.textContent || '';
 
+      const metadata = this.getWordMetadata(kanji);
+
       this.selectedWord = {
         id: wordId || '',
         kanji: kanji,
         reading: reading,
-        meaning: this.kanji[kanji]?.meaning || 'Unknown',
-        pos: this.kanji[kanji]?.pos || 'N/A'
+        meaning: metadata.meaning,
+        pos: metadata.pos
+      };
+      this.showSaveConfirm = false;
+      this.saveErrorMessage = '';
+    }
+  }
+
+  private getWordMetadata(wordText: string): { meaning: string; pos: string } {
+    const directMatch = this.wordMetadata[wordText];
+    if (directMatch) {
+      return directMatch;
+    }
+
+    const kanjiChars = Array.from(wordText).filter(char => /[\u4E00-\u9FFF]/.test(char));
+    const meaningParts = kanjiChars
+      .map(char => this.kanjiByCharacter.get(char)?.meaning)
+      .filter((meaning): meaning is string => Boolean(meaning));
+
+    if (meaningParts.length > 0) {
+      const uniqueMeanings = Array.from(new Set(meaningParts));
+      return {
+        meaning: uniqueMeanings.join(' · '),
+        pos: kanjiChars.length > 1 ? 'compound' : 'kanji'
       };
     }
+
+    return {
+      meaning: 'Unknown',
+      pos: 'N/A'
+    };
+  }
+
+  closeWordModal(): void {
+    this.selectedWord = null;
+    this.showSaveConfirm = false;
+    this.saveErrorMessage = '';
   }
 
   saveToVocabulary(): void {
     if (!this.selectedWord || !this.chapter || !this.book) return;
 
+    const wordText = this.selectedWord.kanji;
     const word = {
       id: this.selectedWord.id,
       text: this.selectedWord.kanji,
@@ -388,10 +466,15 @@ export class BookReaderComponent implements OnInit, AfterViewInit {
     this.vocabularyService.addWord(
       word,
       `From: ${this.book.title} - ${this.chapter.title}`
-    );
-
-    alert(`✅ "${this.selectedWord.kanji}" added to vocabulary!`);
-    this.selectedWord = null;
+    ).subscribe({
+      next: () => {
+        this.closeWordModal();
+      },
+      error: (err) => {
+        this.saveErrorMessage = `Failed to add "${wordText}" to vocabulary.`;
+        console.error('Error adding word:', err);
+      }
+    });
   }
 
   goBack(): void {

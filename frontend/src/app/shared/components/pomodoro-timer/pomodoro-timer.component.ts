@@ -10,19 +10,17 @@ import { ThemeService, Theme } from '../../../core/services/theme.service';
   imports: [CommonModule],
   template: `
     <div *ngIf="visible" 
-         [ngClass]="currentTheme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'"
-         class="fixed bottom-4 right-4 rounded-lg shadow-2xl border z-50 transition-all"
+         class="fixed bottom-4 right-4 rounded-lg shadow-2xl border z-50 transition-all bg-white dark:bg-slate-800 border-secondary dark:border-success"
          [class.w-80]="!minimized"
          [class.w-16]="minimized">
       
       <!-- Minimized View -->
       <div *ngIf="minimized" 
            (click)="minimized = false"
-           class="p-3 cursor-pointer hover:bg-opacity-80 transition">
+           class="p-3 cursor-pointer hover:opacity-80 transition">
         <div class="text-center">
           <div class="text-2xl mb-1">🍅</div>
-          <div [ngClass]="currentTheme === 'dark' ? 'text-slate-300' : 'text-slate-700'"
-               class="text-xs font-mono">
+          <div class="text-xs font-mono text-light-paragraph dark:text-dark-paragraph">
             {{ formatTime(pomodoroState.timeRemaining) }}
           </div>
         </div>
@@ -32,21 +30,18 @@ import { ThemeService, Theme } from '../../../core/services/theme.service';
       <div *ngIf="!minimized" class="p-4">
         <!-- Header -->
         <div class="flex justify-between items-center mb-4">
-          <h3 [ngClass]="currentTheme === 'dark' ? 'text-slate-200' : 'text-slate-800'"
-              class="font-bold flex items-center gap-2">
+          <h3 class="font-bold flex items-center gap-2 text-light-headline dark:text-dark-headline">
             <span class="text-xl">🍅</span>
             Pomodoro Timer
           </h3>
           <div class="flex gap-1">
             <button (click)="minimized = true"
-                    [ngClass]="currentTheme === 'dark' ? 'text-slate-400 hover:text-slate-200' : 'text-slate-500 hover:text-slate-700'"
-                    class="text-lg leading-none transition"
+                    class="text-lg leading-none transition text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark"
                     title="Minimize">
               _
             </button>
             <button (click)="visible = false"
-                    [ngClass]="currentTheme === 'dark' ? 'text-slate-400 hover:text-slate-200' : 'text-slate-500 hover:text-slate-700'"
-                    class="text-lg leading-none transition"
+                    class="text-lg leading-none transition text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark"
                     title="Close">
               ×
             </button>
@@ -63,19 +58,16 @@ import { ThemeService, Theme } from '../../../core/services/theme.service';
 
         <!-- Timer Display -->
         <div class="text-center mb-6">
-          <div [ngClass]="currentTheme === 'dark' ? 'text-slate-100' : 'text-slate-900'"
-               class="text-5xl font-mono font-bold transition-colors">
+          <div class="text-5xl font-mono font-bold transition-colors text-light-headline dark:text-dark-headline">
             {{ formatTime(pomodoroState.timeRemaining) }}
           </div>
-          <div [ngClass]="currentTheme === 'dark' ? 'text-slate-400' : 'text-slate-600'"
-               class="text-sm mt-2 transition-colors">
+          <div class="text-sm mt-2 transition-colors text-light-paragraph dark:text-dark-paragraph">
             {{ pomodoroState.completedPomodoros }} / {{ pomodoroState.completedPomodoros + (4 - (pomodoroState.completedPomodoros % 4)) }} until long break
           </div>
         </div>
 
         <!-- Progress Bar -->
-        <div [ngClass]="currentTheme === 'dark' ? 'bg-slate-700' : 'bg-slate-200'"
-             class="h-2 rounded-full mb-6 overflow-hidden transition-colors">
+        <div class="h-2 rounded-full mb-6 overflow-hidden transition-colors bg-secondary/20 dark:bg-success/20">
           <div [ngClass]="getPhaseBarColor()"
                class="h-full transition-all duration-1000"
                [style.width.%]="getProgress()">
@@ -86,22 +78,20 @@ import { ThemeService, Theme } from '../../../core/services/theme.service';
         <div class="flex gap-2 mb-4">
           <button *ngIf="pomodoroState.state === 'idle' || pomodoroState.state === 'paused'"
                   (click)="start()"
-                  class="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition">
+                  class="flex-1 bg-success hover:opacity-90 text-white font-medium py-2 px-4 rounded-lg transition">
                   {{ pomodoroState.state === 'paused' ? 'Resume' : 'Start' }}
           </button>
           <button *ngIf="pomodoroState.state === 'running'"
                   (click)="pause()"
-                  class="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white font-medium py-2 px-4 rounded-lg transition">
+                  class="flex-1 bg-yellow-600 hover:opacity-90 text-white font-medium py-2 px-4 rounded-lg transition">
             Pause
           </button>
           <button (click)="reset()"
-                  [ngClass]="currentTheme === 'dark' ? 'bg-slate-700 hover:bg-slate-600 text-slate-200' : 'bg-slate-200 hover:bg-slate-300 text-slate-800'"
-                  class="px-4 py-2 rounded-lg font-medium transition">
+                  class="px-4 py-2 rounded-lg font-medium transition bg-light-bg dark:bg-slate-700 text-light-headline dark:text-dark-headline hover:opacity-80">
             Reset
           </button>
           <button (click)="skip()"
-                  [ngClass]="currentTheme === 'dark' ? 'bg-slate-700 hover:bg-slate-600 text-slate-200' : 'bg-slate-200 hover:bg-slate-300 text-slate-800'"
-                  class="px-4 py-2 rounded-lg font-medium transition"
+                  class="px-4 py-2 rounded-lg font-medium transition bg-light-bg dark:bg-slate-700 text-light-headline dark:text-dark-headline hover:opacity-80"
                   title="Skip to next phase">
             Skip
           </button>
@@ -110,32 +100,43 @@ import { ThemeService, Theme } from '../../../core/services/theme.service';
         <!-- Quick Actions -->
         <div class="flex gap-2 text-xs">
           <button (click)="startWork()"
-                  [ngClass]="currentTheme === 'dark' ? 'bg-red-900 hover:bg-red-800 text-red-200' : 'bg-red-100 hover:bg-red-200 text-red-800'"
-                  class="flex-1 py-1.5 rounded transition font-medium">
+                  class="flex-1 py-1.5 rounded transition font-medium bg-red-600 hover:bg-red-700 text-white">
             Work (25m)
           </button>
           <button (click)="startShortBreak()"
-                  [ngClass]="currentTheme === 'dark' ? 'bg-blue-900 hover:bg-blue-800 text-blue-200' : 'bg-blue-100 hover:bg-blue-200 text-blue-800'"
-                  class="flex-1 py-1.5 rounded transition font-medium">
+                  class="flex-1 py-1.5 rounded transition font-medium bg-teal-600 hover:bg-teal-700 text-white">
             Break (5m)
           </button>
           <button (click)="startLongBreak()"
-                  [ngClass]="currentTheme === 'dark' ? 'bg-purple-900 hover:bg-purple-800 text-purple-200' : 'bg-purple-100 hover:bg-purple-200 text-purple-800'"
-                  class="flex-1 py-1.5 rounded transition font-medium">
+                  class="flex-1 py-1.5 rounded transition font-medium bg-violet-600 hover:bg-violet-700 text-white">
             Long (15m)
           </button>
         </div>
 
         <!-- Stats -->
-        <div [ngClass]="currentTheme === 'dark' ? 'bg-slate-700 text-slate-300' : 'bg-slate-50 text-slate-700'"
-             class="mt-4 p-3 rounded-lg text-center transition-colors">
+        <div class="mt-4 p-3 rounded-lg text-center transition-colors bg-light-bg dark:bg-slate-700 text-light-headline dark:text-dark-headline">
           <div class="text-2xl font-bold">{{ pomodoroState.totalPomodoros }}</div>
           <div class="text-xs">Total Pomodoros Today</div>
-          <button (click)="resetStats()"
-                  [ngClass]="currentTheme === 'dark' ? 'text-slate-500 hover:text-slate-300' : 'text-slate-400 hover:text-slate-600'"
-                  class="text-xs mt-1 transition">
+
+          <button *ngIf="!showResetStatsConfirm"
+                  (click)="showResetStatsConfirm = true"
+                  class="text-xs mt-1 transition text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark">
             Reset Stats
           </button>
+
+          <div *ngIf="showResetStatsConfirm" class="mt-2">
+            <p class="text-[11px] mb-2 text-light-paragraph dark:text-dark-paragraph">Reset today’s pomodoro count?</p>
+            <div class="flex justify-center gap-2">
+              <button (click)="cancelResetStats()"
+                      class="px-2 py-1 text-xs rounded transition bg-light-bg dark:bg-slate-600 text-light-headline dark:text-dark-headline hover:opacity-80">
+                Cancel
+              </button>
+              <button (click)="confirmResetStats()"
+                      class="px-2 py-1 text-xs rounded transition bg-red-600 hover:bg-red-700 text-white">
+                Yes, Reset
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -143,7 +144,7 @@ import { ThemeService, Theme } from '../../../core/services/theme.service';
     <!-- Floating Toggle Button (when hidden) -->
     <button *ngIf="!visible"
             (click)="visible = true"
-            class="fixed bottom-4 right-4 w-14 h-14 bg-red-600 hover:bg-red-700 text-white rounded-full shadow-lg flex items-center justify-center text-2xl z-50 transition-all hover:scale-110"
+            class="fixed bottom-4 right-4 w-14 h-14 bg-secondary dark:bg-success hover:opacity-90 text-white rounded-full shadow-lg flex items-center justify-center text-2xl z-50 transition-all hover:scale-110"
             title="Show Pomodoro Timer">
       🍅
     </button>
@@ -158,6 +159,7 @@ export class PomodoroTimerComponent implements OnInit, OnDestroy {
   pomodoroState!: PomodoroState;
   visible = false;
   minimized = false;
+  showResetStatsConfirm = false;
   currentTheme: Theme = 'light';
   
   private subscription = new Subscription();
@@ -215,20 +217,26 @@ export class PomodoroTimerComponent implements OnInit, OnDestroy {
 
   startWork(): void {
     this.pomodoroService.startWork();
+    this.showResetStatsConfirm = false;
   }
 
   startShortBreak(): void {
     this.pomodoroService.startShortBreak();
+    this.showResetStatsConfirm = false;
   }
 
   startLongBreak(): void {
     this.pomodoroService.startLongBreak();
+    this.showResetStatsConfirm = false;
   }
 
-  resetStats(): void {
-    if (confirm('Reset today\'s pomodoro count?')) {
-      this.pomodoroService.resetTotalPomodoros();
-    }
+  cancelResetStats(): void {
+    this.showResetStatsConfirm = false;
+  }
+
+  confirmResetStats(): void {
+    this.pomodoroService.resetTotalPomodoros();
+    this.showResetStatsConfirm = false;
   }
 
   formatTime(seconds: number): string {

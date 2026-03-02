@@ -9,23 +9,23 @@ import { AuthService } from '../../core/services/auth.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div class="min-h-screen flex items-center justify-center bg-slate-50 px-4">
-      <div class="w-full max-w-md bg-white border border-slate-200 rounded-xl shadow p-6">
-        <h1 class="text-2xl font-bold text-slate-900 mb-2">Sign In</h1>
-        <p class="text-slate-600 mb-6">Use your account to access your vocabulary and reviews.</p>
+    <div class="min-h-screen flex items-center justify-center px-4 transition-colors duration-300 bg-light-bg dark:bg-dark-bg">
+      <div class="w-full max-w-md bg-white dark:bg-slate-800 border border-secondary dark:border-success rounded-xl shadow-lg p-6 transition-colors">
+        <h1 class="text-2xl font-bold text-light-headline dark:text-dark-headline mb-2">Sign In</h1>
+        <p class="text-light-paragraph dark:text-dark-paragraph mb-6">Use your account to access your vocabulary and reviews.</p>
 
         <div class="flex gap-2 mb-4">
           <button
             type="button"
             (click)="mode = 'login'"
-            [class]="mode === 'login' ? 'bg-blue-600 text-white px-3 py-2 rounded-lg font-medium' : 'bg-slate-200 text-slate-700 px-3 py-2 rounded-lg font-medium'"
+            [class]="mode === 'login' ? 'bg-light-button dark:bg-dark-button text-white px-3 py-2 rounded-lg font-medium' : 'bg-light-bg dark:bg-slate-700 text-light-headline dark:text-dark-headline px-3 py-2 rounded-lg font-medium hover:opacity-80'"
           >
             Login
           </button>
           <button
             type="button"
             (click)="mode = 'register'"
-            [class]="mode === 'register' ? 'bg-blue-600 text-white px-3 py-2 rounded-lg font-medium' : 'bg-slate-200 text-slate-700 px-3 py-2 rounded-lg font-medium'"
+            [class]="mode === 'register' ? 'bg-light-button dark:bg-dark-button text-white px-3 py-2 rounded-lg font-medium' : 'bg-light-bg dark:bg-slate-700 text-light-headline dark:text-dark-headline px-3 py-2 rounded-lg font-medium hover:opacity-80'"
           >
             Register
           </button>
@@ -33,37 +33,36 @@ import { AuthService } from '../../core/services/auth.service';
 
         <form (ngSubmit)="submit()" class="space-y-4">
           <div>
-            <label class="block text-sm text-slate-700 mb-1">Email</label>
+            <label class="block text-sm text-light-headline dark:text-dark-headline mb-1 font-medium">Email</label>
             <input
               [(ngModel)]="email"
               name="email"
               type="email"
               required
-              class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="w-full border border-secondary rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary bg-light-bg dark:bg-slate-700 text-light-paragraph dark:text-dark-paragraph placeholder-gray-400 dark:placeholder-gray-500"
               placeholder="you@example.com"
             />
           </div>
 
           <div>
-            <label class="block text-sm text-slate-700 mb-1">Password</label>
+            <label class="block text-sm text-light-headline dark:text-dark-headline mb-1 font-medium">Password</label>
             <input
               [(ngModel)]="password"
               name="password"
               type="password"
               required
               minlength="8"
-              class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="w-full border border-secondary rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary bg-light-bg dark:bg-slate-700 text-light-paragraph dark:text-dark-paragraph placeholder-gray-400 dark:placeholder-gray-500"
               placeholder="At least 8 characters"
             />
           </div>
 
-          <p *ngIf="errorMessage" class="text-red-600 text-sm">{{ errorMessage }}</p>
+          <p *ngIf="errorMessage" class="text-secondary dark:text-success text-sm font-medium">{{ errorMessage }}</p>
 
           <button
             type="submit"
             [disabled]="loading || !email.trim() || password.length < 8"
-            class="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
+            class="w-full bg-light-button dark:bg-dark-button hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed text-white py-2 rounded-lg font-semibold transition">
             {{ loading ? 'Please wait...' : (mode === 'login' ? 'Login' : 'Create account') }}
           </button>
         </form>

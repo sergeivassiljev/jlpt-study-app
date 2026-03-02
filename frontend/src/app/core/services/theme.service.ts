@@ -52,8 +52,10 @@ export class ThemeService {
     const html = document.documentElement;
     if (theme === 'dark') {
       html.classList.add('dark');
+      html.setAttribute('data-theme', 'dark');
     } else {
       html.classList.remove('dark');
+      html.setAttribute('data-theme', 'light');
     }
   }
 }

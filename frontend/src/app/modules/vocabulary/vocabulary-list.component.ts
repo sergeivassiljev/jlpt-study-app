@@ -13,19 +13,16 @@ import { VocabularyItem, Word } from '../../core/models/index';
   standalone: true,
   imports: [CommonModule, RouterLink, FormsModule],
   template: `
-    <div [ngClass]="currentTheme === 'dark' ? 'bg-slate-950' : 'bg-slate-50'" 
-         class="min-h-screen transition-colors duration-300">
+    <div class="min-h-screen transition-colors duration-300 bg-light-bg dark:bg-dark-bg text-light-paragraph dark:text-dark-paragraph">
       <div class="container mx-auto px-4 py-8">
         <div class="flex justify-between items-center mb-8">
           <div>
-            <h1 [ngClass]="currentTheme === 'dark' ? 'text-blue-400' : 'text-blue-600'" 
-                class="text-4xl font-bold mb-2 transition-colors">
+            <h1 class="text-4xl font-bold mb-2 transition-colors text-primary dark:text-primary-dark">
               My Vocabulary
             </h1>
-            <p [ngClass]="currentTheme === 'dark' ? 'text-slate-400' : 'text-slate-600'" 
-               class="transition-colors">
+            <p class="transition-colors text-light-paragraph dark:text-dark-paragraph">
               {{ vocabulary.length }} / 10,000 words saved
-              <span *ngIf="vocabulary.length >= 10000" class="text-red-500 font-semibold ml-2">
+              <span *ngIf="vocabulary.length >= 10000" class="text-secondary dark:text-success font-semibold ml-2">
                 (Limit reached)
               </span>
             </p>
@@ -34,16 +31,16 @@ import { VocabularyItem, Word } from '../../core/models/index';
           <div class="flex gap-2">
             <button (click)="viewMode = 'list'"
                     [ngClass]="viewMode === 'list'
-                      ? 'bg-blue-600 text-white'
-                      : (currentTheme === 'dark' ? 'bg-slate-700 text-slate-300 hover:bg-slate-600' : 'bg-slate-200 text-slate-800 hover:bg-slate-300')"
+                      ? 'bg-light-button dark:bg-dark-button text-white'
+                      : 'bg-light-bg dark:bg-slate-700 text-light-headline dark:text-dark-headline hover:opacity-80'"
                     class="px-3 py-2 rounded-lg transition font-medium"
                     title="List view">
               ≡ List
             </button>
             <button (click)="viewMode = 'card'"
                     [ngClass]="viewMode === 'card'
-                      ? 'bg-blue-600 text-white'
-                      : (currentTheme === 'dark' ? 'bg-slate-700 text-slate-300 hover:bg-slate-600' : 'bg-slate-200 text-slate-800 hover:bg-slate-300')"
+                      ? 'bg-light-button dark:bg-dark-button text-white'
+                      : 'bg-light-bg dark:bg-slate-700 text-light-headline dark:text-dark-headline hover:opacity-80'"
                     class="px-3 py-2 rounded-lg transition font-medium"
                     title="Card view">
               ⊞ Card
@@ -54,10 +51,7 @@ import { VocabularyItem, Word } from '../../core/models/index';
         <!-- Search Input -->
         <div class="mb-6">
           <input [(ngModel)]="searchTerm"
-                 [ngClass]="currentTheme === 'dark' 
-                   ? 'bg-slate-800 border-slate-700 text-slate-100 placeholder-slate-400' 
-                   : 'bg-white border-slate-200 text-slate-800 placeholder-slate-500'"
-                 class="w-full rounded-lg px-4 py-2 border transition focus:outline-none focus:ring-2 focus:ring-blue-500"
+                 class="w-full rounded-lg px-4 py-2 border border-secondary dark:border-success transition focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-slate-800 text-light-paragraph dark:text-dark-paragraph placeholder-gray-400 dark:placeholder-gray-500"
                  placeholder="🔍 Search vocabulary...">
         </div>
 
@@ -65,22 +59,22 @@ import { VocabularyItem, Word } from '../../core/models/index';
         <div class="flex gap-4 mb-8">
           <button (click)="filter = 'all'" 
                   [ngClass]="filter === 'all' 
-                    ? 'bg-blue-600 text-white' 
-                    : (currentTheme === 'dark' ? 'bg-slate-700 text-slate-300 hover:bg-slate-600' : 'bg-slate-200 text-slate-800 hover:bg-slate-300')"
+                    ? 'bg-light-button dark:bg-dark-button text-white' 
+                    : 'bg-light-bg dark:bg-slate-700 text-light-headline dark:text-dark-headline hover:opacity-80'"
                   class="px-4 py-2 rounded-lg transition font-medium">
             All ({{ vocabulary.length }})
           </button>
           <button (click)="filter = 'new'"
                   [ngClass]="filter === 'new'
                     ? 'bg-yellow-600 text-white'
-                    : (currentTheme === 'dark' ? 'bg-slate-700 text-slate-300 hover:bg-slate-600' : 'bg-slate-200 text-slate-800 hover:bg-slate-300')"
+                    : 'bg-light-bg dark:bg-slate-700 text-light-headline dark:text-dark-headline hover:opacity-80'"
                   class="px-4 py-2 rounded-lg transition font-medium">
             New ({{ newCount }})
           </button>
           <button (click)="filter = 'reviewed'"
                   [ngClass]="filter === 'reviewed'
-                    ? 'bg-green-600 text-white'
-                    : (currentTheme === 'dark' ? 'bg-slate-700 text-slate-300 hover:bg-slate-600' : 'bg-slate-200 text-slate-800 hover:bg-slate-300')"
+                    ? 'bg-success text-white'
+                    : 'bg-light-bg dark:bg-slate-700 text-light-headline dark:text-dark-headline hover:opacity-80'"
                   class="px-4 py-2 rounded-lg transition font-medium">
             Reviewed ({{ reviewedCount }})
           </button>
@@ -89,8 +83,8 @@ import { VocabularyItem, Word } from '../../core/models/index';
         <div class="mb-4">
           <button (click)="toggleAddWordForm()"
                   [ngClass]="showAddWordForm
-                    ? (currentTheme === 'dark' ? 'bg-slate-700 text-slate-100 hover:bg-slate-600' : 'bg-slate-300 text-slate-900 hover:bg-slate-400')
-                    : 'bg-green-600 text-white hover:bg-green-700'"
+                    ? 'bg-light-bg dark:bg-slate-700 text-light-headline dark:text-dark-headline hover:opacity-80'
+                    : 'bg-light-button dark:bg-dark-button text-white hover:opacity-90'"
                   class="px-4 py-2 rounded-lg transition font-semibold">
             {{ showAddWordForm ? '✖ Hide Form' : '➕ Add New Word' }}
           </button>
@@ -98,69 +92,49 @@ import { VocabularyItem, Word } from '../../core/models/index';
 
         <!-- Add Custom Vocabulary -->
         <div *ngIf="showAddWordForm"
-             [ngClass]="currentTheme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'"
-             class="rounded-lg shadow p-6 border mb-8">
-          <h2 [ngClass]="currentTheme === 'dark' ? 'text-slate-100' : 'text-slate-800'"
-              class="text-xl font-bold mb-4 transition-colors">
+             class="rounded-lg shadow p-6 border border-secondary dark:border-success mb-8 bg-white dark:bg-slate-800 transition-colors">
+          <h2 class="text-xl font-bold mb-4 transition-colors text-light-headline dark:text-dark-headline">
             Add Your Own Word
           </h2>
-          <p [ngClass]="currentTheme === 'dark' ? 'text-slate-400' : 'text-slate-600'"
-             class="text-sm mb-4 transition-colors">
+          <p class="text-sm mb-4 transition-colors text-light-paragraph dark:text-dark-paragraph">
             Add kanji, kana-only words, or any term you want to study.
           </p>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
             <input [(ngModel)]="customWordText"
-                   [ngClass]="currentTheme === 'dark' 
-                     ? 'bg-slate-700 border-slate-600 text-slate-100 placeholder-slate-400' 
-                     : 'bg-slate-50 border-slate-300 text-slate-800 placeholder-slate-500'"
-                   class="rounded-lg px-3 py-2 border transition focus:outline-none focus:ring-2 focus:ring-blue-500"
+                   class="rounded-lg px-3 py-2 border border-secondary dark:border-success transition focus:outline-none focus:ring-2 focus:ring-primary bg-light-bg dark:bg-slate-700 text-light-paragraph dark:text-dark-paragraph placeholder-gray-400 dark:placeholder-gray-500"
                    placeholder="Word (e.g. ねこ / 猫) *">
             <input [(ngModel)]="customWordReading"
-                   [ngClass]="currentTheme === 'dark' 
-                     ? 'bg-slate-700 border-slate-600 text-slate-100 placeholder-slate-400' 
-                     : 'bg-slate-50 border-slate-300 text-slate-800 placeholder-slate-500'"
-                   class="rounded-lg px-3 py-2 border transition focus:outline-none focus:ring-2 focus:ring-blue-500"
+                   class="rounded-lg px-3 py-2 border border-secondary dark:border-success transition focus:outline-none focus:ring-2 focus:ring-primary bg-light-bg dark:bg-slate-700 text-light-paragraph dark:text-dark-paragraph placeholder-gray-400 dark:placeholder-gray-500"
                    placeholder="Reading (optional if kana-only)">
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
             <input [(ngModel)]="customWordMeaning"
-                   [ngClass]="currentTheme === 'dark' 
-                     ? 'bg-slate-700 border-slate-600 text-slate-100 placeholder-slate-400' 
-                     : 'bg-slate-50 border-slate-300 text-slate-800 placeholder-slate-500'"
-                   class="rounded-lg px-3 py-2 border transition focus:outline-none focus:ring-2 focus:ring-blue-500"
+                   class="rounded-lg px-3 py-2 border border-secondary dark:border-success transition focus:outline-none focus:ring-2 focus:ring-primary bg-light-bg dark:bg-slate-700 text-light-paragraph dark:text-dark-paragraph placeholder-gray-400 dark:placeholder-gray-500"
                    placeholder="Meaning in English *">
             <input [(ngModel)]="customPartOfSpeech"
-                   [ngClass]="currentTheme === 'dark' 
-                     ? 'bg-slate-700 border-slate-600 text-slate-100 placeholder-slate-400' 
-                     : 'bg-slate-50 border-slate-300 text-slate-800 placeholder-slate-500'"
-                   class="rounded-lg px-3 py-2 border transition focus:outline-none focus:ring-2 focus:ring-blue-500"
+                   class="rounded-lg px-3 py-2 border border-secondary dark:border-success transition focus:outline-none focus:ring-2 focus:ring-primary bg-light-bg dark:bg-slate-700 text-light-paragraph dark:text-dark-paragraph placeholder-gray-400 dark:placeholder-gray-500"
                    placeholder="Part of speech (optional)">
           </div>
 
           <textarea [(ngModel)]="customExampleSentence"
                     rows="2"
-                    [ngClass]="currentTheme === 'dark' 
-                      ? 'bg-slate-700 border-slate-600 text-slate-100 placeholder-slate-400' 
-                      : 'bg-slate-50 border-slate-300 text-slate-800 placeholder-slate-500'"
-                    class="w-full rounded-lg px-3 py-2 border transition focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
+                    class="w-full rounded-lg px-3 py-2 border border-secondary dark:border-success transition focus:outline-none focus:ring-2 focus:ring-primary mb-4 bg-light-bg dark:bg-slate-700 text-light-paragraph dark:text-dark-paragraph placeholder-gray-400 dark:placeholder-gray-500"
                     placeholder="Example sentence (optional)"></textarea>
 
           <div class="flex items-center gap-3">
             <button (click)="addCustomWord()"
                     [disabled]="!customWordText.trim() || !customWordMeaning.trim() || vocabulary.length >= 10000"
-                    class="px-4 py-2 rounded-lg transition font-semibold bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                    class="px-4 py-2 rounded-lg transition font-semibold bg-light-button dark:bg-dark-button text-white hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed">
               ➕ Add Word
             </button>
             <p *ngIf="customWordAddedMessage"
-               [ngClass]="currentTheme === 'dark' ? 'text-green-400' : 'text-green-700'"
-               class="text-sm transition-colors">
+               class="text-sm transition-colors text-success font-medium">
               {{ customWordAddedMessage }}
             </p>
             <p *ngIf="customWordErrorMessage"
-               [ngClass]="currentTheme === 'dark' ? 'text-red-400' : 'text-red-600'"
-               class="text-sm transition-colors">
+               class="text-sm transition-colors text-secondary dark:text-success font-medium">
               {{ customWordErrorMessage }}
             </p>
           </div>
@@ -169,57 +143,45 @@ import { VocabularyItem, Word } from '../../core/models/index';
         <!-- View: List -->
         <div *ngIf="viewMode === 'list' && filteredVocabulary.length > 0" class="space-y-3">
           <div *ngFor="let item of filteredVocabulary"
-               [ngClass]="currentTheme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'"
-               class="rounded-lg shadow hover:shadow-lg transition p-6 border">
+               class="rounded-lg shadow hover:shadow-lg transition p-6 border border-secondary dark:border-success bg-white dark:bg-slate-800 transition-colors">
             <div class="flex justify-between items-start gap-4">
               <div class="flex-1">
-                <h3 [ngClass]="currentTheme === 'dark' ? 'text-slate-100' : 'text-slate-800'" 
-                    class="text-2xl font-bold transition-colors">
+                <h3 class="text-2xl font-bold transition-colors text-light-headline dark:text-dark-headline">
                   {{ item.word.text }}
                 </h3>
-                <p [ngClass]="currentTheme === 'dark' ? 'text-blue-400' : 'text-blue-600'" 
-                   class="text-lg mb-2 transition-colors">
+                <p class="text-lg mb-2 transition-colors text-primary dark:text-primary-dark">
                   {{ item.word.reading }}
                 </p>
-                <p [ngClass]="currentTheme === 'dark' ? 'text-slate-400' : 'text-slate-600'" 
-                   class="mb-2 transition-colors">
+                <p class="mb-2 transition-colors text-light-paragraph dark:text-dark-paragraph">
                   {{ item.word.meaning }}
                 </p>
                 <p *ngIf="!isFromBook(item.exampleSentence)"
-                   [ngClass]="currentTheme === 'dark' ? 'text-slate-500' : 'text-slate-500'" 
-                   class="text-sm transition-colors">
+                   class="text-sm transition-colors text-light-paragraph dark:text-dark-paragraph">
                   {{ item.exampleSentence }}
                 </p>
                 <p *ngIf="isFromBook(item.exampleSentence)"
                    class="text-sm">
-                  <span [ngClass]="currentTheme === 'dark' ? 'text-slate-500' : 'text-slate-500'">From: </span>
+                  <span class="text-light-paragraph dark:text-dark-paragraph">From: </span>
                   <button (click)="navigateToBook(item.exampleSentence)"
-                          [ngClass]="currentTheme === 'dark' ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'"
-                          class="underline transition-colors cursor-pointer">
+                          class="underline transition-colors cursor-pointer text-primary dark:text-primary-dark hover:opacity-80">
                     {{ getBookInfo(item.exampleSentence)?.bookTitle }} - {{ getBookInfo(item.exampleSentence)?.chapterTitle }}
                   </button>
                 </p>
               </div>
               <div class="flex items-center gap-3 whitespace-nowrap">
                 <span [ngClass]="item.reviewed 
-                        ? (currentTheme === 'dark' ? 'bg-green-900 text-green-200' : 'bg-green-100 text-green-800')
-                        : (currentTheme === 'dark' ? 'bg-yellow-900 text-yellow-200' : 'bg-yellow-100 text-yellow-800')"
+                        ? 'bg-success text-white'
+                        : 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200'"
                       class="inline-block px-3 py-1 rounded-full text-sm font-semibold transition-colors">
                   {{ item.reviewed ? 'Reviewed' : 'New' }}
                 </span>
                 <button (click)="scheduleForReview(item.id)"
-                        [ngClass]="currentTheme === 'dark' 
-                          ? 'bg-blue-900 text-blue-200 hover:bg-blue-800' 
-                          : 'bg-blue-100 text-blue-800 hover:bg-blue-200'"
-                        class="px-3 py-1 rounded-lg transition font-medium text-sm"
+                        class="px-3 py-1 rounded-lg transition font-medium text-sm bg-indigo-600 hover:bg-indigo-700 text-white"
                         title="Review this word now">
                   ⚡ Review Now
                 </button>
                 <button (click)="confirmDelete(item.id)"
-                        [ngClass]="currentTheme === 'dark' 
-                          ? 'bg-red-900 text-red-200 hover:bg-red-800' 
-                          : 'bg-red-100 text-red-800 hover:bg-red-200'"
-                        class="px-3 py-1 rounded-lg transition font-medium text-sm">
+                        class="px-3 py-1 rounded-lg transition font-medium text-sm bg-red-600 hover:bg-red-700 text-white">
                   🗑️ Delete
                 </button>
               </div>
@@ -231,57 +193,44 @@ import { VocabularyItem, Word } from '../../core/models/index';
         <div *ngIf="viewMode === 'card' && filteredVocabulary.length > 0" 
              class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div *ngFor="let item of filteredVocabulary"
-               [ngClass]="currentTheme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'"
-               class="rounded-lg shadow hover:shadow-lg transition p-6 border flex flex-col">
+               class="rounded-lg shadow hover:shadow-lg transition p-6 border border-secondary dark:border-success bg-white dark:bg-slate-800 transition-colors flex flex-col">
             <div class="flex-1">
-              <h3 [ngClass]="currentTheme === 'dark' ? 'text-slate-100' : 'text-slate-800'" 
-                  class="text-2xl font-bold transition-colors mb-2">
+              <h3 class="text-2xl font-bold transition-colors mb-2 text-light-headline dark:text-dark-headline">
                 {{ item.word.text }}
               </h3>
-              <p [ngClass]="currentTheme === 'dark' ? 'text-blue-400' : 'text-blue-600'" 
-                 class="text-base mb-3 transition-colors">
+              <p class="text-base mb-3 transition-colors text-primary dark:text-primary-dark">
                 {{ item.word.reading }}
               </p>
-              <p [ngClass]="currentTheme === 'dark' ? 'text-slate-400' : 'text-slate-600'" 
-                 class="mb-3 transition-colors">
+              <p class="mb-3 transition-colors text-light-paragraph dark:text-dark-paragraph">
                 {{ item.word.meaning }}
               </p>
               <p *ngIf="!isFromBook(item.exampleSentence)"
-                 [ngClass]="currentTheme === 'dark' ? 'text-slate-500' : 'text-slate-500'" 
-                 class="text-sm mb-4 transition-colors">
+                 class="text-sm mb-4 transition-colors text-light-paragraph dark:text-dark-paragraph">
                 {{ item.exampleSentence }}
               </p>
               <p *ngIf="isFromBook(item.exampleSentence)"
                  class="text-sm mb-4">
-                <span [ngClass]="currentTheme === 'dark' ? 'text-slate-500' : 'text-slate-500'">From: </span>
+                <span class="text-light-paragraph dark:text-dark-paragraph">From: </span>
                 <button (click)="navigateToBook(item.exampleSentence)"
-                        [ngClass]="currentTheme === 'dark' ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'"
-                        class="underline transition-colors cursor-pointer">
-                  {{ getBookInfo(item.exampleSentence)?.bookTitle }} - {{ getBookInfo(item.exampleSentence)?.chapterTitle }}
+                        class="underline transition-colors cursor-pointer text-primary dark:text-primary-dark hover:opacity-80">
+                  {{ getBookInfo(item.exampleSentence)?.bookTitle }}
                 </button>
               </p>
             </div>
-            <div class="flex items-center gap-2 pt-4 border-t"
-                 [ngClass]="currentTheme === 'dark' ? 'border-slate-700' : 'border-slate-200'">
+            <div class="flex items-center gap-2 pt-4 border-t border-secondary dark:border-success">
               <span [ngClass]="item.reviewed 
-                      ? (currentTheme === 'dark' ? 'bg-green-900 text-green-200' : 'bg-green-100 text-green-800')
-                      : (currentTheme === 'dark' ? 'bg-yellow-900 text-yellow-200' : 'bg-yellow-100 text-yellow-800')"
+                      ? 'bg-success text-white'
+                      : 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200'"
                     class="inline-block px-2 py-1 rounded text-xs font-semibold transition-colors">
                 {{ item.reviewed ? 'Reviewed' : 'New' }}
               </span>
               <button (click)="scheduleForReview(item.id)"
-                      [ngClass]="currentTheme === 'dark' 
-                        ? 'bg-blue-900 text-blue-200 hover:bg-blue-800' 
-                        : 'bg-blue-100 text-blue-800 hover:bg-blue-200'"
-                      class="ml-auto px-2 py-1 rounded transition font-medium text-sm"
+                      class="ml-auto px-2 py-1 rounded transition font-medium text-sm bg-indigo-600 hover:bg-indigo-700 text-white"
                       title="Review this word now">
                 ⚡
               </button>
               <button (click)="confirmDelete(item.id)"
-                      [ngClass]="currentTheme === 'dark' 
-                        ? 'bg-red-900 text-red-200 hover:bg-red-800' 
-                        : 'bg-red-100 text-red-800 hover:bg-red-200'"
-                      class="px-2 py-1 rounded transition font-medium text-sm">
+                      class="px-2 py-1 rounded transition font-medium text-sm bg-red-600 hover:bg-red-700 text-white">
                 🗑️
               </button>
             </div>
@@ -289,36 +238,28 @@ import { VocabularyItem, Word } from '../../core/models/index';
         </div>
 
         <div *ngIf="filteredVocabulary.length === 0" class="text-center py-12">
-          <p [ngClass]="currentTheme === 'dark' ? 'text-slate-400' : 'text-slate-500'" 
-             class="text-lg transition-colors">
+          <p class="text-lg transition-colors text-light-paragraph dark:text-dark-paragraph">
             {{ searchTerm ? 'No vocabulary matches your search' : 'No vocabulary to show' }}
           </p>
         </div>
 
         <!-- Delete Confirmation Modal -->
         <div *ngIf="showDeleteConfirm"
-             [ngClass]="currentTheme === 'dark' ? 'bg-black/50' : 'bg-black/30'"
-             class="fixed inset-0 flex items-center justify-center z-50 transition-all">
-          <div [ngClass]="currentTheme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'"
-               class="rounded-lg shadow-2xl p-6 max-w-sm border">
-            <h2 [ngClass]="currentTheme === 'dark' ? 'text-slate-100' : 'text-slate-800'"
-                class="text-2xl font-bold mb-4 transition-colors">
+             class="fixed inset-0 flex items-center justify-center z-50 transition-all bg-black/30 dark:bg-black/50">
+          <div class="rounded-lg shadow-2xl p-6 max-w-sm border border-secondary dark:border-success bg-white dark:bg-slate-800 transition-colors">
+            <h2 class="text-2xl font-bold mb-4 transition-colors text-light-headline dark:text-dark-headline">
               Delete Word?
             </h2>
-            <p [ngClass]="currentTheme === 'dark' ? 'text-slate-300' : 'text-slate-600'"
-               class="mb-6 transition-colors">
+            <p class="mb-6 transition-colors text-light-paragraph dark:text-dark-paragraph">
               Are you sure you want to delete "{{ getWordToDelete()?.word?.text }}"? This action cannot be undone.
             </p>
             <div class="flex gap-4">
               <button (click)="deleteWord()"
-                      class="flex-1 bg-red-600 text-white px-4 py-2 rounded-lg transition font-medium hover:bg-red-700">
+                      class="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition font-medium">
                 Delete
               </button>
               <button (click)="cancelDelete()"
-                      [ngClass]="currentTheme === 'dark' 
-                        ? 'bg-slate-700 text-slate-100 hover:bg-slate-600'
-                        : 'bg-slate-200 text-slate-800 hover:bg-slate-300'"
-                      class="flex-1 px-4 py-2 rounded-lg transition font-medium">
+                      class="flex-1 bg-light-bg dark:bg-slate-700 text-light-headline dark:text-dark-headline px-4 py-2 rounded-lg transition font-medium hover:opacity-80">
                 Cancel
               </button>
             </div>

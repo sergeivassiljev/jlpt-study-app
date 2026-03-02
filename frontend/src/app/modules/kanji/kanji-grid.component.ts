@@ -11,15 +11,12 @@ import { Kanji, Word } from '../../core/models/index';
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div [ngClass]="currentTheme === 'dark' ? 'bg-slate-950' : 'bg-slate-50'" 
-         class="min-h-screen transition-colors duration-300">
+    <div class="min-h-screen transition-colors duration-300 bg-light-bg dark:bg-dark-bg text-light-paragraph dark:text-dark-paragraph">
       <div class="container mx-auto px-4 py-8">
-        <h1 [ngClass]="currentTheme === 'dark' ? 'text-blue-400' : 'text-blue-600'" 
-            class="text-4xl font-bold mb-2 transition-colors">
+        <h1 class="text-4xl font-bold mb-2 transition-colors text-primary dark:text-primary-dark">
           N5 Kanji
         </h1>
-        <p [ngClass]="currentTheme === 'dark' ? 'text-slate-400' : 'text-slate-600'" 
-           class="mb-8 transition-colors">
+        <p class="mb-8 transition-colors text-light-paragraph dark:text-dark-paragraph">
           Master essential N5 kanji characters ({{ filteredKanji.length }} / {{ allKanji.length }})
         </p>
 
@@ -29,8 +26,7 @@ import { Kanji, Word } from '../../core/models/index';
                  (input)="filterKanji()"
                  type="text" 
                  placeholder="Search by character or meaning..."
-                 [ngClass]="currentTheme === 'dark' ? 'bg-slate-800 border-slate-700 text-slate-100 placeholder-slate-500' : 'bg-white border-slate-300 text-slate-900'"
-                 class="w-full px-4 py-2 border rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500">
+                 class="w-full px-4 py-2 border border-secondary dark:border-success rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-slate-800 text-light-paragraph dark:text-dark-paragraph placeholder-gray-400 dark:placeholder-gray-500">
         </div>
 
         <!-- Category Filter -->
@@ -38,36 +34,31 @@ import { Kanji, Word } from '../../core/models/index';
           <button *ngFor="let category of categories"
                   (click)="toggleCategory(category)"
                   [ngClass]="selectedCategory === category 
-                    ? (currentTheme === 'dark' ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white')
-                    : (currentTheme === 'dark' ? 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700' : 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200')"
-                  class="px-4 py-2 rounded-full border transition font-medium text-sm">
+                    ? 'bg-light-button dark:bg-dark-button text-white'
+                    : 'bg-light-bg dark:bg-slate-700 text-light-headline dark:text-dark-headline border border-secondary dark:border-success hover:opacity-80'"
+                  class="px-4 py-2 rounded-full transition font-medium text-sm">
             {{ category }}
           </button>
           <button (click)="clearFilters()"
-                  [ngClass]="currentTheme === 'dark' ? 'text-slate-400 hover:text-slate-200' : 'text-slate-600 hover:text-slate-800'"
-                  class="px-4 py-2 text-sm transition">
+                  class="px-4 py-2 text-sm transition text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark">
             Clear All
           </button>
         </div>
 
         <p *ngIf="filteredKanji.length === 0" 
-           [ngClass]="currentTheme === 'dark' ? 'text-slate-400' : 'text-slate-600'"
-           class="text-center py-8">
+           class="text-center py-8 text-light-paragraph dark:text-dark-paragraph">
           No kanji found. Try adjusting your search or filters.
         </p>
 
         <div class="grid grid-cols-3 md:grid-cols-5 gap-3 mb-8">
           <div *ngFor="let k of filteredKanji"
                (click)="selectKanji(k)"
-               [ngClass]="currentTheme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'"
-               class="aspect-square rounded-lg shadow hover:shadow-lg transition cursor-pointer flex items-center justify-center group border">
+               class="aspect-square rounded-lg shadow hover:shadow-lg transition cursor-pointer flex items-center justify-center group border border-primary-dark bg-white dark:bg-slate-800">
             <div class="text-center">
-              <p [ngClass]="currentTheme === 'dark' ? 'text-blue-400' : 'text-blue-600'" 
-                 class="text-5xl font-bold group-hover:scale-110 transition">
+              <p class="text-5xl font-bold group-hover:scale-110 transition text-primary dark:text-primary-dark">
                 {{ k.character }}
               </p>
-              <p [ngClass]="currentTheme === 'dark' ? 'text-slate-500' : 'text-slate-500'" 
-                 class="text-xs mt-1 transition-colors">
+              <p class="text-xs mt-1 transition-colors text-light-paragraph dark:text-dark-paragraph">
                 {{ k.meaning }}
               </p>
             </div>
@@ -76,84 +67,70 @@ import { Kanji, Word } from '../../core/models/index';
 
         <!-- Kanji Detail Modal -->
         <div *ngIf="selectedKanji" 
-             [ngClass]="currentTheme === 'dark' ? 'bg-black bg-opacity-60' : 'bg-black bg-opacity-50'"
-             class="fixed inset-0 flex items-center justify-center z-50 p-4 backdrop-blur-sm transition-colors"
+             class="fixed inset-0 flex items-center justify-center z-50 p-4 backdrop-blur-sm transition-colors bg-black/40 dark:bg-black/60"
              (click)="selectedKanji = undefined">
-          <div [ngClass]="currentTheme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'"
-               class="rounded-lg shadow-xl p-8 max-w-2xl w-full max-h-96 overflow-y-auto border transition-colors"
+          <div class="rounded-lg shadow-xl p-8 max-w-2xl w-full max-h-96 overflow-y-auto border border-primary-dark transition-colors bg-white dark:bg-slate-800"
                (click)="$event.stopPropagation()">
             <div *ngIf="selectedKanji" class="flex justify-between items-start mb-6">
-              <p [ngClass]="currentTheme === 'dark' ? 'text-blue-400' : 'text-blue-600'" 
-                 class="text-6xl font-bold transition-colors">
+              <p class="text-6xl font-bold transition-colors text-primary dark:text-primary-dark">
                 {{ selectedKanji.character }}
               </p>
               <button (click)="selectedKanji = undefined" 
-                      [ngClass]="currentTheme === 'dark' ? 'text-slate-500 hover:text-slate-300' : 'text-slate-400 hover:text-slate-600'"
-                      class="text-3xl transition-colors">
+                      class="text-3xl transition-colors text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark">
                 ×
               </button>
             </div>
 
             <div *ngIf="selectedKanji" class="grid grid-cols-2 gap-6 mb-6">
               <div>
-                <p [ngClass]="currentTheme === 'dark' ? 'text-slate-400' : 'text-slate-500'" 
-                   class="text-sm mb-1 transition-colors">
+                <p class="text-sm mb-1 transition-colors text-light-paragraph dark:text-dark-paragraph">
                   Meaning
                 </p>
-                <p [ngClass]="currentTheme === 'dark' ? 'text-slate-100' : 'text-slate-800'" 
-                   class="text-2xl font-semibold transition-colors">
+                <p class="text-2xl font-semibold transition-colors text-light-headline dark:text-dark-headline">
                   {{ selectedKanji.meaning }}
                 </p>
               </div>
               <div>
-                <p [ngClass]="currentTheme === 'dark' ? 'text-slate-400' : 'text-slate-500'" 
-                   class="text-sm mb-1 transition-colors">
+                <p class="text-sm mb-1 transition-colors text-light-paragraph dark:text-dark-paragraph">
                   Strokes
                 </p>
-                <p [ngClass]="currentTheme === 'dark' ? 'text-slate-100' : 'text-slate-800'" 
-                   class="text-2xl font-semibold transition-colors">
+                <p class="text-2xl font-semibold transition-colors text-light-headline dark:text-dark-headline">
                   {{ selectedKanji.strokeCount }}
                 </p>
               </div>
             </div>
 
             <div *ngIf="selectedKanji" class="mb-6">
-              <p [ngClass]="currentTheme === 'dark' ? 'text-slate-400' : 'text-slate-500'" 
-                 class="text-sm mb-2 transition-colors">
+              <p class="text-sm mb-2 transition-colors text-light-paragraph dark:text-dark-paragraph">
                 On'yomi (音読み)
               </p>
               <div class="flex gap-2 flex-wrap">
                 <span *ngFor="let onyomi of selectedKanji.onyomi"
-                      [ngClass]="currentTheme === 'dark' ? 'bg-blue-900 text-blue-200' : 'bg-blue-100 text-blue-800'"
-                      class="px-3 py-1 rounded-full text-sm font-semibold transition-colors">
+                      class="px-3 py-1 rounded-full text-sm font-semibold transition-colors bg-primary text-white">
                   {{ onyomi }}
                 </span>
               </div>
             </div>
 
             <div *ngIf="selectedKanji" class="mb-6">
-              <p [ngClass]="currentTheme === 'dark' ? 'text-slate-400' : 'text-slate-500'" 
-                 class="text-sm mb-2 transition-colors">
+              <p class="text-sm mb-2 transition-colors text-light-paragraph dark:text-dark-paragraph">
                 Kun'yomi (訓読み)
               </p>
               <div class="flex gap-2 flex-wrap">
                 <span *ngFor="let kunyomi of selectedKanji.kunyomi"
-                      [ngClass]="currentTheme === 'dark' ? 'bg-green-900 text-green-200' : 'bg-green-100 text-green-800'"
-                      class="px-3 py-1 rounded-full text-sm font-semibold transition-colors">
+                      class="px-3 py-1 rounded-full text-sm font-semibold transition-colors bg-success text-white">
                   {{ kunyomi }}
                 </span>
               </div>
             </div>
 
             <div *ngIf="selectedKanji && selectedKanji.exampleSentences.length > 0" class="mb-6">
-              <p [ngClass]="currentTheme === 'dark' ? 'text-slate-400' : 'text-slate-500'" 
-                 class="text-sm mb-2 transition-colors">
+              <p class="text-sm mb-2 transition-colors text-light-paragraph dark:text-dark-paragraph">
                 Example Sentences
               </p>
               <div class="space-y-2">
                 <p *ngFor="let sentence of selectedKanji.exampleSentences"
-                   [ngClass]="currentTheme === 'dark' ? 'text-slate-300 bg-slate-700' : 'text-slate-700 bg-slate-50'"
-                   class="p-3 rounded transition-colors">
+                   class="p-3 rounded transition-colors bg-light-bg dark:bg-slate-700 text-light-paragraph dark:text-dark-paragraph">
                   {{ sentence }}
                 </p>
               </div>
@@ -161,7 +138,7 @@ import { Kanji, Word } from '../../core/models/index';
 
             <button *ngIf="selectedKanji"
                     (click)="addKanjiToVocabulary(selectedKanji)"
-                    class="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition font-semibold shadow-sm hover:shadow-md mt-6">
+                    class="w-full px-4 py-2 bg-success hover:opacity-90 text-white rounded-lg transition font-semibold shadow-sm hover:shadow-md mt-6">
               ➕ Add to Vocabulary
             </button>
           </div>
@@ -272,8 +249,14 @@ export class KanjiGridComponent implements OnInit {
       partOfSpeech: 'Kanji'
     };
 
-    this.vocabularyService.addWord(word, exampleSentence);
-    console.log('✅ Added kanji to vocabulary:', kanji.character);
-    this.selectedKanji = undefined; // Close modal after adding
+    this.vocabularyService.addWord(word, exampleSentence).subscribe({
+      next: () => {
+        console.log('✅ Added kanji to vocabulary:', kanji.character);
+        this.selectedKanji = undefined; // Close modal after adding
+      },
+      error: (err) => {
+        console.error('❌ Failed to add kanji to vocabulary:', err);
+      }
+    });
   }
 }

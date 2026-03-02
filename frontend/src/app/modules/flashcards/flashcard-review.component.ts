@@ -11,15 +11,12 @@ import { Subscription } from 'rxjs';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div [ngClass]="currentTheme === 'dark' ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'" 
-         class="min-h-screen transition-colors duration-300">
+    <div class="min-h-screen transition-colors duration-300 bg-light-bg dark:bg-dark-bg text-light-paragraph dark:text-dark-paragraph">
       <div class="container mx-auto px-4 py-8">
-        <h1 [ngClass]="currentTheme === 'dark' ? 'text-blue-400' : 'text-blue-600'" 
-            class="text-4xl font-bold mb-2 transition-colors">
+        <h1 class="text-4xl font-bold mb-2 transition-colors text-primary dark:text-primary-dark">
           Review Flashcards
         </h1>
-        <p [ngClass]="currentTheme === 'dark' ? 'text-slate-400' : 'text-slate-600'" 
-           class="mb-8 transition-colors">
+        <p class="mb-8 transition-colors text-light-paragraph dark:text-dark-paragraph">
           {{ reviewDue.length }} cards due for review
         </p>
 
@@ -27,58 +24,46 @@ import { Subscription } from 'rxjs';
           <!-- Progress -->
           <div class="mb-8">
             <div class="flex justify-between mb-2">
-              <span [ngClass]="currentTheme === 'dark' ? 'text-slate-400' : 'text-slate-600'" 
-                    class="transition-colors">
+              <span class="transition-colors text-light-paragraph dark:text-dark-paragraph">
                 Card {{ currentIndex + 1 }} / {{ reviewDue.length }}
               </span>
-              <span [ngClass]="currentTheme === 'dark' ? 'text-slate-400' : 'text-slate-600'" 
-                    class="transition-colors">
+              <span class="transition-colors text-light-paragraph dark:text-dark-paragraph">
                 {{ Math.round((currentIndex + 1) / reviewDue.length * 100) }}%
               </span>
             </div>
-            <div [ngClass]="currentTheme === 'dark' ? 'bg-slate-700' : 'bg-slate-200'" 
-                 class="w-full rounded-full h-2 transition-colors overflow-hidden">
-              <div [ngClass]="currentTheme === 'dark' ? 'bg-blue-500' : 'bg-blue-600'" 
-                   class="h-2 rounded-full transition-all" 
+            <div class="w-full rounded-full h-2 transition-colors overflow-hidden bg-light-accent-tertiary dark:bg-dark-accent-tertiary">
+              <div class="h-2 rounded-full transition-all bg-primary dark:bg-primary-dark" 
                    [style.width.%]="((currentIndex + 1) / reviewDue.length) * 100"></div>
             </div>
           </div>
 
           <!-- Flashcard -->
-          <div [ngClass]="currentTheme === 'dark' 
-                 ? 'bg-slate-800 border-slate-700 hover:border-slate-600' 
-                 : 'bg-white border-slate-200 hover:border-slate-300'"
-               class="rounded-lg shadow-lg p-12 mb-8 h-80 flex flex-col justify-center items-center cursor-pointer hover:shadow-2xl transition border"
+          <div class="rounded-lg shadow-lg p-12 mb-8 h-80 flex flex-col justify-center items-center cursor-pointer hover:shadow-2xl transition border bg-white dark:bg-dark-accent-tertiary border-secondary dark:border-primary-dark hover:border-primary dark:hover:border-primary-dark"
                (click)="toggleFlip()">
             <div class="text-center w-full">
-              <p [ngClass]="currentTheme === 'dark' ? 'text-slate-500' : 'text-slate-500'" 
-                 class="text-sm mb-4 transition-colors">
+              <p class="text-sm mb-4 transition-colors text-light-paragraph dark:text-dark-paragraph">
                 {{ flipped ? 'Answer' : 'Question' }}
               </p>
               <div class="overflow-hidden">
                 <p *ngIf="!flipped" 
-                   [ngClass]="currentTheme === 'dark' ? 'text-slate-100' : 'text-slate-800'" 
-                   class="text-5xl font-bold transition-all"
+                   class="text-5xl font-bold transition-all text-light-headline dark:text-dark-headline"
                    [style.opacity]="flipped ? '0' : '1'"
                    [style.transform]="flipped ? 'translateY(20px)' : 'translateY(0)'">
                   {{ currentCard?.front }}
                 </p>
                 <div *ngIf="flipped && currentVocab" 
-                     [ngClass]="currentTheme === 'dark' ? 'text-slate-100' : 'text-slate-800'" 
-                     class="transition-all"
+                     class="transition-all text-light-headline dark:text-dark-headline"
                      [style.opacity]="flipped ? '1' : '0'"
                      [style.transform]="flipped ? 'translateY(0)' : 'translateY(20px)'">
                   <div class="text-3xl font-semibold">{{ currentVocab.word.reading }}</div>
                   <div class="text-2xl mt-4">{{ currentVocab.word.meaning }}</div>
-                  <div [ngClass]="currentTheme === 'dark' ? 'text-slate-400' : 'text-slate-500'" 
-                       class="text-sm mt-4 italic transition-colors">
+                  <div class="text-sm mt-4 italic transition-colors text-light-paragraph dark:text-dark-paragraph">
                     {{ currentVocab.exampleSentence }}
                   </div>
                 </div>
               </div>
             </div>
-            <p [ngClass]="currentTheme === 'dark' ? 'text-slate-500' : 'text-slate-400'" 
-               class="text-sm mt-8 transition-colors">
+            <p class="text-sm mt-8 transition-colors text-light-paragraph dark:text-dark-paragraph">
               Click to reveal answer
             </p>
           </div>
@@ -101,12 +86,10 @@ import { Subscription } from 'rxjs';
         </div>
 
         <div *ngIf="reviewDue.length === 0" class="text-center py-12">
-          <p [ngClass]="currentTheme === 'dark' ? 'text-slate-300' : 'text-slate-500'" 
-             class="text-2xl mb-4 transition-colors">
+          <p class="text-2xl mb-4 transition-colors text-light-headline dark:text-dark-headline">
             🎉 No cards due for review!
           </p>
-          <p [ngClass]="currentTheme === 'dark' ? 'text-slate-400' : 'text-slate-400'" 
-             class="transition-colors">
+          <p class="transition-colors text-light-paragraph dark:text-dark-paragraph">
             Come back later or add new vocabulary from the reader.
           </p>
         </div>
