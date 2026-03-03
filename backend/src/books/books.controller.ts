@@ -1,4 +1,4 @@
-import { Body, Controller, Get, NotFoundException, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, NotFoundException, Param, Post } from '@nestjs/common';
 import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
 import { CreateChapterDto } from './dto/create-chapter.dto';
@@ -43,5 +43,23 @@ export class BooksController {
   @Post(':bookId/chapters')
   async createOrUpdateChapter(@Param('bookId') bookId: string, @Body() body: CreateChapterDto) {
     return await this.booksService.upsertChapter({ ...body, bookId });
+  }
+
+  @Delete(':bookId')
+  async deleteBook(@Param('bookId') bookId: string) {
+    const deleted = await this.booksService.deleteBook(bookId);
+    if (!deleted) {
+      throw new NotFoundException(`Book not found: ${bookId}`);
+    }
+    return { success: true, message: `Book ${bookId} and its chapters deleted` };
+  }
+
+  @Delete(':bookId/chapters/:chapterId')
+  async deleteChapter(@Param('bookId') bookId: string, @Param('chapterId') chapterId: string) {
+    const deleted = await this.booksService.deleteChapter(bookId, chapterId);
+    if (!deleted) {
+      throw new NotFoundException(`Chapter not found: ${chapterId}`);
+    }
+    return { success: true, message: `Chapter ${chapterId} deleted` };
   }
 }

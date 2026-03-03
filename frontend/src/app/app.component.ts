@@ -19,6 +19,7 @@ export class AppComponent implements OnInit {
   dueCount = 0;
   currentTheme: Theme = 'light';
   currentUserEmail: string | null = null;
+  mobileMenuOpen = false;
 
   constructor(
     private srsService: SrsService,
@@ -60,7 +61,16 @@ export class AppComponent implements OnInit {
   }
 
   logout(): void {
+    this.mobileMenuOpen = false;
     this.authService.logout();
     this.router.navigate(['/']);
+  }
+
+  toggleMobileMenu(): void {
+    this.mobileMenuOpen = !this.mobileMenuOpen;
+  }
+
+  closeMobileMenu(): void {
+    this.mobileMenuOpen = false;
   }
 }

@@ -16,6 +16,7 @@ import { Book, Chapter, Word, Kanji } from '../../core/models/index';
   template: `
     <div class="min-h-screen transition-colors duration-300 bg-light-bg dark:bg-dark-bg text-light-paragraph dark:text-dark-paragraph"
          *ngIf="book && chapter">
+
       <div class="max-w-4xl mx-auto px-6 py-12">
         <!-- Header -->
         <div class="mb-10">
@@ -62,34 +63,50 @@ import { Book, Chapter, Word, Kanji } from '../../core/models/index';
         </div>
 
         <!-- Book Content -->
-        <article class="rounded-lg shadow-sm p-20 mb-12 transition-colors bg-white dark:bg-slate-800 border border-secondary dark:border-success" 
+        <article class="rounded-lg shadow-sm p-20 mb-12 transition-colors bg-white dark:bg-slate-800 border border-secondary dark:border-success relative" 
              style="box-shadow: 0 2px 8px rgba(0,0,0,0.04);"
              [style.--reader-font-size.rem]="textSizeRem"
              #contentContainer
              (click)="onContentClick($event)">
+          
+          <!-- Floating Navigation Arrows -->
+          <div class="absolute top-4 right-4 flex gap-2 z-50 nav-arrows">
+            <button *ngIf="chapter.number > 1"
+                    (click)="previousChapter()"
+                    class="w-12 h-12 flex items-center justify-center rounded-full transition-all bg-white dark:bg-slate-800 border-2 border-primary dark:border-primary-dark shadow-lg hover:shadow-xl hover:scale-110 text-xl font-bold text-primary dark:text-primary-dark"
+                    title="Previous Chapter">
+              ←
+            </button>
+            <button *ngIf="chapter.number < totalChapters"
+                    (click)="nextChapter()"
+                    class="w-12 h-12 flex items-center justify-center rounded-full transition-all bg-white dark:bg-slate-800 border-2 border-primary dark:border-primary-dark shadow-lg hover:shadow-xl hover:scale-110 text-xl font-bold text-primary dark:text-primary-dark"
+                    title="Next Chapter">
+              →
+            </button>
+          </div>
+
           <div *ngFor="let paragraph of chapter.content; let i = index" 
                class="mb-8 last:mb-0">
             <div [innerHTML]="sanitizeHtml(paragraph)" class="book-text"></div>
           </div>
-        </article>
 
-        <!-- Navigation + Reader Controls -->
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-5 mb-8">
-          <div class="flex gap-6 justify-center md:justify-end w-full">
+          <!-- Chapter Navigation -->
+          <div class="mt-12 pt-8 border-t border-secondary dark:border-success flex gap-4 justify-center">
             <button *ngIf="chapter.number > 1"
                     (click)="previousChapter()"
-                    class="px-7 py-3 bg-light-button dark:bg-dark-button hover:opacity-90 text-white rounded-md transition-all font-medium shadow-sm hover:shadow-md">
-              ← Previous
+                    class="px-6 py-2.5 bg-light-button dark:bg-dark-button hover:opacity-90 text-white rounded-md transition-all font-medium text-sm shadow-sm hover:shadow-md">
+              ← Previous Chapter
             </button>
             <button *ngIf="chapter.number < totalChapters"
                     (click)="nextChapter()"
-                    class="px-7 py-3 bg-light-button dark:bg-dark-button hover:opacity-90 text-white rounded-md transition-all font-medium shadow-sm hover:shadow-md">
-              Next →
+                    class="px-6 py-2.5 bg-light-button dark:bg-dark-button hover:opacity-90 text-white rounded-md transition-all font-medium text-sm shadow-sm hover:shadow-md">
+              Next Chapter →
             </button>
           </div>
-        </div>
+        </article>
+      </div>
 
-        <!-- Word Details Modal -->
+      <!-- Word Details Modal -->
         <div *ngIf="selectedWord" 
              class="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm transition-colors bg-black/40 dark:bg-black/60"
              (click)="closeWordModal()">
@@ -168,10 +185,24 @@ import { Book, Chapter, Word, Kanji } from '../../core/models/index';
             </p>
           </div>
         </div>
-      </div>
     </div>
   `,
   styles: [`
+    .nav-arrows {
+      opacity: 0.5;
+      transition: opacity 0.3s ease, transform 0.2s ease;
+    }
+
+    .nav-arrows:hover {
+      opacity: 1;
+    }
+
+    @media (hover: none) {
+      .nav-arrows {
+        opacity: 0.8;
+      }
+    }
+
     .book-text {
       font-family: 'Merriweather', 'Georgia', serif;
       color: var(--paragraph-color);
@@ -333,12 +364,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit {
       if (bookId) {
         this.book = this.bookService.getBook(bookId);
         if (this.book) {
-          this.totalChapters = this.book.chaptersCount;
+          // Get actual chapters instead of relying on metadata
+          const chapters = this.bookService.getChapters(bookId);
+          this.totalChapters = chapters.length;
           
           if (chapterId) {
             this.chapter = this.bookService.getChapter(bookId, chapterId);
           } else {
-            const chapters = this.bookService.getChapters(bookId);
             this.chapter = chapters[0];
           }
         }

@@ -2,6 +2,7 @@ import { Body, Controller, Delete, Get, NotFoundException, Param, Patch, Post, U
 import { StudyDataService } from '../study-data/study-data.service';
 import { CreateVocabularyDto } from './dto/create-vocabulary.dto';
 import { UpdateVocabularyReviewDto } from './dto/update-vocabulary-review.dto';
+import { CreateFolderDto, MoveToFolderDto } from './dto/folder.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
 
@@ -55,5 +56,47 @@ export class VocabularyController {
     }
 
     return { success: true };
+  }
+
+  // Folder endpoints
+  @Post('folders')
+  async createFolder(@CurrentUserId() userId: string, @Body() body: CreateFolderDto) {
+    return await this.studyDataService.createFolder(userId, body.name, body.color || '');
+  }
+
+  @Get('folders')
+  async listFolders(@CurrentUserId() userId: string) {
+    return await this.studyDataService.getFolders(userId);
+  }
+
+  @Delete('folders/:folderId')
+  async deleteFolder(@Param('folderId') folderId: string, @CurrentUserId() userId: string) {
+    const deleted = await this.studyDataService.deleteFolder(userId, folderId);
+
+    if (!deleted) {
+      throw new NotFoundException(`Folder not found: ${folderId}`);
+    }
+
+    return { success: true };
+  }
+
+  @Patch(':id/move-to-folder')
+  async moveToFolder(
+    @Param('id') vocabularyId: string,
+    @CurrentUserId() userId: string,
+    @Body() body: MoveToFolderDto,
+  ) {
+    const moved = await this.studyDataService.moveWordToFolder(userId, vocabularyId, body.folderId || null);
+
+    if (!moved) {
+      throw new NotFoundException(`Vocabulary item not found: ${vocabularyId}`);
+    }
+
+    return { success: true };
+  }
+
+  @Get('folders/:folderId')
+  async getVocabularyByFolder(@Param('folderId') folderId: string, @CurrentUserId() userId: string) {
+    return await this.studyDataService.getVocabularyByFolder(userId, folderId === 'none' ? null : folderId);
   }
 }

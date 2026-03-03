@@ -5,6 +5,7 @@ import { FlashcardsModule } from './flashcards/flashcards.module';
 import { StudyDataModule } from './study-data/study-data.module';
 import { VocabularyEntity } from './study-data/entities/vocabulary.entity';
 import { FlashcardEntity } from './study-data/entities/flashcard.entity';
+import { FolderEntity } from './study-data/entities/folder.entity';
 import { BookEntity } from './books/entities/book.entity';
 import { ChapterEntity } from './books/entities/chapter.entity';
 import { BooksModule } from './books/books.module';
@@ -18,7 +19,7 @@ import { AuthModule } from './auth/auth.module';
     TypeOrmModule.forRoot({
       type: 'sqlite',
       database: 'data/jlpt-study.sqlite',
-      entities: [VocabularyEntity, FlashcardEntity, BookEntity, ChapterEntity, KanjiEntity, UserEntity],
+      entities: [VocabularyEntity, FlashcardEntity, FolderEntity, BookEntity, ChapterEntity, KanjiEntity, UserEntity],
       synchronize: true,
     }),
     StudyDataModule,

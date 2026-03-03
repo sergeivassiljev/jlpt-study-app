@@ -1,9 +1,10 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { FlashcardItem, ReviewDifficulty, VocabularyItem, Word } from '../types';
+import { FlashcardItem, ReviewDifficulty, VocabularyItem, Word, Folder } from '../types';
 import { VocabularyEntity } from './entities/vocabulary.entity';
 import { FlashcardEntity } from './entities/flashcard.entity';
+import { FolderEntity } from './entities/folder.entity';
 
 @Injectable()
 export class StudyDataService {
@@ -14,6 +15,8 @@ export class StudyDataService {
     private readonly vocabularyRepository: Repository<VocabularyEntity>,
     @InjectRepository(FlashcardEntity)
     private readonly flashcardRepository: Repository<FlashcardEntity>,
+    @InjectRepository(FolderEntity)
+    private readonly folderRepository: Repository<FolderEntity>,
   ) {}
 
   async getVocabulary(userId: string): Promise<VocabularyItem[]> {
@@ -92,6 +95,57 @@ export class StudyDataService {
     }
 
     return false;
+  }
+
+  async createFolder(userId: string, name: string, color: string = ''): Promise<Folder> {
+    const folder: Folder = {
+      id: `folder-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      userId,
+      name,
+      color,
+      createdAt: new Date().toISOString(),
+      wordCount: 0,
+    };
+
+    await this.folderRepository.save(this.toFolderEntity(folder));
+    return folder;
+  }
+
+  async getFolders(userId: string): Promise<Folder[]> {
+    const folders = await this.folderRepository.find({
+      where: { userId },
+      order: { createdAt: 'DESC' },
+    });
+    return folders.map((f) => this.toFolder(f));
+  }
+
+  async deleteFolder(userId: string, folderId: string): Promise<boolean> {
+    const deleted = await this.folderRepository.delete({ id: folderId, userId });
+    if (deleted.affected && deleted.affected > 0) {
+      // Remove folderId from all words in this folder
+      await this.vocabularyRepository.update(
+        { userId, folderId },
+        { folderId: null },
+      );
+      return true;
+    }
+    return false;
+  }
+
+  async moveWordToFolder(userId: string, vocabularyId: string, folderId: string | null): Promise<boolean> {
+    const updated = await this.vocabularyRepository.update(
+      { id: vocabularyId, userId },
+      { folderId },
+    );
+    return updated.affected ? updated.affected > 0 : false;
+  }
+
+  async getVocabularyByFolder(userId: string, folderId: string | null): Promise<VocabularyItem[]> {
+    const items = await this.vocabularyRepository.find({
+      where: { userId, folderId: folderId === null ? null : folderId },
+      order: { dateAdded: 'DESC' },
+    });
+    return items.map((item) => this.toVocabularyItem(item));
   }
 
   async getFlashcards(userId: string): Promise<FlashcardItem[]> {
@@ -222,6 +276,7 @@ export class StudyDataService {
       nextReviewDate: entity.nextReviewDate.toISOString(),
       reviewCount: entity.reviewCount,
       difficulty: entity.difficulty,
+      folderId: entity.folderId,
     };
   }
 
@@ -250,6 +305,7 @@ export class StudyDataService {
       nextReviewDate: new Date(item.nextReviewDate),
       reviewCount: item.reviewCount,
       difficulty: item.difficulty,
+      folderId: item.folderId,
     };
   }
 
@@ -264,6 +320,28 @@ export class StudyDataService {
       difficulty: item.difficulty,
       interval: item.interval,
       repetitions: item.repetitions,
+    };
+  }
+
+  private toFolderEntity(folder: Folder): FolderEntity {
+    return {
+      id: folder.id,
+      userId: folder.userId,
+      name: folder.name,
+      color: folder.color,
+      createdAt: new Date(folder.createdAt),
+      wordCount: folder.wordCount,
+    };
+  }
+
+  private toFolder(entity: FolderEntity): Folder {
+    return {
+      id: entity.id,
+      userId: entity.userId,
+      name: entity.name,
+      color: entity.color,
+      createdAt: entity.createdAt.toISOString(),
+      wordCount: entity.wordCount,
     };
   }
 }

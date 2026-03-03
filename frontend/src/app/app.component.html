@@ -27,6 +27,11 @@
              class="px-4 py-2 transition text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark border-primary">
             📝 Vocab
           </a>
+           <a routerLink="/words" 
+             routerLinkActive="border-b-2"
+             class="px-4 py-2 transition text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark border-primary">
+            🔤 Words
+           </a>
           <a routerLink="/review" 
              routerLinkActive="border-b-2"
              class="px-4 py-2 transition text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark border-primary relative">
@@ -44,6 +49,11 @@
              routerLinkActive="border-b-2"
              class="px-4 py-2 transition text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark border-primary">
             📚 Grammar
+          </a>
+          <a routerLink="/admin" 
+             routerLinkActive="border-b-2"
+             class="px-4 py-2 transition text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark border-primary">
+            ⚙️ Admin
           </a>
         </div>
 
@@ -71,8 +81,46 @@
             {{ currentTheme === 'dark' ? '☀️' : '🌙' }}
           </button>
           <div class="md:hidden">
-            <button class="transition text-light-paragraph dark:text-dark-paragraph hover:opacity-80">☰</button>
+            <button (click)="toggleMobileMenu()"
+                    class="transition text-light-paragraph dark:text-dark-paragraph hover:opacity-80"
+                    [attr.aria-expanded]="mobileMenuOpen"
+                    aria-label="Toggle mobile navigation menu">
+              {{ mobileMenuOpen ? '✕' : '☰' }}
+            </button>
           </div>
+        </div>
+      </div>
+
+      <div *ngIf="mobileMenuOpen" class="md:hidden pb-4">
+        <div class="flex flex-col gap-1">
+          <a routerLink="/books" (click)="closeMobileMenu()"
+             class="px-3 py-2 rounded transition text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark hover:bg-light-bg dark:hover:bg-slate-800">
+            📖 Read
+          </a>
+          <a routerLink="/vocabulary" (click)="closeMobileMenu()"
+             class="px-3 py-2 rounded transition text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark hover:bg-light-bg dark:hover:bg-slate-800">
+            📝 Vocab
+          </a>
+          <a routerLink="/words" (click)="closeMobileMenu()"
+             class="px-3 py-2 rounded transition text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark hover:bg-light-bg dark:hover:bg-slate-800">
+            🔤 Words
+          </a>
+          <a routerLink="/review" (click)="closeMobileMenu()"
+             class="px-3 py-2 rounded transition text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark hover:bg-light-bg dark:hover:bg-slate-800">
+            🎴 Review <span *ngIf="dueCount > 0">({{ dueCount }})</span>
+          </a>
+          <a routerLink="/kanji" (click)="closeMobileMenu()"
+             class="px-3 py-2 rounded transition text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark hover:bg-light-bg dark:hover:bg-slate-800">
+            漢字 Kanji
+          </a>
+          <a routerLink="/grammar" (click)="closeMobileMenu()"
+             class="px-3 py-2 rounded transition text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark hover:bg-light-bg dark:hover:bg-slate-800">
+            📚 Grammar
+          </a>
+          <a routerLink="/admin" (click)="closeMobileMenu()"
+             class="px-3 py-2 rounded transition text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark hover:bg-light-bg dark:hover:bg-slate-800">
+            ⚙️ Admin
+          </a>
         </div>
       </div>
     </div>

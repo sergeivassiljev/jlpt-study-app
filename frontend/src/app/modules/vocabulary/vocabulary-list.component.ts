@@ -5,8 +5,9 @@ import { FormsModule } from '@angular/forms';
 import { VocabularyService } from '../../core/services/vocabulary.service';
 import { SrsService } from '../../core/services/srs.service';
 import { BookService } from '../../core/services/book.service';
+import { FolderService } from '../../core/services/folder.service';
 import { ThemeService, Theme } from '../../core/services/theme.service';
-import { VocabularyItem, Word } from '../../core/models/index';
+import { VocabularyItem, Word, VocabularyFolder } from '../../core/models/index';
 
 @Component({
   selector: 'app-vocabulary-list',
@@ -15,6 +16,89 @@ import { VocabularyItem, Word } from '../../core/models/index';
   template: `
     <div class="min-h-screen transition-colors duration-300 bg-light-bg dark:bg-dark-bg text-light-paragraph dark:text-dark-paragraph">
       <div class="container mx-auto px-4 py-8">
+        <div class="flex gap-6">
+          <!-- Folder Sidebar -->
+          <div class="w-64 flex-shrink-0">
+            <div class="rounded-lg shadow border border-secondary dark:border-success bg-white dark:bg-slate-800 p-4 transition-colors sticky top-4">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="font-bold transition-colors text-light-headline dark:text-dark-headline">📁 Folders</h3>
+                <button (click)="toggleCreateFolderForm()"
+                        class="text-lg hover:opacity-80 transition"
+                        title="Create folder">
+                  +
+                </button>
+              </div>
+
+              <!-- Create Folder Form -->
+              <div *ngIf="showCreateFolderForm" class="mb-3 p-3 rounded bg-light-bg dark:bg-slate-700">
+                <input [(ngModel)]="newFolderName"
+                       class="w-full mb-3 px-2 py-1 text-sm rounded border border-secondary dark:border-success bg-white dark:bg-slate-800"
+                       placeholder="Folder name">
+                <div class="mb-2">
+                  <p class="text-xs font-medium mb-2 text-light-paragraph dark:text-dark-paragraph">Choose color:</p>
+                  <div class="grid grid-cols-8 gap-2">
+                    <button *ngFor="let color of predefinedColors"
+                            (click)="newFolderColor = color"
+                            [style.background-color]="color"
+                            [class.ring-2]="newFolderColor === color"
+                            [class.ring-offset-1]="newFolderColor === color"
+                            [class.ring-white]="newFolderColor === color"
+                            class="w-6 h-6 rounded-full cursor-pointer hover:scale-110 transition-transform"
+                            [title]="color">
+                    </button>
+                  </div>
+                </div>
+                <div class="flex gap-1">
+                  <button (click)="createFolder()"
+                          class="flex-1 px-2 py-1 text-xs rounded bg-success text-white hover:opacity-80">
+                    Create
+                  </button>
+                  <button (click)="toggleCreateFolderForm()"
+                          class="flex-1 px-2 py-1 text-xs rounded bg-gray-500 text-white hover:opacity-80">
+                    Cancel
+                  </button>
+                </div>
+              </div>
+
+              <!-- All Words -->
+              <button (click)="selectFolder(null)"
+                      (dragover)="onDragOver($event, null)"
+                      (dragleave)="onDragLeave()"
+                      (drop)="onDrop($event, null)"
+                      [class.bg-primary]="selectedFolderId === null"
+                      [class.text-white]="selectedFolderId === null"
+                      [class.ring-2]="dragOverFolderId === null && draggedWordId !== null"
+                      [class.ring-indigo-500]="dragOverFolderId === null && draggedWordId !== null"
+                      class="w-full text-left px-3 py-2 rounded mb-1 hover:bg-light-bg dark:hover:bg-slate-700 transition text-sm">
+                All Words ({{ getFolderWordsCount(null) }})
+              </button>
+
+              <!-- Folder List -->
+              <div *ngFor="let folder of folders" class="mb-1 group relative">
+                <button (click)="selectFolder(folder.id)"
+                        (dragover)="onDragOver($event, folder.id)"
+                        (dragleave)="onDragLeave()"
+                        (drop)="onDrop($event, folder.id)"
+                        [class.bg-primary]="selectedFolderId === folder.id"
+                        [class.text-white]="selectedFolderId === folder.id"
+                        [class.ring-2]="dragOverFolderId === folder.id"
+                        [class.ring-indigo-500]="dragOverFolderId === folder.id"
+                        class="w-full text-left pl-3 pr-10 py-2 rounded hover:bg-light-bg dark:hover:bg-slate-700 transition text-sm flex items-center gap-2">
+                  <span class="w-3 h-3 rounded-full flex-shrink-0" [style.backgroundColor]="folder.color"></span>
+                  <span class="flex-1 truncate">{{ folder.name }}</span>
+                  <span class="text-xs opacity-70">({{ getFolderWordsCount(folder.id) }})</span>
+                </button>
+                <button (click)="confirmDeleteFolder(folder.id); $event.stopPropagation()"
+                        class="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 text-red-600 hover:text-red-700 text-lg px-2 py-1 leading-none"
+                        title="Delete folder">
+                  ×
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Main Content -->
+          <div class="flex-1 min-w-0">
         <div class="flex justify-between items-center mb-8">
           <div>
             <h1 class="text-4xl font-bold mb-2 transition-colors text-primary dark:text-primary-dark">
@@ -80,8 +164,7 @@ import { VocabularyItem, Word } from '../../core/models/index';
           </button>
         </div>
 
-        <div class="mb-4">
-          <button (click)="toggleAddWordForm()"
+        <div class="mb-4">\n          <button (click)="toggleAddWordForm()"
                   [ngClass]="showAddWordForm
                     ? 'bg-light-bg dark:bg-slate-700 text-light-headline dark:text-dark-headline hover:opacity-80'
                     : 'bg-light-button dark:bg-dark-button text-white hover:opacity-90'"
@@ -143,8 +226,17 @@ import { VocabularyItem, Word } from '../../core/models/index';
         <!-- View: List -->
         <div *ngIf="viewMode === 'list' && filteredVocabulary.length > 0" class="space-y-3">
           <div *ngFor="let item of filteredVocabulary"
-               class="rounded-lg shadow hover:shadow-lg transition p-6 border border-secondary dark:border-success bg-white dark:bg-slate-800 transition-colors">
-            <div class="flex justify-between items-start gap-4">
+               [class.opacity-50]="draggedWordId === item.id"
+               class="rounded-lg shadow hover:shadow-lg transition p-6 border border-secondary dark:border-success bg-white dark:bg-slate-800 transition-colors flex gap-3">
+            <!-- Drag Handle -->
+            <div [draggable]="true"
+                 (dragstart)="onDragStart(item.id, $event)"
+                 (dragend)="onDragEnd()"
+                 class="flex-shrink-0 cursor-grab active:cursor-grabbing flex items-center justify-center w-8 h-8 rounded hover:bg-light-bg dark:hover:bg-slate-700 transition text-gray-400 hover:text-primary dark:hover:text-primary-dark"
+                 title="Drag to move to folder">
+              <span class="text-xl">⋮⋮</span>
+            </div>
+            <div class="flex justify-between items-start gap-4 flex-1">
               <div class="flex-1">
                 <h3 class="text-2xl font-bold transition-colors text-light-headline dark:text-dark-headline">
                   {{ item.word.text }}
@@ -193,8 +285,17 @@ import { VocabularyItem, Word } from '../../core/models/index';
         <div *ngIf="viewMode === 'card' && filteredVocabulary.length > 0" 
              class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div *ngFor="let item of filteredVocabulary"
-               class="rounded-lg shadow hover:shadow-lg transition p-6 border border-secondary dark:border-success bg-white dark:bg-slate-800 transition-colors flex flex-col">
-            <div class="flex-1">
+               [class.opacity-50]="draggedWordId === item.id"
+               class="rounded-lg shadow hover:shadow-lg transition p-6 border border-secondary dark:border-success bg-white dark:bg-slate-800 transition-colors flex flex-col relative">
+            <!-- Drag Handle -->
+            <div [draggable]="true"
+                 (dragstart)="onDragStart(item.id, $event)"
+                 (dragend)="onDragEnd()"
+                 class="absolute top-2 left-2 cursor-grab active:cursor-grabbing flex items-center justify-center w-8 h-8 rounded hover:bg-light-bg dark:hover:bg-slate-700 transition text-gray-400 hover:text-primary dark:hover:text-primary-dark"
+                 title="Drag to move to folder">
+              <span class="text-xl">⋮⋮</span>
+            </div>
+            <div class="flex-1 pt-6">
               <h3 class="text-2xl font-bold transition-colors mb-2 text-light-headline dark:text-dark-headline">
                 {{ item.word.text }}
               </h3>
@@ -265,6 +366,29 @@ import { VocabularyItem, Word } from '../../core/models/index';
             </div>
           </div>
         </div>
+
+        <!-- Delete Folder Confirmation Modal -->
+        <div *ngIf="showDeleteFolderConfirm"
+             class="fixed inset-0 flex items-center justify-center z-50 transition-all bg-black/30 dark:bg-black/50">
+          <div class="rounded-lg shadow-2xl p-6 max-w-sm border border-secondary dark:border-success bg-white dark:bg-slate-800 transition-colors">
+            <h2 class="text-2xl font-bold mb-4 transition-colors text-light-headline dark:text-dark-headline">
+              Delete Folder?
+            </h2>
+            <p class="mb-6 transition-colors text-light-paragraph dark:text-dark-paragraph">
+              Are you sure you want to delete "{{ getFolderToDelete()?.name }}"? Words in this folder will be moved to "No Folder". This action cannot be undone.
+            </p>
+            <div class="flex gap-4">
+              <button (click)="deleteFolder()"
+                      class="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition font-medium">
+                Delete
+              </button>
+              <button (click)="cancelDeleteFolder()"
+                      class="flex-1 bg-light-bg dark:bg-slate-700 text-light-headline dark:text-dark-headline px-4 py-2 rounded-lg transition font-medium hover:opacity-80">
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   `,
@@ -272,6 +396,8 @@ import { VocabularyItem, Word } from '../../core/models/index';
 })
 export class VocabularyListComponent implements OnInit {
   vocabulary: VocabularyItem[] = [];
+  folders: VocabularyFolder[] = [];
+  selectedFolderId: string | null = null;
   filter: 'all' | 'new' | 'reviewed' = 'all';
   viewMode: 'list' | 'card' = 'list';
   searchTerm: string = '';
@@ -286,7 +412,37 @@ export class VocabularyListComponent implements OnInit {
   currentTheme: Theme = 'light';
   showDeleteConfirm: boolean = false;
   deleteConfirmId: string | null = null;
+  showDeleteFolderConfirm: boolean = false;
+  deleteFolderConfirmId: string | null = null;
   books: any[] = [];
+  showCreateFolderForm = false;
+  newFolderName = '';
+  newFolderColor = '#7c3aed';
+  draggedWordId: string | null = null;
+  dragOverFolderId: string | null = null;
+
+  predefinedColors = [
+    '#7c3aed', // purple
+    '#ef4444', // red
+    '#f59e0b', // orange
+    '#10b981', // green
+    '#3b82f6', // blue
+    '#ec4899', // pink
+    '#eab308', // yellow
+    '#14b8a6', // teal
+    '#f97316', // deep orange
+    '#06b6d4', // cyan
+    '#84cc16', // lime
+    '#6366f1', // indigo
+    '#8b5cf6', // violet
+    '#d946ef', // fuchsia
+    '#22c55e', // emerald
+    '#a855f7', // purple-light
+    '#fb923c', // orange-light
+    '#38bdf8', // sky
+    '#f43f5e', // rose
+    '#94a3b8', // slate
+  ];
 
   get newCount(): number {
     return this.vocabulary.filter(v => !v.reviewed).length;
@@ -298,6 +454,11 @@ export class VocabularyListComponent implements OnInit {
 
   get filteredVocabulary(): VocabularyItem[] {
     let result = this.vocabulary;
+
+    // Apply folder filter
+    if (this.selectedFolderId !== null) {
+      result = result.filter(v => v.folderId === this.selectedFolderId);
+    }
 
     // Apply status filter
     if (this.filter === 'new') {
@@ -324,6 +485,7 @@ export class VocabularyListComponent implements OnInit {
     private vocabularyService: VocabularyService,
     private srsService: SrsService,
     private bookService: BookService,
+    private folderService: FolderService,
     private router: Router,
     private themeService: ThemeService
   ) { }
@@ -337,6 +499,12 @@ export class VocabularyListComponent implements OnInit {
     this.vocabularyService.vocabulary$.subscribe(vocab => {
       this.vocabulary = vocab;
     });
+
+    this.folderService.folders$.subscribe(folders => {
+      this.folders = folders;
+    });
+
+    this.folderService.refreshFolders();
 
     this.bookService.getBooks().subscribe(books => {
       this.books = books;
@@ -450,5 +618,139 @@ export class VocabularyListComponent implements OnInit {
         }, 5000);
       }
     });
+  }
+
+  selectFolder(folderId: string | null): void {
+    this.selectedFolderId = folderId;
+  }
+
+  toggleCreateFolderForm(): void {
+    this.showCreateFolderForm = !this.showCreateFolderForm;
+  }
+
+  createFolder(): void {
+    if (!this.newFolderName.trim()) return;
+
+    this.folderService.createFolder(this.newFolderName, this.newFolderColor).subscribe({
+      next: () => {
+        this.folderService.refreshFolders();
+        this.newFolderName = '';
+        this.newFolderColor = '#7c3aed';
+        this.showCreateFolderForm = false;
+      },
+      error: (err) => {
+        console.error('Failed to create folder:', err);
+      }
+    });
+  }
+
+  confirmDeleteFolder(folderId: string): void {
+    this.deleteFolderConfirmId = folderId;
+    this.showDeleteFolderConfirm = true;
+  }
+
+  deleteFolder(): void {
+    if (!this.deleteFolderConfirmId) return;
+
+    this.folderService.deleteFolder(this.deleteFolderConfirmId).subscribe({
+      next: () => {
+        this.folderService.refreshFolders();
+        this.vocabularyService.refreshVocabularyFromApi();
+        if (this.selectedFolderId === this.deleteFolderConfirmId) {
+          this.selectedFolderId = null;
+        }
+        this.showDeleteFolderConfirm = false;
+        this.deleteFolderConfirmId = null;
+      },
+      error: (err) => {
+        console.error('Failed to delete folder:', err);
+        this.showDeleteFolderConfirm = false;
+        this.deleteFolderConfirmId = null;
+      }
+    });
+  }
+
+  cancelDeleteFolder(): void {
+    this.showDeleteFolderConfirm = false;
+    this.deleteFolderConfirmId = null;
+  }
+
+  getFolderToDelete(): VocabularyFolder | undefined {
+    return this.folders.find(f => f.id === this.deleteFolderConfirmId);
+  }
+
+  getFolderName(folderId: string | undefined): string {
+    if (!folderId) return 'No Folder';
+    const folder = this.folders.find(f => f.id === folderId);
+    return folder ? folder.name : 'Unknown';
+  }
+
+  getFolderWordsCount(folderId: string | null): number {
+    return this.vocabulary.filter(v => v.folderId === folderId).length;
+  }
+
+  // Drag and drop methods
+  onDragStart(wordId: string, event: DragEvent): void {
+    this.draggedWordId = wordId;
+    if (event.dataTransfer) {
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/plain', wordId);
+      
+      // Set the entire word item as the drag image
+      const dragHandle = event.target as HTMLElement;
+      const wordItem = dragHandle.closest('.rounded-lg') as HTMLElement;
+      if (wordItem) {
+        // Clone the element to use as drag image
+        const dragImage = wordItem.cloneNode(true) as HTMLElement;
+        dragImage.style.position = 'absolute';
+        dragImage.style.left = '-9999px';
+        dragImage.style.width = wordItem.offsetWidth + 'px';
+        document.body.appendChild(dragImage);
+        
+        event.dataTransfer.setDragImage(dragImage, event.offsetX, event.offsetY);
+        
+        // Clean up the clone after drag starts
+        setTimeout(() => {
+          document.body.removeChild(dragImage);
+        }, 0);
+      }
+    }
+  }
+
+  onDragEnd(): void {
+    this.draggedWordId = null;
+    this.dragOverFolderId = null;
+  }
+
+  onDragOver(event: DragEvent, folderId: string | null): void {
+    event.preventDefault();
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = 'move';
+    }
+    this.dragOverFolderId = folderId;
+  }
+
+  onDragLeave(): void {
+    this.dragOverFolderId = null;
+  }
+
+  onDrop(event: DragEvent, folderId: string | null): void {
+    event.preventDefault();
+    
+    if (this.draggedWordId) {
+      this.folderService.moveToFolder(this.draggedWordId, folderId).subscribe({
+        next: () => {
+          this.vocabularyService.refreshVocabularyFromApi();
+          this.folderService.refreshFolders();
+          this.draggedWordId = null;
+          this.dragOverFolderId = null;
+        },
+        error: (err) => {
+          console.error('Failed to move word:', err);
+          this.draggedWordId = null;
+          this.dragOverFolderId = null;
+        }
+      });
+    }
   }
 }

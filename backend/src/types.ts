@@ -18,6 +18,16 @@ export interface VocabularyItem {
   nextReviewDate: string;
   reviewCount: number;
   difficulty: ReviewDifficulty;
+  folderId?: string;
+}
+
+export interface Folder {
+  id: string;
+  userId: string;
+  name: string;
+  color: string;
+  createdAt: string;
+  wordCount: number;
 }
 
 export interface FlashcardItem {

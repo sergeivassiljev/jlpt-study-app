@@ -34,6 +34,15 @@ export interface VocabularyItem {
   nextReviewDate: Date;
   reviewCount: number;
   difficulty: 'hard' | 'medium' | 'easy';
+  folderId?: string;
+}
+
+export interface VocabularyFolder {
+  id: string;
+  name: string;
+  color: string;
+  createdAt: Date;
+  wordCount: number;
 }
 
 // Flashcard Models

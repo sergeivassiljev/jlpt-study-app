@@ -62,4 +62,17 @@ export class BooksService {
   async upsertChapter(chapter: CreateChapterDto): Promise<ChapterEntity> {
     return this.chapterRepository.save(chapter);
   }
+
+  async deleteBook(bookId: string): Promise<boolean> {
+    // Delete all chapters for this book first
+    await this.chapterRepository.delete({ bookId });
+    // Then delete the book
+    const result = await this.bookRepository.delete({ id: bookId });
+    return result.affected ? result.affected > 0 : false;
+  }
+
+  async deleteChapter(bookId: string, chapterId: string): Promise<boolean> {
+    const result = await this.chapterRepository.delete({ id: chapterId, bookId });
+    return result.affected ? result.affected > 0 : false;
+  }
 }

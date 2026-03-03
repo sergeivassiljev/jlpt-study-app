@@ -6,12 +6,17 @@ import { FlashcardReviewComponent } from './modules/flashcards/flashcard-review.
 import { KanjiGridComponent } from './modules/kanji/kanji-grid.component';
 import { GrammarListComponent } from './modules/grammar/grammar-list.component';
 import { AuthComponent } from './modules/auth/auth.component';
+import { WordsComponent } from './modules/words/words.component';
 import { HomeComponent } from './pages/home/home.component';
+import { AdminComponent } from './modules/admin/admin.component';
 import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'auth', component: AuthComponent },
+  
+  // Admin
+  { path: 'admin', component: AdminComponent, canActivate: [authGuard] },
   
   // Books
   { path: 'books', component: BookListComponent, canActivate: [authGuard] },
@@ -19,6 +24,9 @@ export const routes: Routes = [
   
   // Vocabulary
   { path: 'vocabulary', component: VocabularyListComponent, canActivate: [authGuard] },
+
+  // Words
+  { path: 'words', component: WordsComponent, canActivate: [authGuard] },
   
   // Flashcards (SRS Review)
   { path: 'review', component: FlashcardReviewComponent, canActivate: [authGuard] },

@@ -29,4 +29,7 @@ export class VocabularyEntity {
 
   @Column({ type: 'text', default: 'medium' })
   difficulty: ReviewDifficulty;
+
+  @Column({ nullable: true })
+  folderId?: string;
 }

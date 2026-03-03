@@ -43,6 +43,64 @@ export class BookService {
     return chapters.find(c => c.id === chapterId);
   }
 
+  upsertBook(book: Book): Observable<Book> {
+    return new Observable(observer => {
+      this.http.post<Book>(`${this.apiBaseUrl}/books`, book).subscribe({
+        next: (savedBook) => {
+          const existingIndex = this.books.findIndex(existing => existing.id === savedBook.id);
+
+          if (existingIndex >= 0) {
+            this.books[existingIndex] = { ...this.books[existingIndex], ...savedBook };
+          } else {
+            this.books.push(savedBook);
+          }
+
+          this.booksSubject.next([...this.books]);
+          observer.next(savedBook);
+          observer.complete();
+        },
+        error: (err) => {
+          observer.error(err);
+        }
+      });
+    });
+  }
+
+  deleteBook(bookId: string): Observable<any> {
+    return new Observable(observer => {
+      this.http.delete(`${this.apiBaseUrl}/books/${bookId}`).subscribe({
+        next: (response) => {
+          // Remove from local state
+          this.books = this.books.filter(b => b.id !== bookId);
+          this.chapters.delete(bookId);
+          this.booksSubject.next([...this.books]);
+          observer.next(response);
+          observer.complete();
+        },
+        error: (err) => {
+          observer.error(err);
+        }
+      });
+    });
+  }
+
+  deleteChapter(bookId: string, chapterId: string): Observable<any> {
+    return new Observable(observer => {
+      this.http.delete(`${this.apiBaseUrl}/books/${bookId}/chapters/${chapterId}`).subscribe({
+        next: (response) => {
+          // Remove from local state
+          const chapters = this.chapters.get(bookId) || [];
+          this.chapters.set(bookId, chapters.filter(c => c.id !== chapterId));
+          observer.next(response);
+          observer.complete();
+        },
+        error: (err) => {
+          observer.error(err);
+        }
+      });
+    });
+  }
+
   private syncBooksFromBackend(): void {
     this.http.get<any[]>(`${this.apiBaseUrl}/books`).subscribe({
       next: (booksWithChapters) => {

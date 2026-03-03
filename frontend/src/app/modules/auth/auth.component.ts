@@ -66,6 +66,15 @@ import { AuthService } from '../../core/services/auth.service';
             {{ loading ? 'Please wait...' : (mode === 'login' ? 'Login' : 'Create account') }}
           </button>
         </form>
+
+        <div class="mt-4 text-center">
+          <button
+            type="button"
+            (click)="router.navigate(['/'])"
+            class="text-sm text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark transition-colors font-medium">
+            ← Back to Home
+          </button>
+        </div>
       </div>
     </div>
   `,
@@ -79,7 +88,7 @@ export class AuthComponent implements OnInit {
 
   constructor(
     private readonly authService: AuthService,
-    private readonly router: Router,
+    public readonly router: Router,
     private readonly route: ActivatedRoute,
   ) {}
 
