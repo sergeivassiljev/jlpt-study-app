@@ -1,17 +1,37 @@
-# JLPT Study App
+# Japanese Learning App
 
-A comprehensive Japanese language studying platform built with Angular and NestJS.
+A comprehensive Japanese language learning platform built with Angular and NestJS.
 
 ## 📚 Project Overview
 
-This project is designed to help users prepare for the Japanese Language Proficiency Test (JLPT) through an organized, interactive learning platform.
+This platform provides an organized, interactive environment for learning Japanese through vocabulary management, flashcard study, reading materials, and kanji practice.
 
 ### Features
 
-- **Kanji Study**: Learn and practice Japanese Kanji characters organized by JLPT levels
-- **Study Books**: Recommended resources and materials for JLPT preparation
-- **Grammar Lessons**: Comprehensive grammar patterns and sentence structures
-- **Modern UI**: Built with Tailwind CSS and Angular Material
+- **Vocabulary Management**: 
+  - Create, edit, and delete vocabulary words with translations, readings, and example sentences
+  - Organize words into custom folders with color coding (20 predefined colors)
+  - Drag and drop words between folders
+  - Filter vocabulary by folder or view all words
+  
+- **Flashcard System**: 
+  - Spaced Repetition System (SRS) with automatic scheduling
+  - Study due flashcards with 4 difficulty ratings (Again, Hard, Good, Easy)
+  - Track learning progress with review history
+  
+- **Books & Reading**: 
+  - Import and read Japanese books with chapter navigation
+  - Filter books by JLPT level (N1-N5)
+  - Chapter-based reading structure
+
+- **Kanji Study**: 
+  - Learn Japanese Kanji characters
+  - Organized by JLPT levels
+
+- **Modern UI**: 
+  - Dark/Light theme support
+  - Built with Tailwind CSS and Angular Material
+  - Responsive design
 
 ## 🏗️ Project Structure
 
@@ -20,7 +40,8 @@ jlpt-study-app/
 ├── frontend/              # Angular application
 │   ├── src/
 │   │   ├── app/
-│   │   │   ├── pages/    # Kanji, Books, Grammar pages
+│   │   │   ├── modules/  # Feature modules (Vocabulary, Books, Kanji)
+│   │   │   ├── core/     # Services, guards, interceptors
 │   │   │   └── shared/   # Shared components
 │   │   ├── main.ts       # Entry point
 │   │   └── styles.css    # Global styles
@@ -30,7 +51,11 @@ jlpt-study-app/
 │
 ├── backend/               # NestJS application
 │   ├── src/
-│   │   └── modules/      # Feature modules
+│   │   ├── auth/         # Authentication module
+│   │   ├── vocabulary/   # Vocabulary CRUD & Folders
+│   │   ├── study-data/   # Flashcards & SRS logic
+│   │   ├── books/        # Books & Chapters
+│   │   └── database/     # SQLite database
 │   └── package.json
 │
 └── .github/
@@ -96,22 +121,35 @@ jlpt-study-app/
 - **NestJS 10** - Progressive Node.js framework
 - **TypeScript** - Type-safe JavaScript
 - **TypeORM** - ORM for database management
+- **SQLite** - Lightweight database
+- **JWT** - Token-based authentication
 - **Jest** - Testing framework
 
 ## 📖 Pages
 
-### Kanji Page (`/kanji`)
-Learn Japanese Kanji characters organized by JLPT levels (N1, N2, N3, etc.)
+### Vocabulary Page (`/vocabulary`)
+Manage your personal vocabulary collection:
+- Add new words with readings, translations, and example sentences
+- Create custom folders with color coding
+- Drag and drop words between folders
+- Edit and delete vocabulary entries
+- Filter by folder or view all words
+
+### Flashcards Page (`/flashcards`)
+Study vocabulary using spaced repetition:
+- Review flashcards that are due for study
+- Rate difficulty: Again, Hard, Good, Easy
+- Automatic scheduling based on performance
+- Track learning progress
 
 ### Books Page (`/books`)
-Discover recommended study materials and textbooks for JLPT preparation
+Read Japanese books with chapter navigation:
+- Browse books filtered by JLPT level (N1-N5)
+- Navigate through chapters
+- Integrated reading experience
 
-### Grammar Page (`/grammar`)
-Master essential Japanese grammar patterns including:
-- Particles (助詞)
-- Verb Conjugation
-- Adjectives & Adverbs
-- Sentence Structures
+### Kanji Page (`/kanji`)
+Learn Japanese Kanji characters organized by JLPT levels
 
 ## 🎯 Development
 
@@ -137,30 +175,57 @@ The frontend uses Tailwind CSS for styling. Configuration is in `frontend/tailwi
 ### Angular Material
 Angular Material components are available for enhanced UI elements. Import from `@angular/material` as needed.
 
-## � Authentication
+## 🔐 Authentication
 
-The app now uses JWT-based authentication:
+The app uses JWT-based authentication:
 
-- `POST /auth/register` — create account (`email`, `password`)
-- `POST /auth/login` — sign in and receive `accessToken`
-- Protected endpoints (`/vocabulary`, `/flashcards`) require `Authorization: Bearer <token>`
+- `POST /auth/register` — Create account (`email`, `password`)
+- `POST /auth/login` — Sign in and receive `accessToken`
+- Protected endpoints require `Authorization: Bearer <token>` header
 
 `JWT_SECRET` can be configured as an environment variable for backend runtime. If not provided, a local development fallback secret is used.
 
 ## 🔄 API Endpoints
 
-Current backend endpoints include:
-
+### Authentication
 ```
-POST   /auth/register
-POST   /auth/login
-GET    /books
-GET    /books/:bookId/chapters
-GET    /kanji
-GET    /vocabulary            (auth required)
-POST   /vocabulary            (auth required)
-GET    /flashcards            (auth required)
-GET    /flashcards/due        (auth required)
+POST   /auth/register          Create new user account
+POST   /auth/login             Sign in and get access token
+```
+
+### Vocabulary Management
+```
+GET    /vocabulary             Get all vocabulary (auth required)
+POST   /vocabulary             Create new vocabulary entry (auth required)
+PUT    /vocabulary/:id         Update vocabulary entry (auth required)
+DELETE /vocabulary/:id         Delete vocabulary entry (auth required)
+PATCH  /vocabulary/:id/move-to-folder  Move word to folder (auth required)
+```
+
+### Folder Management
+```
+GET    /vocabulary/folders          Get all folders (auth required)
+POST   /vocabulary/folders          Create new folder (auth required)
+DELETE /vocabulary/folders/:id     Delete folder (auth required)
+GET    /vocabulary/folders/:id     Get vocabulary by folder (auth required)
+```
+
+### Flashcards (SRS)
+```
+GET    /flashcards                  Get all flashcards (auth required)
+GET    /flashcards/due              Get due flashcards (auth required)
+POST   /flashcards/review/:id       Submit flashcard review (auth required)
+```
+
+### Books & Reading
+```
+GET    /books                       Get all books
+GET    /books/:bookId/chapters      Get chapters for a book
+```
+
+### Kanji
+```
+GET    /kanji                       Get all kanji
 ```
 
 ## 📦 Build & Deployment
@@ -170,7 +235,7 @@ GET    /flashcards/due        (auth required)
 cd frontend
 npm run build
 ```
-Output will be in `frontend/dist/jlpt-study-app/`
+Output will be in `frontend/dist/`
 
 ### Backend Build
 ```bash
