@@ -41,3 +41,15 @@ export interface FlashcardItem {
   interval: number;
   repetitions: number;
 }
+
+export type KanaType = 'hiragana' | 'katakana';
+
+export interface Kana {
+  id: string;
+  character: string;
+  romaji: string;
+  type: KanaType;
+  strokeOrder?: string;
+  isDiacritical: boolean;
+}
+

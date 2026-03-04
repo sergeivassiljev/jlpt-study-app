@@ -85,3 +85,14 @@ export interface GrammarExample {
   furigana: string;
   english: string;
 }
+
+// Kana Models
+export interface Kana {
+  id: string;
+  character: string;
+  romaji: string;
+  type: 'hiragana' | 'katakana';
+  strokeOrder?: string;
+  isDiacritical: boolean;
+}
+

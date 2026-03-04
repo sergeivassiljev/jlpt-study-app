@@ -21,6 +21,9 @@
   --accent-tertiary: #f8f5f2;
   --illustration-main: #fffffe;
   --illustration-highlight: #078080;
+  --scrollbar-track: var(--accent-tertiary);
+  --scrollbar-thumb: var(--button-color);
+  --scrollbar-thumb-hover: var(--accent-secondary);
 }
 
 html.dark {
@@ -34,6 +37,9 @@ html.dark {
   --accent-tertiary: #122027;
   --illustration-main: #122027;
   --illustration-highlight: #14b8a6;
+  --scrollbar-track: var(--accent-tertiary);
+  --scrollbar-thumb: var(--button-color);
+  --scrollbar-thumb-hover: var(--illustration-highlight);
 }
 
 body {
@@ -48,6 +54,31 @@ body {
 
 html, body {
   height: 100%;
+}
+
+/* Global custom scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 9999px;
+  border: 2px solid var(--scrollbar-track);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
 }
 
 /* Typography enhancements for Montserrat (Proxima Nova alternative) */
