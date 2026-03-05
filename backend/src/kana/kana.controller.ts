@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Query, Request, UseGuards } from '@nestjs/
 import { KanaService } from './kana.service';
 import { KanaStatsService, RecordAttemptDto } from './kana-stats.service';
 import { RecordKanaAttemptDto } from './dto/record-kana-attempt.dto';
+import { RecordKanaSessionDto } from './dto/record-kana-session.dto';
 import { KanaType } from '../types';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -69,6 +70,98 @@ export class KanaController {
       return result;
     } catch (error) {
       console.error('Error recording attempt:', error);
+      throw error;
+    }
+  }
+
+  @Post('stats/record-batch')
+  @UseGuards(JwtAuthGuard)
+  async recordSessionAttempts(
+    @Request() req,
+    @Body() body: any,
+  ) {
+    try {
+      const userId = req.user?.userId;
+      console.log('\n=== BATCH RECORD START ===');
+      console.log('Body structure:', {
+        hasAttempts: !!body?.attempts,
+        attemptsLength: body?.attempts?.length,
+        sessionSize: body?.sessionSize,
+      });
+
+      if (!userId) {
+        console.error('No userId found in request');
+        throw new Error('User ID not found in request');
+      }
+
+      if (!body || typeof body !== 'object') {
+        console.error('Body is not valid object:', typeof body);
+        throw new Error('Request body must be an object');
+      }
+
+      if (!Array.isArray(body.attempts)) {
+        console.error('Attempts is not an array:', typeof body.attempts);
+        throw new Error('Attempts must be an array');
+      }
+
+      if (body.attempts.length === 0) {
+        console.error('Attempts array is empty');
+        throw new Error('Attempts array cannot be empty');
+      }
+
+      // Validate attempt structure
+      console.log('Validating attempt structure...');
+      for (let i = 0; i < body.attempts.length; i++) {
+        const att = body.attempts[i];
+        if (!att || typeof att !== 'object') {
+          throw new Error(`Attempt ${i} is not a valid object`);
+        }
+        const required = ['kanaId', 'character', 'romaji', 'type', 'isCorrect', 'responseTime'];
+        for (const field of required) {
+          if (!(field in att)) {
+            throw new Error(`Attempt ${i} missing required field: ${field}`);
+          }
+        }
+      }
+
+      console.log('All validations passed. Creating RecordAttemptDto array...');
+      const attemptDataArray: RecordAttemptDto[] = body.attempts.map((attempt: any, idx: number) => {
+        console.log(`  Attempt ${idx}: ${attempt.character}`);
+        return {
+          userId,
+          kanaId: attempt.kanaId,
+          character: attempt.character,
+          romaji: attempt.romaji,
+          type: attempt.type,
+          isCorrect: attempt.isCorrect,
+          responseTime: attempt.responseTime,
+        };
+      });
+
+      console.log('Calling recordSessionAttempts with', attemptDataArray.length, 'attempts...');
+      const results = await this.kanaStatsService.recordSessionAttempts(userId, attemptDataArray);
+      console.log('recordSessionAttempts returned', results.length, 'results');
+      
+      console.log('=== BATCH RECORD END (SUCCESS) ===\n');
+      
+      return {
+        message: `Successfully recorded ${results.length} attempts`,
+        results,
+        sessionStats: {
+          totalAttempts: body.attempts.length,
+          correctAttempts: body.attempts.filter((a: any) => a.isCorrect).length,
+          accuracy: body.accuracy || 0,
+          avgResponseTime: body.avgResponseTime || 0,
+        }
+      };
+    } catch (error) {
+      console.error('\n=== ERROR IN BATCH RECORD ===');
+      console.error('Error type:', error?.constructor?.name);
+      console.error('Error message:', error instanceof Error ? error.message : String(error));
+      if (error instanceof Error) {
+        console.error('Stack:', error.stack);
+      }
+      console.error('=== END ERROR ===\n');
       throw error;
     }
   }

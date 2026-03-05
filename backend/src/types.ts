@@ -42,6 +42,46 @@ export interface FlashcardItem {
   repetitions: number;
 }
 
+export type JLPTLevel = 'N5' | 'N4' | 'N3' | 'N2' | 'N1';
+
+export interface StructuredLessonWord {
+  id: string;
+  jlptLevel: JLPTLevel;
+  topic: string;
+  topics: string[];
+  lessonOrder: number;
+  wordOrder: number;
+  word: string;
+  reading: string;
+  meaning: string;
+  emoji?: string;
+  partOfSpeech: string;
+  isCompleted: boolean;
+}
+
+export interface TopicLessonProgress {
+  lessonOrder: number;
+  totalWords: number;
+  completedWords: number;
+  isUnlocked: boolean;
+  isCompleted: boolean;
+}
+
+export interface TopicProgressSummary {
+  topic: string;
+  totalWords: number;
+  completedWords: number;
+  lessons: TopicLessonProgress[];
+}
+
+export interface DailyLessonPayload {
+  jlptLevel: JLPTLevel;
+  topic: string;
+  dailyLimit: number;
+  words: StructuredLessonWord[];
+  remainingWords: number;
+}
+
 export type KanaType = 'hiragana' | 'katakana';
 
 export interface Kana {

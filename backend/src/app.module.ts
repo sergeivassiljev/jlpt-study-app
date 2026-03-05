@@ -15,13 +15,26 @@ import { UserEntity } from './auth/entities/user.entity';
 import { AuthModule } from './auth/auth.module';
 import { KanaModule } from './kana/kana.module';
 import { KanaStats } from './kana/kana-stats.entity';
+import { LessonWordEntity } from './study-data/entities/lesson-word.entity';
+import { LessonWordProgressEntity } from './study-data/entities/lesson-word-progress.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot({
       type: 'sqlite',
       database: 'data/jlpt-study.sqlite',
-      entities: [VocabularyEntity, FlashcardEntity, FolderEntity, BookEntity, ChapterEntity, KanjiEntity, UserEntity, KanaStats],
+      entities: [
+        VocabularyEntity,
+        FlashcardEntity,
+        FolderEntity,
+        BookEntity,
+        ChapterEntity,
+        KanjiEntity,
+        UserEntity,
+        KanaStats,
+        LessonWordEntity,
+        LessonWordProgressEntity,
+      ],
       synchronize: true,
     }),
     StudyDataModule,

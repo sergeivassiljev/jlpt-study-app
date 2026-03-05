@@ -1,14 +1,30 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { FlashcardItem, ReviewDifficulty, VocabularyItem, Word, Folder } from '../types';
+import {
+  DailyLessonPayload,
+  FlashcardItem,
+  Folder,
+  JLPTLevel,
+  ReviewDifficulty,
+  StructuredLessonWord,
+  TopicLessonProgress,
+  TopicProgressSummary,
+  VocabularyItem,
+  Word,
+} from '../types';
 import { VocabularyEntity } from './entities/vocabulary.entity';
 import { FlashcardEntity } from './entities/flashcard.entity';
 import { FolderEntity } from './entities/folder.entity';
+import { LessonWordEntity } from './entities/lesson-word.entity';
+import { LessonWordProgressEntity } from './entities/lesson-word-progress.entity';
+import { N5_TOPIC_LESSON_WORDS } from '../vocabulary/data/n5-topic-lessons.data';
 
 @Injectable()
 export class StudyDataService {
   private readonly MAX_VOCABULARY_PER_USER = 10000;
+  private readonly DEFAULT_DAILY_LIMIT = 10;
+  private readonly MAX_DAILY_LIMIT = 50;
 
   constructor(
     @InjectRepository(VocabularyEntity)
@@ -17,6 +33,10 @@ export class StudyDataService {
     private readonly flashcardRepository: Repository<FlashcardEntity>,
     @InjectRepository(FolderEntity)
     private readonly folderRepository: Repository<FolderEntity>,
+    @InjectRepository(LessonWordEntity)
+    private readonly lessonWordRepository: Repository<LessonWordEntity>,
+    @InjectRepository(LessonWordProgressEntity)
+    private readonly lessonProgressRepository: Repository<LessonWordProgressEntity>,
   ) {}
 
   async getVocabulary(userId: string): Promise<VocabularyItem[]> {
@@ -25,6 +45,169 @@ export class StudyDataService {
       order: { dateAdded: 'DESC' },
     });
     return items.map((item) => this.toVocabularyItem(item));
+  }
+
+  async getStructuredLessonTopics(userId: string, jlptLevel: JLPTLevel): Promise<TopicProgressSummary[]> {
+    await this.ensureLessonSeedData(jlptLevel);
+
+    const lessonWords = await this.lessonWordRepository.find({
+      where: { jlptLevel },
+      order: { topic: 'ASC', lessonOrder: 'ASC', wordOrder: 'ASC' },
+    });
+
+    if (lessonWords.length === 0) {
+      return [];
+    }
+
+    const progressRows = await this.lessonProgressRepository.find({
+      where: { userId, jlptLevel },
+      order: { completedAt: 'DESC' },
+    });
+    const completedWordIds = new Set(progressRows.map((row) => row.lessonWordId));
+
+    const byTopic = new Map<string, Map<number, { totalWords: number; completedWords: number }>>();
+
+    for (const lessonWord of lessonWords) {
+      const topicLessons = byTopic.get(lessonWord.topic) ?? new Map<number, { totalWords: number; completedWords: number }>();
+      const lessonStats = topicLessons.get(lessonWord.lessonOrder) ?? { totalWords: 0, completedWords: 0 };
+
+      lessonStats.totalWords += 1;
+      if (completedWordIds.has(lessonWord.id)) {
+        lessonStats.completedWords += 1;
+      }
+
+      topicLessons.set(lessonWord.lessonOrder, lessonStats);
+      byTopic.set(lessonWord.topic, topicLessons);
+    }
+
+    const result: TopicProgressSummary[] = [];
+
+    for (const [topic, lessonsMap] of byTopic.entries()) {
+      const lessonOrders = Array.from(lessonsMap.keys()).sort((a, b) => a - b);
+      const lessons: TopicLessonProgress[] = [];
+
+      let previousCompleted = true;
+      let topicTotalWords = 0;
+      let topicCompletedWords = 0;
+
+      for (const order of lessonOrders) {
+        const stats = lessonsMap.get(order)!;
+        const isCompleted = stats.totalWords > 0 && stats.completedWords >= stats.totalWords;
+        const isUnlocked = previousCompleted;
+
+        lessons.push({
+          lessonOrder: order,
+          totalWords: stats.totalWords,
+          completedWords: stats.completedWords,
+          isUnlocked,
+          isCompleted,
+        });
+
+        topicTotalWords += stats.totalWords;
+        topicCompletedWords += stats.completedWords;
+        previousCompleted = isCompleted;
+      }
+
+      result.push({
+        topic,
+        totalWords: topicTotalWords,
+        completedWords: topicCompletedWords,
+        lessons,
+      });
+    }
+
+    return result.sort((a, b) => a.topic.localeCompare(b.topic));
+  }
+
+  async getDailyLessonWords(
+    userId: string,
+    jlptLevel: JLPTLevel,
+    topic: string,
+    dailyLimit = this.DEFAULT_DAILY_LIMIT,
+  ): Promise<DailyLessonPayload> {
+    await this.ensureLessonSeedData(jlptLevel);
+
+    const normalizedTopic = topic.trim();
+    const safeLimit = Math.max(1, Math.min(this.MAX_DAILY_LIMIT, dailyLimit || this.DEFAULT_DAILY_LIMIT));
+
+    const lessonWords = await this.lessonWordRepository.find({
+      where: { jlptLevel, topic: normalizedTopic },
+      order: { lessonOrder: 'ASC', wordOrder: 'ASC' },
+    });
+
+    const progressRows = await this.lessonProgressRepository.find({
+      where: { userId, jlptLevel, topic: normalizedTopic },
+    });
+    const completedWordIds = new Set(progressRows.map((row) => row.lessonWordId));
+
+    const allPendingWords = lessonWords.filter((word) => !completedWordIds.has(word.id));
+    const nextLessonOrder = allPendingWords.length > 0
+      ? Math.min(...allPendingWords.map((word) => word.lessonOrder))
+      : null;
+    const lessonPendingWords = nextLessonOrder === null
+      ? []
+      : allPendingWords.filter((word) => word.lessonOrder === nextLessonOrder);
+    const limitedWords = lessonPendingWords.slice(0, safeLimit);
+
+    return {
+      jlptLevel,
+      topic: normalizedTopic,
+      dailyLimit: safeLimit,
+      words: limitedWords.map((word) => this.toStructuredLessonWord(word, completedWordIds)),
+      remainingWords: Math.max(0, allPendingWords.length - limitedWords.length),
+    };
+  }
+
+  async getTopicLessonWords(
+    userId: string,
+    jlptLevel: JLPTLevel,
+    topic: string,
+    lessonOrder: number,
+  ): Promise<StructuredLessonWord[]> {
+    await this.ensureLessonSeedData(jlptLevel);
+
+    const words = await this.lessonWordRepository.find({
+      where: { jlptLevel, topic, lessonOrder },
+      order: { wordOrder: 'ASC' },
+    });
+
+    const progressRows = await this.lessonProgressRepository.find({ where: { userId, jlptLevel, topic, lessonOrder } });
+    const completedWordIds = new Set(progressRows.map((row) => row.lessonWordId));
+
+    return words.map((word) => this.toStructuredLessonWord(word, completedWordIds));
+  }
+
+  async completeLessonWord(userId: string, lessonWordId: string, vocabularyId?: string): Promise<{ lessonWordId: string; completedAt: string }> {
+    const lessonWord = await this.lessonWordRepository.findOne({ where: { id: lessonWordId } });
+    if (!lessonWord) {
+      throw new BadRequestException(`Lesson word not found: ${lessonWordId}`);
+    }
+
+    const existing = await this.lessonProgressRepository.findOne({ where: { userId, lessonWordId } });
+    if (existing) {
+      return {
+        lessonWordId: existing.lessonWordId,
+        completedAt: existing.completedAt.toISOString(),
+      };
+    }
+
+    const completedAt = new Date();
+    const progress = this.lessonProgressRepository.create({
+      id: `lesson-progress-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      userId,
+      lessonWordId,
+      jlptLevel: lessonWord.jlptLevel,
+      topic: lessonWord.topic,
+      lessonOrder: lessonWord.lessonOrder,
+      completedAt,
+      vocabularyId,
+    });
+    await this.lessonProgressRepository.save(progress);
+
+    return {
+      lessonWordId,
+      completedAt: completedAt.toISOString(),
+    };
   }
 
   async addVocabulary(userId: string, payload: { word: Word; exampleSentence: string }): Promise<VocabularyItem> {
@@ -263,6 +446,53 @@ export class StudyDataService {
     if (missingCards.length > 0) {
       await this.flashcardRepository.save(missingCards);
     }
+  }
+
+  private async ensureLessonSeedData(jlptLevel: JLPTLevel): Promise<void> {
+    if (jlptLevel !== 'N5') {
+      return;
+    }
+
+    const existingCount = await this.lessonWordRepository.count({ where: { jlptLevel } });
+    if (existingCount > 0) {
+      return;
+    }
+
+    const entities = N5_TOPIC_LESSON_WORDS.map((item) => {
+      const topicSlug = item.topic.toLowerCase().replace(/\s+/g, '-');
+      return this.lessonWordRepository.create({
+        id: `lesson-${item.jlptLevel.toLowerCase()}-${topicSlug}-${item.lessonOrder}-${item.wordOrder}`,
+        jlptLevel: item.jlptLevel,
+        topic: item.topic,
+        topics: [item.topic],
+        lessonOrder: item.lessonOrder,
+        wordOrder: item.wordOrder,
+        word: item.word,
+        reading: item.reading,
+        meaning: item.meaning,
+        emoji: item.emoji,
+        partOfSpeech: 'word',
+      });
+    });
+
+    await this.lessonWordRepository.save(entities);
+  }
+
+  private toStructuredLessonWord(entity: LessonWordEntity, completedWordIds: Set<string>): StructuredLessonWord {
+    return {
+      id: entity.id,
+      jlptLevel: entity.jlptLevel as JLPTLevel,
+      topic: entity.topic,
+      topics: entity.topics,
+      lessonOrder: entity.lessonOrder,
+      wordOrder: entity.wordOrder,
+      word: entity.word,
+      reading: entity.reading,
+      meaning: entity.meaning,
+      emoji: entity.emoji,
+      partOfSpeech: entity.partOfSpeech,
+      isCompleted: completedWordIds.has(entity.id),
+    };
   }
 
   private toVocabularyItem(entity: VocabularyEntity): VocabularyItem {

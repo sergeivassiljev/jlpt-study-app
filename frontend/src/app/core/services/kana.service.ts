@@ -150,6 +150,15 @@ export class KanaService {
     return this.http.get<KanaStats[]>(url);
   }
 
+  recordSessionAttempts(data: {
+    attempts: RecordAttemptDto[],
+    sessionSize: number,
+    accuracy?: number,
+    avgResponseTime?: number
+  }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/stats/record-batch`, data);
+  }
+
   resetStats(): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(`${this.apiUrl}/stats/reset`, {});
   }

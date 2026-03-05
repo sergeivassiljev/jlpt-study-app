@@ -133,36 +133,49 @@ export class KanaStatsService {
   }
 
   async getUserStatsOverview(userId: string, type?: 'hiragana' | 'katakana'): Promise<UserKanaStatsOverview> {
-    const stats = await this.getUserKanaStats(userId, type);
+    try {
+      const stats = await this.getUserKanaStats(userId, type);
 
-    const totalKanaPracticed = stats.filter(s => s.totalAttempts > 0).length;
-    const totalAttempts = stats.reduce((sum, s) => sum + s.totalAttempts, 0);
-    const totalCorrect = stats.reduce((sum, s) => sum + s.correctAttempts, 0);
-    const overallAccuracy = totalAttempts > 0 ? (totalCorrect / totalAttempts) * 100 : 0;
-    
-    const practicedStats = stats.filter(s => s.totalAttempts > 0);
-    const avgResponseTime = practicedStats.length > 0
-      ? practicedStats.reduce((sum, s) => sum + s.avgResponseTime, 0) / practicedStats.length
-      : 0;
+      const totalKanaPracticed = stats.filter(s => s.totalAttempts > 0).length;
+      const totalAttempts = stats.reduce((sum, s) => sum + s.totalAttempts, 0);
+      const totalCorrect = stats.reduce((sum, s) => sum + s.correctAttempts, 0);
+      const overallAccuracy = totalAttempts > 0 ? (totalCorrect / totalAttempts) * 100 : 0;
+      
+      const practicedStats = stats.filter(s => s.totalAttempts > 0);
+      const avgResponseTime = practicedStats.length > 0
+        ? practicedStats.reduce((sum, s) => sum + s.avgResponseTime, 0) / practicedStats.length
+        : 0;
 
-    const strongCount = stats.filter(s => s.masteryLevel === KanaMasteryLevel.STRONG).length;
-    const mediumCount = stats.filter(s => s.masteryLevel === KanaMasteryLevel.MEDIUM).length;
-    const weakCount = stats.filter(s => s.masteryLevel === KanaMasteryLevel.WEAK).length;
-    
-    // Calculate not practiced based on type
-    const totalKanaCount = type === 'hiragana' ? 46 : type === 'katakana' ? 46 : 92;
-    const notPracticedCount = totalKanaCount - totalKanaPracticed;
+      const strongCount = stats.filter(s => s.masteryLevel === KanaMasteryLevel.STRONG).length;
+      const mediumCount = stats.filter(s => s.masteryLevel === KanaMasteryLevel.MEDIUM).length;
+      const weakCount = stats.filter(s => s.masteryLevel === KanaMasteryLevel.WEAK).length;
+      
+      // Calculate total kana available (use hardcoded values for reliability)
+      let totalKanaCount = 0;
+      if (type === 'hiragana') {
+        totalKanaCount = 46;
+      } else if (type === 'katakana') {
+        totalKanaCount = 46;
+      } else {
+        totalKanaCount = 92;
+      }
+      
+      const notPracticedCount = Math.max(0, totalKanaCount - totalKanaPracticed);
 
-    return {
-      totalKanaPracticed,
-      totalAttempts,
-      overallAccuracy: Math.round(overallAccuracy * 10) / 10,
-      avgResponseTime: Math.round(avgResponseTime),
-      strongCount,
-      mediumCount,
-      weakCount,
-      notPracticedCount,
-    };
+      return {
+        totalKanaPracticed,
+        totalAttempts,
+        overallAccuracy: Math.round(overallAccuracy * 10) / 10,
+        avgResponseTime: Math.round(avgResponseTime),
+        strongCount,
+        mediumCount,
+        weakCount,
+        notPracticedCount,
+      };
+    } catch (error) {
+      console.error('Error in getUserStatsOverview:', error instanceof Error ? error.message : error);
+      throw error;
+    }
   }
 
   async getWeakKana(userId: string, type?: 'hiragana' | 'katakana'): Promise<KanaStats[]> {
@@ -255,6 +268,41 @@ export class KanaStatsService {
     }
 
     return { score, level };
+  }
+
+  async recordSessionAttempts(userId: string, attempts: RecordAttemptDto[]): Promise<KanaStats[]> {
+    try {
+      console.log(`Recording batch of ${attempts.length} attempts for user ${userId}`);
+      const results: KanaStats[] = [];
+      const errors: any[] = [];
+
+      for (let i = 0; i < attempts.length; i++) {
+        try {
+          const attempt = attempts[i];
+          console.log(`  [${i}/${attempts.length}] Recording: ${attempt.character} (${attempt.romaji})`);
+          const result = await this.recordAttempt({ ...attempt, userId });
+          results.push(result);
+        } catch (attemptError) {
+          console.error(`  [${i}] ERROR:`, attemptError instanceof Error ? attemptError.message : attemptError);
+          errors.push({
+            index: i,
+            error: attemptError instanceof Error ? attemptError.message : String(attemptError)
+          });
+          // Continue processing other attempts instead of failing entirely
+        }
+      }
+
+      console.log(`Successfully recorded ${results.length}/${attempts.length} attempts. Errors: ${errors.length}`);
+      
+      if (errors.length > 0) {
+        console.warn('Some attempts failed:', errors);
+      }
+
+      return results;
+    } catch (error) {
+      console.error('Error recording session attempts:', error);
+      throw error;
+    }
   }
 
   async resetUserStats(userId: string): Promise<void> {

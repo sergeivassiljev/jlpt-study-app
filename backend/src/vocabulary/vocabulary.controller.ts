@@ -1,10 +1,12 @@
-import { Body, Controller, Delete, Get, NotFoundException, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, NotFoundException, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { StudyDataService } from '../study-data/study-data.service';
 import { CreateVocabularyDto } from './dto/create-vocabulary.dto';
 import { UpdateVocabularyReviewDto } from './dto/update-vocabulary-review.dto';
 import { CreateFolderDto, MoveToFolderDto } from './dto/folder.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
+import { CompleteLessonWordDto } from './dto/complete-lesson-word.dto';
+import { DailyLessonQueryDto, LessonTopicsQueryDto, TopicLessonWordsQueryDto } from './dto/lesson-query.dto';
 
 @Controller('vocabulary')
 @UseGuards(JwtAuthGuard)
@@ -14,6 +16,26 @@ export class VocabularyController {
   @Get()
   async list(@CurrentUserId() userId: string) {
     return await this.studyDataService.getVocabulary(userId);
+  }
+
+  @Get('lessons/topics')
+  async listLessonTopics(@CurrentUserId() userId: string, @Query() query: LessonTopicsQueryDto) {
+    return await this.studyDataService.getStructuredLessonTopics(userId, query.level);
+  }
+
+  @Get('lessons/daily')
+  async getDailyLesson(@CurrentUserId() userId: string, @Query() query: DailyLessonQueryDto) {
+    return await this.studyDataService.getDailyLessonWords(userId, query.level, query.topic, query.limit);
+  }
+
+  @Get('lessons/words')
+  async getTopicLessonWords(@CurrentUserId() userId: string, @Query() query: TopicLessonWordsQueryDto) {
+    return await this.studyDataService.getTopicLessonWords(userId, query.level, query.topic, query.lessonOrder);
+  }
+
+  @Post('lessons/complete')
+  async completeLessonWord(@CurrentUserId() userId: string, @Body() body: CompleteLessonWordDto) {
+    return await this.studyDataService.completeLessonWord(userId, body.lessonWordId, body.vocabularyId);
   }
 
   @Post()

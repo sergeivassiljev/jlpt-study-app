@@ -5,7 +5,10 @@ import { FormsModule } from '@angular/forms';
 import { KanaService, Kana } from '../../core/services/kana.service';
 
 type PracticeMode = 'hiragana' | 'katakana' | 'mixed' | 'custom';
-type AppState = 'selection' | 'practice';
+type PracticeDirection = 'kana-to-romaji' | 'romaji-to-kana' | 'mixed-direction';
+type QuestionDirection = 'kana-to-romaji' | 'romaji-to-kana';
+type AppState = 'selection' | 'session-size' | 'practice' | 'session-end';
+type SessionAttempt = { kanaId: number; character: string; romaji: string; type: 'hiragana' | 'katakana'; isCorrect: boolean; responseTime: number };
 
 @Component({
   selector: 'app-kana-typing',
@@ -26,11 +29,10 @@ type AppState = 'selection' | 'practice';
             </h1>
           </div>
           <p class="text-light-paragraph dark:text-dark-paragraph">
-            {{ state === 'selection' ? 'Select a practice mode' : 'Type the romaji for each kana' }}
+            {{ state === 'selection' ? 'Select a practice mode and answer direction' : 'Answer each question to continue' }}
           </p>
         </div>
 
-        <!-- SELECTION STATE -->
         <ng-container *ngIf="state === 'selection'">
           <!-- Mode Selection Buttons -->
           <div class="mb-8">
@@ -164,24 +166,193 @@ type AppState = 'selection' | 'practice';
             </div>
           </div>
 
+          <!-- Direction Selection -->
+          <div class="mb-8 max-w-3xl mx-auto">
+            <h3 class="text-lg font-bold text-light-headline dark:text-dark-headline mb-3 text-center">Answer Direction</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <button
+                (click)="selectDirection('kana-to-romaji')"
+                [class.bg-primary]="selectedDirection === 'kana-to-romaji'"
+                [class.text-white]="selectedDirection === 'kana-to-romaji'"
+                [class.ring-2]="selectedDirection === 'kana-to-romaji'"
+                [class.ring-primary]="selectedDirection === 'kana-to-romaji'"
+                [class.bg-white]="selectedDirection !== 'kana-to-romaji'"
+                [class.dark:bg-slate-800]="selectedDirection !== 'kana-to-romaji'"
+                class="p-4 rounded-lg border-2 border-transparent text-light-headline dark:text-dark-headline shadow transition font-medium hover:border-primary">
+                Kana -> Romaji
+              </button>
+              <button
+                (click)="selectDirection('romaji-to-kana')"
+                [class.bg-primary]="selectedDirection === 'romaji-to-kana'"
+                [class.text-white]="selectedDirection === 'romaji-to-kana'"
+                [class.ring-2]="selectedDirection === 'romaji-to-kana'"
+                [class.ring-primary]="selectedDirection === 'romaji-to-kana'"
+                [class.bg-white]="selectedDirection !== 'romaji-to-kana'"
+                [class.dark:bg-slate-800]="selectedDirection !== 'romaji-to-kana'"
+                class="p-4 rounded-lg border-2 border-transparent text-light-headline dark:text-dark-headline shadow transition font-medium hover:border-primary">
+                Romaji -> Kana
+              </button>
+              <button
+                (click)="selectDirection('mixed-direction')"
+                [class.bg-primary]="selectedDirection === 'mixed-direction'"
+                [class.text-white]="selectedDirection === 'mixed-direction'"
+                [class.ring-2]="selectedDirection === 'mixed-direction'"
+                [class.ring-primary]="selectedDirection === 'mixed-direction'"
+                [class.bg-white]="selectedDirection !== 'mixed-direction'"
+                [class.dark:bg-slate-800]="selectedDirection !== 'mixed-direction'"
+                class="p-4 rounded-lg border-2 border-transparent text-light-headline dark:text-dark-headline shadow transition font-medium hover:border-primary">
+                Mixed
+              </button>
+            </div>
+          </div>
+
           <!-- Play Button -->
           <div class="text-center">
             <button
               (click)="startPractice()"
               [disabled]="!selectedMode || (selectedMode === 'custom' && customSelectedKana.length === 0)"
               class="px-8 py-4 bg-primary hover:opacity-90 text-white rounded-lg transition font-bold text-xl disabled:opacity-50 disabled:cursor-not-allowed">
-              ▶ {{ selectedMode ? 'Start ' + getModeLabel() + ' Practice' : 'Start Practice' }}
+              ▶ {{ selectedMode ? 'Start ' + getModeLabel() + ' (' + getSelectedDirectionLabel() + ')' : 'Start Practice' }}
             </button>
+          </div>
+        </ng-container>
+
+        <!-- SESSION SIZE SELECTION STATE -->
+        <ng-container *ngIf="state === 'session-size'">
+          <div class="max-w-3xl mx-auto">
+            <h2 class="text-3xl font-bold text-light-headline dark:text-dark-headline mb-8 text-center">
+              How many questions?
+            </h2>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+              <button
+                (click)="selectSessionSize(10)"
+                [class.bg-primary]="sessionSize === 10"
+                [class.text-white]="sessionSize === 10"
+                [class.ring-2]="sessionSize === 10"
+                [class.ring-primary]="sessionSize === 10"
+                class="p-6 rounded-lg bg-white dark:bg-slate-800 border-2 border-secondary dark:border-slate-700 hover:border-primary transition shadow-lg font-bold text-xl">
+                10
+              </button>
+              <button
+                (click)="selectSessionSize(20)"
+                [class.bg-primary]="sessionSize === 20"
+                [class.text-white]="sessionSize === 20"
+                [class.ring-2]="sessionSize === 20"
+                [class.ring-primary]="sessionSize === 20"
+                class="p-6 rounded-lg bg-white dark:bg-slate-800 border-2 border-secondary dark:border-slate-700 hover:border-primary transition shadow-lg font-bold text-xl">
+                20
+              </button>
+              <button
+                (click)="selectSessionSize(30)"
+                [class.bg-primary]="sessionSize === 30"
+                [class.text-white]="sessionSize === 30"
+                [class.ring-2]="sessionSize === 30"
+                [class.ring-primary]="sessionSize === 30"
+                class="p-6 rounded-lg bg-white dark:bg-slate-800 border-2 border-secondary dark:border-slate-700 hover:border-primary transition shadow-lg font-bold text-xl">
+                30
+              </button>
+              <button
+                (click)="openCustomSessionSize()"
+                [class.bg-primary]="sessionSize > 30"
+                [class.text-white]="sessionSize > 30"
+                [class.ring-2]="sessionSize > 30"
+                [class.ring-primary]="sessionSize > 30"
+                class="p-6 rounded-lg bg-white dark:bg-slate-800 border-2 border-secondary dark:border-slate-700 hover:border-primary transition shadow-lg font-bold text-xl">
+                Custom
+              </button>
+            </div>
+
+            <!-- Custom Session Size Input -->
+            <div *ngIf="showCustomSessionSize" class="mb-8 max-w-md mx-auto">
+              <div class="flex items-center gap-4 justify-center">
+                <!-- Decrement Button -->
+                <button
+                  (click)="decrementCustomSession()"
+                  [disabled]="customSessionInput <= 1"
+                  class="w-14 h-14 flex items-center justify-center rounded-lg bg-light-surface dark:bg-slate-700 hover:bg-primary hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition shadow-lg">
+                  <span class="text-2xl font-bold">−</span>
+                </button>
+
+                <!-- Display Value -->
+                <div class="flex flex-col items-center">
+                  <div class="text-5xl font-bold text-primary">{{ customSessionInput }}</div>
+                  <div class="text-sm text-light-paragraph dark:text-dark-paragraph mt-1">Questions</div>
+                </div>
+
+                <!-- Increment Button -->
+                <button
+                  (click)="incrementCustomSession()"
+                  [disabled]="customSessionInput >= 100"
+                  class="w-14 h-14 flex items-center justify-center rounded-lg bg-light-surface dark:bg-slate-700 hover:bg-primary hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition shadow-lg">
+                  <span class="text-2xl font-bold">+</span>
+                </button>
+              </div>
+
+              <!-- Confirm Button -->
+              <div class="mt-6 flex gap-2">
+                <button
+                  (click)="showCustomSessionSize = false"
+                  class="flex-1 px-4 py-3 bg-light-surface dark:bg-slate-700 text-light-headline dark:text-dark-headline rounded-lg hover:opacity-90 transition font-medium">
+                  Cancel
+                </button>
+                <button
+                  (click)="selectSessionSize(customSessionInput)"
+                  class="flex-1 px-4 py-3 bg-primary text-white rounded-lg hover:opacity-90 transition font-medium">
+                  Confirm
+                </button>
+              </div>
+            </div>
+
+            <!-- Info Text -->
+            <div class="text-center mb-8">
+              <p *ngIf="sessionSize > 0" class="text-lg text-light-paragraph dark:text-dark-paragraph">
+                Selected: <span class="font-bold text-primary">{{ sessionSize }} questions</span>
+              </p>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex gap-4 justify-center">
+              <button
+                (click)="backToSelection()"
+                class="px-8 py-3 bg-light-surface dark:bg-slate-700 text-light-headline dark:text-dark-headline rounded-lg hover:opacity-90 transition font-medium">
+                ← Back
+              </button>
+              <button
+                (click)="startPracticeSession()"
+                [disabled]="sessionSize === 0"
+                class="px-8 py-3 bg-primary text-white rounded-lg hover:opacity-90 disabled:opacity-50 transition font-medium text-lg">
+                ▶ Start Session
+              </button>
+            </div>
           </div>
         </ng-container>
 
         <!-- PRACTICE STATE -->
         <ng-container *ngIf="state === 'practice'">
+          <!-- Progress Bar -->
+          <div class="mb-6 max-w-3xl mx-auto">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-sm font-medium text-light-headline dark:text-dark-headline">
+                Question {{ currentSessionIndex + 1 }} of {{ sessionSize }}
+              </span>
+              <span class="text-sm font-medium text-light-paragraph dark:text-dark-paragraph">
+                {{ stats.correct }} ✓ · {{ stats.incorrect }} ✗
+              </span>
+            </div>
+            <div class="w-full h-2 bg-light-surface dark:bg-slate-700 rounded-full overflow-hidden">
+              <div
+                class="h-full bg-primary transition-all duration-300"
+                [style.width.%]="(currentSessionIndex / sessionSize) * 100">
+              </div>
+            </div>
+          </div>
+
           <!-- Practice Mode Info -->
           <div class="mb-6 text-center">
             <div class="inline-block px-4 py-2 bg-light-surface dark:bg-slate-700 rounded-lg">
               <span class="font-medium text-light-headline dark:text-dark-headline">
-                {{ getModeLabel() }} 
+                {{ getModeLabel() }} · {{ getSelectedDirectionLabel() }}
                 <span *ngIf="selectedMode === 'custom'">({{ customSelectedKana.length }} kana)</span>
               </span>
             </div>
@@ -194,13 +365,17 @@ type AppState = 'selection' | 'practice';
             </div>
 
             <div *ngIf="!(loading$ | async) && currentKana" class="text-center">
-              <!-- Character Display -->
-              <div class="text-9xl font-bold text-primary mb-8 min-h-48 flex items-center justify-center">
-                {{ currentKana.character }}
+              <div class="text-sm text-light-paragraph dark:text-dark-paragraph mb-3">
+                {{ isKanaToRomajiQuestion() ? 'Kana -> Romaji' : 'Romaji -> Kana' }}
               </div>
 
-              <!-- Input Field -->
-              <div class="mb-6">
+              <!-- Question Display -->
+              <div class="text-9xl font-bold text-primary mb-8 min-h-48 flex items-center justify-center">
+                {{ isKanaToRomajiQuestion() ? currentKana.character : currentKana.romaji }}
+              </div>
+
+              <!-- Kana -> Romaji Input -->
+              <div *ngIf="isKanaToRomajiQuestion()" class="mb-6">
                 <input
                   #answerInput
                   [(ngModel)]="userAnswer"
@@ -212,9 +387,31 @@ type AppState = 'selection' | 'practice';
                   autofocus>
               </div>
 
+              <!-- Romaji -> Kana Choices -->
+              <div *ngIf="!isKanaToRomajiQuestion()" class="mb-6">
+                <p class="text-light-paragraph dark:text-dark-paragraph mb-4">Select the correct kana:</p>
+                <div class="grid grid-cols-2 gap-4 max-w-xl mx-auto">
+                  <button
+                    *ngFor="let option of answerOptions; let i = index"
+                    (click)="selectKanaOption(option)"
+                    [disabled]="showingResult"
+                    [class.bg-primary]="selectedKanaOption?.id === option.id"
+                    [class.text-white]="selectedKanaOption?.id === option.id"
+                    [class.ring-2]="selectedKanaOption?.id === option.id"
+                    [class.ring-primary]="selectedKanaOption?.id === option.id"
+                    [class.bg-light-surface]="selectedKanaOption?.id !== option.id"
+                    [class.dark:bg-slate-700]="selectedKanaOption?.id !== option.id"
+                    class="relative px-6 py-6 rounded-xl hover:bg-primary hover:text-white text-light-headline dark:text-dark-headline shadow-lg transition text-4xl font-bold disabled:opacity-60 disabled:cursor-not-allowed">
+                    <span class="absolute top-2 right-3 text-xs opacity-50">{{ i + 1 }}</span>
+                    {{ option.character }}
+                  </button>
+                </div>
+              </div>
+
               <!-- Action Buttons -->
               <div class="flex gap-4 justify-center mb-6">
                 <button
+                  *ngIf="isKanaToRomajiQuestion()"
                   (click)="checkAnswer()"
                   [disabled]="!userAnswer.trim() || showingResult"
                   class="px-8 py-3 bg-primary hover:opacity-90 text-white rounded-lg transition font-medium text-lg disabled:opacity-50 disabled:cursor-not-allowed">
@@ -229,7 +426,7 @@ type AppState = 'selection' | 'practice';
                 <button
                   (click)="endPractice()"
                   class="px-8 py-3 bg-red-600 hover:opacity-90 text-white rounded-lg transition font-medium text-lg">
-                  Exit
+                  End Session
                 </button>
               </div>
 
@@ -250,7 +447,7 @@ type AppState = 'selection' | 'practice';
                   <span>{{ result.message }}</span>
                 </div>
                 <div *ngIf="!result.correct" class="text-sm mt-2 opacity-80">
-                  Correct answer: {{ currentKana.romaji }}
+                  {{ isKanaToRomajiQuestion() ? 'Correct answer: ' + currentKana.romaji : 'Correct answer: ' + currentKana.character + ' (' + currentKana.romaji + ')' }}
                 </div>
               </div>
 
@@ -278,6 +475,92 @@ type AppState = 'selection' | 'practice';
             </div>
           </div>
         </ng-container>
+
+        <!-- SESSION END STATE -->
+        <ng-container *ngIf="state === 'session-end' && sessionEndStats">
+          <div class="max-w-3xl mx-auto">
+            <!-- Celebration Header -->
+            <div class="text-center mb-12">
+              <div class="text-7xl mb-4">🎉</div>
+              <h2 class="text-4xl font-bold text-light-headline dark:text-dark-headline mb-2">
+                Session Complete!
+              </h2>
+              <p class="text-lg text-light-paragraph dark:text-dark-paragraph">
+                Great work practicing {{ getModeLabel() }}
+              </p>
+            </div>
+
+            <!-- Stats Card -->
+            <div class="bg-white dark:bg-slate-800 rounded-lg p-8 shadow-lg mb-8">
+              <!-- Main Stats -->
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+                <div class="text-center">
+                  <div class="text-4xl font-bold text-primary mb-2">{{ sessionEndStats.accuracy.toFixed(1) }}%</div>
+                  <div class="text-light-paragraph dark:text-dark-paragraph">Accuracy</div>
+                </div>
+                <div class="text-center">
+                  <div class="text-4xl font-bold text-green-600 dark:text-green-400 mb-2">{{ sessionEndStats.correct }}</div>
+                  <div class="text-light-paragraph dark:text-dark-paragraph">Correct</div>
+                </div>
+                <div class="text-center">
+                  <div class="text-4xl font-bold text-red-600 dark:text-red-400 mb-2">{{ sessionEndStats.incorrect }}</div>
+                  <div class="text-light-paragraph dark:text-dark-paragraph">Incorrect</div>
+                </div>
+                <div class="text-center">
+                  <div class="text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2">{{ sessionEndStats.avgResponseTime }}ms</div>
+                  <div class="text-light-paragraph dark:text-dark-paragraph">Avg Time</div>
+                </div>
+              </div>
+
+              <!-- Breakdown -->
+              <div class="pt-8 border-t border-secondary dark:border-slate-700">
+                <h3 class="font-bold text-light-headline dark:text-dark-headline mb-4">Breakdown</h3>
+                <div class="flex flex-wrap gap-4">
+                  <div class="flex-1 min-w-[120px] p-4 bg-light-surface dark:bg-slate-700 rounded-lg">
+                    <div class="text-2xl font-bold text-green-600 mb-1">🟩</div>
+                    <div class="text-light-paragraph dark:text-dark-paragraph text-sm">Strong</div>
+                    <div class="text-2xl font-bold text-light-headline dark:text-dark-headline">
+                      {{ sessionEndStats.strongCount || 0 }}
+                    </div>
+                  </div>
+                  <div class="flex-1 min-w-[120px] p-4 bg-light-surface dark:bg-slate-700 rounded-lg">
+                    <div class="text-2xl font-bold text-yellow-500 mb-1">🟨</div>
+                    <div class="text-light-paragraph dark:text-dark-paragraph text-sm">Medium</div>
+                    <div class="text-2xl font-bold text-light-headline dark:text-dark-headline">
+                      {{ sessionEndStats.mediumCount || 0 }}
+                    </div>
+                  </div>
+                  <div class="flex-1 min-w-[120px] p-4 bg-light-surface dark:bg-slate-700 rounded-lg">
+                    <div class="text-2xl font-bold text-red-600 mb-1">🟥</div>
+                    <div class="text-light-paragraph dark:text-dark-paragraph text-sm">Weak</div>
+                    <div class="text-2xl font-bold text-light-headline dark:text-dark-headline">
+                      {{ sessionEndStats.weakCount || 0 }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+              <button
+                (click)="practiceAgain()"
+                class="px-8 py-4 bg-primary text-white rounded-lg hover:opacity-90 transition font-bold text-lg flex-1">
+                ▶ Practice Again
+              </button>
+              <button
+                (click)="changeDifficulty()"
+                class="px-8 py-4 bg-light-surface dark:bg-slate-700 text-light-headline dark:text-dark-headline rounded-lg hover:opacity-90 transition font-medium text-lg flex-1">
+                Change Mode
+              </button>
+              <button
+                (click)="backToMenu()"
+                class="px-8 py-4 bg-light-surface dark:bg-slate-700 text-light-headline dark:text-dark-headline rounded-lg hover:opacity-90 transition font-medium text-lg flex-1">
+                Back to Menu
+              </button>
+            </div>
+          </div>
+        </ng-container>
       </div>
     </div>
   `,
@@ -290,6 +573,15 @@ export class KanaTypingComponent implements OnInit {
   state: AppState = 'selection';
   selectedMode: PracticeMode | null = null;
   
+  // Session management
+  sessionSize: number = 0;
+  currentSessionIndex: number = 0;
+  sessionAttempts: SessionAttempt[] = [];
+  sessionStartTime: number = 0;
+  sessionEndStats: any = null;
+  showCustomSessionSize = false;
+  customSessionInput: number = 10;
+  
   // Practice variables
   currentKana: Kana | null = null;
   userAnswer = '';
@@ -297,6 +589,11 @@ export class KanaTypingComponent implements OnInit {
   showingResult = false;
   startTime: number = 0;
   loading$ = this.kanaService.loading$;
+  awaitingCorrection = false;
+  selectedDirection: PracticeDirection = 'kana-to-romaji';
+  currentQuestionDirection: QuestionDirection = 'kana-to-romaji';
+  answerOptions: Kana[] = [];
+  selectedKanaOption: Kana | null = null;
 
   // Custom selection
   customAvailableKana: Kana[] = [];
@@ -324,6 +621,11 @@ export class KanaTypingComponent implements OnInit {
         this.customAvailableKana = kana;
         this.customHiraganaKana = kana.filter(item => item.type === 'hiragana');
         this.customKatakanaKana = kana.filter(item => item.type === 'katakana');
+
+        // If user already entered practice state while kana was loading, continue once data is ready.
+        if (this.state === 'practice' && !this.currentKana) {
+          this.loadRandomKana();
+        }
       },
       error: (err) => console.error('Error loading kana:', err)
     });
@@ -337,6 +639,10 @@ export class KanaTypingComponent implements OnInit {
     } else {
       this.isCustomModalOpen = false;
     }
+  }
+
+  selectDirection(direction: PracticeDirection): void {
+    this.selectedDirection = direction;
   }
 
   closeCustomModal(): void {
@@ -377,55 +683,213 @@ export class KanaTypingComponent implements OnInit {
   }
 
   startPractice(): void {
+    this.state = 'session-size';
+    this.sessionSize = 0;
+    this.currentSessionIndex = 0;
+    this.sessionAttempts = [];
+    this.showCustomSessionSize = false;
+  }
+
+  selectSessionSize(size: number): void {
+    if (size && size > 0 && size <= 100) {
+      this.sessionSize = size;
+      this.showCustomSessionSize = false;
+    }
+  }
+
+  openCustomSessionSize(): void {
+    this.customSessionInput = this.sessionSize > 30 ? this.sessionSize : 10;
+    this.showCustomSessionSize = true;
+  }
+
+  incrementCustomSession(): void {
+    if (this.customSessionInput < 100) {
+      this.customSessionInput++;
+    }
+  }
+
+  decrementCustomSession(): void {
+    if (this.customSessionInput > 1) {
+      this.customSessionInput--;
+    }
+  }
+
+  startPracticeSession(): void {
+    if (this.sessionSize === 0) return;
+
     this.state = 'practice';
+    this.currentSessionIndex = 0;
+    this.sessionAttempts = [];
     this.stats = { correct: 0, incorrect: 0, total: 0 };
+    this.awaitingCorrection = false;
+    this.answerOptions = [];
+    this.sessionStartTime = Date.now();
     this.loadRandomKana();
+  }
+
+  backToSelection(): void {
+    this.state = 'selection';
+    this.sessionSize = 0;
+    this.currentSessionIndex = 0;
+    this.sessionAttempts = [];
   }
 
   loadRandomKana(): void {
     this.resetAnswer();
+    const pool = this.getCurrentPracticePool();
+    if (pool.length === 0) {
+      return;
+    }
 
-    if (this.selectedMode === 'custom') {
-      // Random from selected kana
-      const randomKana = this.customSelectedKana[
-        Math.floor(Math.random() * this.customSelectedKana.length)
-      ];
-      if (randomKana) {
-        this.currentKana = randomKana;
-        this.startTime = Date.now();
+    const candidates = this.currentKana
+      ? pool.filter(kana => kana.id !== this.currentKana!.id)
+      : pool;
+
+    // If the pool only has one item, allow it to repeat.
+    const source = candidates.length > 0 ? candidates : pool;
+    const randomKana = source[Math.floor(Math.random() * source.length)];
+
+    if (randomKana) {
+      this.currentKana = randomKana;
+      this.awaitingCorrection = false;
+      this.currentQuestionDirection = this.resolveQuestionDirection();
+      this.answerOptions = this.currentQuestionDirection === 'romaji-to-kana'
+        ? this.buildKanaOptions(randomKana)
+        : [];
+      this.startTime = Date.now();
+      if (this.isKanaToRomajiQuestion()) {
         setTimeout(() => this.focusInput(), 0);
       }
-    } else {
-      // Load from backend
-      this.kanaService.getRandomKana(
-        this.selectedMode === 'mixed' ? undefined : this.selectedMode as 'hiragana' | 'katakana',
-        1
-      ).subscribe({
-        next: (kana) => {
-          if (kana.length > 0) {
-            this.currentKana = kana[0];
-            this.startTime = Date.now();
-            setTimeout(() => this.focusInput(), 0);
-          }
-        },
-        error: (err) => console.error('Error loading random kana:', err)
-      });
     }
+  }
+
+  private getCurrentPracticePool(): Kana[] {
+    if (this.selectedMode === 'custom') {
+      return this.customSelectedKana;
+    }
+    if (this.selectedMode === 'hiragana') {
+      return this.customHiraganaKana;
+    }
+    if (this.selectedMode === 'katakana') {
+      return this.customKatakanaKana;
+    }
+    if (this.selectedMode === 'mixed') {
+      return this.customAvailableKana;
+    }
+    return [];
+  }
+
+  private resolveQuestionDirection(): QuestionDirection {
+    if (this.selectedDirection === 'mixed-direction') {
+      return Math.random() < 0.5 ? 'kana-to-romaji' : 'romaji-to-kana';
+    }
+    return this.selectedDirection;
+  }
+
+  private buildKanaOptions(correctKana: Kana): Kana[] {
+    const practicePool = this.getCurrentPracticePool();
+    const sameTypeInPool = this.shuffleKana(
+      practicePool.filter(kana => kana.id !== correctKana.id && kana.type === correctKana.type),
+    );
+    const sameTypeGlobal = this.shuffleKana(
+      this.customAvailableKana.filter(kana => kana.id !== correctKana.id && kana.type === correctKana.type),
+    );
+    const fallbackAny = this.shuffleKana(
+      this.customAvailableKana.filter(kana => kana.id !== correctKana.id),
+    );
+
+    const distractors: Kana[] = [];
+    const seenIds = new Set<string>([correctKana.id]);
+
+    for (const source of [sameTypeInPool, sameTypeGlobal, fallbackAny]) {
+      for (const kana of source) {
+        if (seenIds.has(kana.id)) {
+          continue;
+        }
+        distractors.push(kana);
+        seenIds.add(kana.id);
+        if (distractors.length === 3) {
+          break;
+        }
+      }
+      if (distractors.length === 3) {
+        break;
+      }
+    }
+
+    return this.shuffleKana([correctKana, ...distractors]);
+  }
+
+  private shuffleKana(items: Kana[]): Kana[] {
+    const copy = [...items];
+    for (let i = copy.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+  }
+
+  isKanaToRomajiQuestion(): boolean {
+    return this.currentQuestionDirection === 'kana-to-romaji';
   }
 
   skipQuestion(): void {
     this.loadRandomKana();
   }
 
+  selectKanaOption(option: Kana): void {
+    if (!this.currentKana || this.showingResult) {
+      return;
+    }
+
+    // Show visual feedback that option is selected
+    this.selectedKanaOption = option;
+
+    const responseTime = Date.now() - this.startTime;
+    const isCorrect = option.id === this.currentKana.id;
+    this.processAnswer(isCorrect, responseTime);
+  }
+
   checkAnswer(): void {
-    if (!this.userAnswer.trim() || !this.currentKana || this.showingResult) return;
+    if (!this.isKanaToRomajiQuestion() || !this.userAnswer.trim() || !this.currentKana || this.showingResult) {
+      return;
+    }
 
     const responseTime = Date.now() - this.startTime;
     const isCorrect = this.userAnswer.trim().toLowerCase() === this.currentKana.romaji.toLowerCase();
+    this.processAnswer(isCorrect, responseTime);
+  }
+
+  private processAnswer(isCorrect: boolean, responseTime: number): void {
+    if (!this.currentKana) {
+      return;
+    }
+
+    // If user already missed this kana once, require correction but don't affect stats again.
+    if (this.awaitingCorrection) {
+      this.result = {
+        correct: isCorrect,
+        message: isCorrect ? 'Correct! Moving to next one.' : 'Select the correct answer to continue'
+      };
+
+      if (isCorrect) {
+        this.showingResult = true;
+        setTimeout(() => {
+          this.loadRandomKana();
+        }, 600);
+      } else {
+        this.showingResult = false;
+        if (this.isKanaToRomajiQuestion()) {
+          this.userAnswer = '';
+          setTimeout(() => this.focusInput(), 0);
+        }
+      }
+      return;
+    }
 
     this.result = {
       correct: isCorrect,
-      message: isCorrect ? 'Correct! 🎉' : 'Incorrect'
+      message: isCorrect ? 'Correct! 🎉' : 'Select the correct answer to continue'
     };
 
     this.stats.total++;
@@ -435,39 +899,139 @@ export class KanaTypingComponent implements OnInit {
       this.stats.incorrect++;
     }
 
-    // Record attempt to backend
-    this.kanaService.recordAttempt({
-      kanaId: 0, // Not used, character+type is unique key on backend
+    // Record to session attempts array instead of sending immediately
+    this.sessionAttempts.push({
+      kanaId: 0,
       character: this.currentKana.character,
       romaji: this.currentKana.romaji,
       type: this.currentKana.type,
       isCorrect,
       responseTime
-    }).subscribe({
-      error: (err) => console.error('Error recording attempt:', err)
     });
 
     this.showingResult = true;
 
-    // Auto-advance on correct answer after 600ms
     if (isCorrect) {
       setTimeout(() => {
-        this.loadRandomKana();
+        this.currentSessionIndex++;
+        
+        // Check if session is complete
+        if (this.currentSessionIndex >= this.sessionSize) {
+          this.finishSession();
+        } else {
+          this.loadRandomKana();
+        }
       }, 600);
     } else {
-      // For incorrect answers, wait 1.5 seconds before allowing next question
-      setTimeout(() => {
-        this.showingResult = false;
-        this.focusInput();
-      }, 1500);
+      this.awaitingCorrection = true;
+      this.showingResult = false;
+      if (this.isKanaToRomajiQuestion()) {
+        this.userAnswer = '';
+        setTimeout(() => this.focusInput(), 0);
+      }
     }
   }
 
   endPractice(): void {
+    // Cancel current session and go back to selection
     this.state = 'selection';
     this.selectedMode = null;
     this.currentKana = null;
     this.result = null;
+    this.awaitingCorrection = false;
+    this.currentQuestionDirection = 'kana-to-romaji';
+    this.answerOptions = [];
+    this.stats = { correct: 0, incorrect: 0, total: 0 };
+    this.sessionSize = 0;
+    this.currentSessionIndex = 0;
+    this.sessionAttempts = [];
+    this.sessionEndStats = null;
+  }
+
+  private finishSession(): void {
+    // Calculate session statistics
+    const correct = this.stats.correct;
+    const incorrect = this.stats.incorrect;
+    const total = this.stats.total;
+    const accuracy = total > 0 ? (correct / total) * 100 : 0;
+    
+    const sessionDuration = Date.now() - this.sessionStartTime;
+    const avgResponseTime = this.sessionAttempts.length > 0
+      ? Math.round(this.sessionAttempts.reduce((sum, a) => sum + a.responseTime, 0) / this.sessionAttempts.length)
+      : 0;
+
+    // Store stats for display
+    this.sessionEndStats = {
+      correct,
+      incorrect,
+      total,
+      accuracy,
+      avgResponseTime,
+      sessionDuration,
+      strongCount: 0,
+      mediumCount: 0,
+      weakCount: 0
+    };
+
+    // Send batch to backend
+    this.kanaService.recordSessionAttempts({
+      attempts: this.sessionAttempts,
+      sessionSize: this.sessionSize,
+      accuracy,
+      avgResponseTime
+    }).subscribe({
+      next: (response: any) => {
+        console.log('Session stats recorded:', response.sessionStats);
+        
+        // Update counts from response if available
+        if (response.results) {
+          const masteryCounts = { strong: 0, medium: 0, weak: 0 };
+          response.results.forEach((result: any) => {
+            if (result.masteryLevel === 'strong') masteryCounts.strong++;
+            else if (result.masteryLevel === 'medium') masteryCounts.medium++;
+            else if (result.masteryLevel === 'weak') masteryCounts.weak++;
+          });
+          this.sessionEndStats.strongCount = masteryCounts.strong;
+          this.sessionEndStats.mediumCount = masteryCounts.medium;
+          this.sessionEndStats.weakCount = masteryCounts.weak;
+        }
+
+        this.state = 'session-end';
+      },
+      error: (err) => {
+        console.error('Error recording session:', err);
+        this.state = 'session-end';
+      }
+    });
+  }
+
+  practiceAgain(): void {
+    this.state = 'session-size';
+    this.sessionSize = 0;
+    this.currentSessionIndex = 0;
+    this.sessionAttempts = [];
+    this.sessionEndStats = null;
+    this.stats = { correct: 0, incorrect: 0, total: 0 };
+    this.showCustomSessionSize = false;
+  }
+
+  changeDifficulty(): void {
+    this.state = 'selection';
+    this.selectedMode = null;
+    this.sessionSize = 0;
+    this.currentSessionIndex = 0;
+    this.sessionAttempts = [];
+    this.sessionEndStats = null;
+    this.stats = { correct: 0, incorrect: 0, total: 0 };
+  }
+
+  backToMenu(): void {
+    this.state = 'selection';
+    this.selectedMode = null;
+    this.sessionSize = 0;
+    this.currentSessionIndex = 0;
+    this.sessionAttempts = [];
+    this.sessionEndStats = null;
     this.stats = { correct: 0, incorrect: 0, total: 0 };
   }
 
@@ -479,6 +1043,12 @@ export class KanaTypingComponent implements OnInit {
     return 'Practice';
   }
 
+  getSelectedDirectionLabel(): string {
+    if (this.selectedDirection === 'kana-to-romaji') return 'Kana -> Romaji';
+    if (this.selectedDirection === 'romaji-to-kana') return 'Romaji -> Kana';
+    return 'Mixed Direction';
+  }
+
   getAccuracy(): number {
     if (this.stats.total === 0) return 0;
     return (this.stats.correct / this.stats.total) * 100;
@@ -488,6 +1058,7 @@ export class KanaTypingComponent implements OnInit {
     this.userAnswer = '';
     this.result = null;
     this.showingResult = false;
+    this.selectedKanaOption = null;
   }
 
   private focusInput(): void {

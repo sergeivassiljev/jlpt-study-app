@@ -1,12 +1,23 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
-import { VocabularyItem, Word } from '../models/index';
+import {
+  DailyLessonPayload,
+  JLPTLevel,
+  StructuredLessonWord,
+  TopicProgressSummary,
+  VocabularyItem,
+  Word,
+} from '../models/index';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { catchError, map } from 'rxjs/operators';
 
 type ApiVocabularyItem = Omit<VocabularyItem, 'dateAdded' | 'nextReviewDate'> & {
   dateAdded: string | Date;
   nextReviewDate: string | Date;
+};
+
+type ApiDailyLessonPayload = Omit<DailyLessonPayload, 'words'> & {
+  words: StructuredLessonWord[];
 };
 
 @Injectable({
@@ -52,6 +63,49 @@ export class VocabularyService {
 
   getReviewDue(): VocabularyItem[] {
     return this.vocabulary.filter(v => new Date() >= v.nextReviewDate);
+  }
+
+  getLessonTopics(level: JLPTLevel): Observable<TopicProgressSummary[]> {
+    return this.http.get<TopicProgressSummary[]>(`${this.apiBaseUrl}/vocabulary/lessons/topics`, {
+      params: { level },
+    }).pipe(
+      catchError(() => of([]))
+    );
+  }
+
+  getDailyLesson(level: JLPTLevel, topic: string, limit: number): Observable<DailyLessonPayload> {
+    return this.http.get<ApiDailyLessonPayload>(`${this.apiBaseUrl}/vocabulary/lessons/daily`, {
+      params: { level, topic, limit },
+    }).pipe(
+      map((payload) => ({
+        ...payload,
+        words: payload.words ?? [],
+      })),
+      catchError(() => of({
+        jlptLevel: level,
+        topic,
+        dailyLimit: limit,
+        words: [],
+        remainingWords: 0,
+      }))
+    );
+  }
+
+  getTopicLessonWords(level: JLPTLevel, topic: string, lessonOrder: number): Observable<StructuredLessonWord[]> {
+    return this.http.get<StructuredLessonWord[]>(`${this.apiBaseUrl}/vocabulary/lessons/words`, {
+      params: { level, topic, lessonOrder },
+    }).pipe(
+      catchError(() => of([]))
+    );
+  }
+
+  completeLessonWord(lessonWordId: string, vocabularyId?: string): Observable<{ lessonWordId: string; completedAt: string } | null> {
+    return this.http.post<{ lessonWordId: string; completedAt: string }>(
+      `${this.apiBaseUrl}/vocabulary/lessons/complete`,
+      { lessonWordId, vocabularyId }
+    ).pipe(
+      catchError(() => of(null))
+    );
   }
 
   addWord(word: Word, exampleSentence: string): Observable<{ success: boolean; error?: string }> {
