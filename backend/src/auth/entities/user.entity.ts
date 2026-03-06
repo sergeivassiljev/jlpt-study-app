@@ -11,6 +11,9 @@ export class UserEntity {
   @Column({ type: 'text' })
   passwordHash: string;
 
+  @Column({ type: 'text', nullable: true })
+  avatar?: string;
+
   @CreateDateColumn({ type: 'datetime' })
   createdAt: Date;
 }

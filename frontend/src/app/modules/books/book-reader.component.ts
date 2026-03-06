@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, HostListener } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -14,7 +14,7 @@ import { Book, Chapter, Word, Kanji } from '../../core/models/index';
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div class="min-h-screen transition-colors duration-300 bg-light-bg dark:bg-dark-bg text-light-paragraph dark:text-dark-paragraph"
+    <div class="themed-page min-h-screen transition-colors duration-300 bg-light-bg dark:bg-dark-bg text-light-paragraph dark:text-dark-paragraph"
          *ngIf="book && chapter">
 
       <div class="max-w-4xl mx-auto px-6 py-12">
@@ -106,85 +106,74 @@ import { Book, Chapter, Word, Kanji } from '../../core/models/index';
         </article>
       </div>
 
-      <!-- Word Details Modal -->
-        <div *ngIf="selectedWord" 
-             class="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm transition-colors bg-black/40 dark:bg-black/60"
-             (click)="closeWordModal()">
-          <div class="rounded-lg shadow-lg p-10 max-w-md w-full mx-4 transition-colors bg-white dark:bg-slate-800 border border-secondary dark:border-success" 
-               (click)="$event.stopPropagation()">
-            <!-- Close Button -->
-            <button (click)="closeWordModal()" 
-                    class="float-right text-2xl font-light transition-colors text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark">
-              ×
-            </button>
-            
-            <!-- Word Display -->
-            <div class="text-center mb-8 pt-2">
-              <div class="text-6xl font-semibold mb-3 transition-colors text-light-headline dark:text-dark-headline">
-                {{ selectedWord.kanji }}
-              </div>
-              <div class="text-2xl mb-2 font-medium transition-colors text-primary dark:text-primary-dark"
-                   style="font-family: 'Merriweather', serif;">
-                {{ selectedWord.reading }}
-              </div>
-            </div>
+       <!-- Word Details Popover -->
+       <div *ngIf="selectedWord"
+           class="word-popover rounded-lg shadow-lg p-5 w-[min(92vw,24rem)] transition-colors bg-white dark:bg-slate-800 border border-secondary dark:border-success"
+           [style.left.px]="selectedWordPopoverLeft"
+           [style.top.px]="selectedWordPopoverTop"
+           [style.transform]="selectedWordPopoverPlacement === 'top' ? 'translate(-50%, -100%)' : 'translate(-50%, 0)'"
+           (click)="$event.stopPropagation()">
+        <div class="popover-arrow"
+             [class.popover-arrow-top]="selectedWordPopoverPlacement === 'top'"
+             [class.popover-arrow-bottom]="selectedWordPopoverPlacement === 'bottom'"></div>
 
-            <!-- Details -->
-            <div class="border-t border-b border-secondary dark:border-success py-6 mb-8 space-y-4 transition-colors">
-              <div>
-                <p class="text-xs font-semibold uppercase tracking-wide mb-1 transition-colors text-light-paragraph dark:text-dark-paragraph">
-                  Reading
-                </p>
-                <p class="text-lg transition-colors text-light-headline dark:text-dark-headline">
-                  {{ selectedWord.reading }}
-                </p>
-              </div>
-              <div>
-                <p class="text-xs font-semibold uppercase tracking-wide mb-1 transition-colors text-light-paragraph dark:text-dark-paragraph">
-                  Meaning
-                </p>
-                <p class="text-lg transition-colors text-light-headline dark:text-dark-headline">
-                  {{ selectedWord.meaning }}
-                </p>
-              </div>
-              <div>
-                <p class="text-xs font-semibold uppercase tracking-wide mb-1 transition-colors text-light-paragraph dark:text-dark-paragraph">
-                  Type
-                </p>
-                <p class="text-lg transition-colors text-light-headline dark:text-dark-headline">
-                  {{ selectedWord.pos }}
-                </p>
-              </div>
-            </div>
+        <!-- Close Button -->
+        <button (click)="closeWordModal()"
+                class="absolute top-2 right-2 text-xl leading-none transition-colors text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark"
+                aria-label="Close word details">
+          ×
+        </button>
 
-            <!-- Save Actions -->
-            <button *ngIf="!showSaveConfirm"
-                    (click)="showSaveConfirm = true"
-                    class="w-full px-4 py-3 bg-success hover:opacity-90 text-white rounded-md transition-all font-medium shadow-sm hover:shadow-md">
-              💾 Save to Vocabulary
-            </button>
-
-            <div *ngIf="showSaveConfirm" class="space-y-3">
-              <p class="text-sm text-center transition-colors text-light-paragraph dark:text-dark-paragraph">
-                Save this word to vocabulary?
-              </p>
-              <div class="flex gap-2">
-                <button (click)="showSaveConfirm = false"
-                        class="flex-1 px-4 py-2 rounded-md font-medium transition bg-light-bg dark:bg-slate-700 text-light-headline dark:text-dark-headline hover:opacity-80">
-                  Cancel
-                </button>
-                <button (click)="saveToVocabulary()"
-                        class="flex-1 px-4 py-2 bg-success hover:opacity-90 text-white rounded-md transition-all font-medium shadow-sm hover:shadow-md">
-                  Confirm Save
-                </button>
-              </div>
-            </div>
-
-            <p *ngIf="saveErrorMessage" class="text-sm text-center mt-3 text-red-600 dark:text-red-400">
-              {{ saveErrorMessage }}
-            </p>
+        <!-- Word Display -->
+        <div class="text-center mb-4 pt-1 pr-6">
+          <div class="text-4xl font-semibold transition-colors text-light-headline dark:text-dark-headline">
+            {{ selectedWord.kanji }}
+          </div>
+          <div class="text-lg font-medium transition-colors text-primary dark:text-primary-dark"
+               style="font-family: 'Merriweather', serif;">
+            {{ selectedWord.reading }}
           </div>
         </div>
+
+        <!-- Details -->
+        <div class="border-t border-secondary/50 dark:border-success/50 pt-3 mb-4 space-y-2 transition-colors">
+          <p class="text-sm transition-colors text-light-headline dark:text-dark-headline">
+            <span class="font-semibold text-light-paragraph dark:text-dark-paragraph">Meaning:</span>
+            {{ selectedWord.meaning }}
+          </p>
+          <p class="text-sm transition-colors text-light-headline dark:text-dark-headline">
+            <span class="font-semibold text-light-paragraph dark:text-dark-paragraph">Type:</span>
+            {{ selectedWord.pos }}
+          </p>
+        </div>
+
+        <!-- Save Actions -->
+        <button *ngIf="!showSaveConfirm"
+                (click)="showSaveConfirm = true"
+                class="w-full px-4 py-2.5 bg-success hover:opacity-90 text-white rounded-md transition-all font-medium shadow-sm hover:shadow-md">
+          Save to Vocabulary
+        </button>
+
+        <div *ngIf="showSaveConfirm" class="space-y-2">
+          <p class="text-sm text-center transition-colors text-light-paragraph dark:text-dark-paragraph">
+            Save this word to vocabulary?
+          </p>
+          <div class="flex gap-2">
+            <button (click)="showSaveConfirm = false"
+                    class="flex-1 px-4 py-2 rounded-md font-medium transition bg-light-bg dark:bg-slate-700 text-light-headline dark:text-dark-headline hover:opacity-80">
+              Cancel
+            </button>
+            <button (click)="saveToVocabulary()"
+                    class="flex-1 px-4 py-2 bg-success hover:opacity-90 text-white rounded-md transition-all font-medium shadow-sm hover:shadow-md">
+              Confirm
+            </button>
+          </div>
+        </div>
+
+        <p *ngIf="saveErrorMessage" class="text-xs text-center mt-2 text-red-600 dark:text-red-400">
+          {{ saveErrorMessage }}
+        </p>
+      </div>
     </div>
   `,
   styles: [`
@@ -241,7 +230,7 @@ import { Book, Chapter, Word, Kanji } from '../../core/models/index';
       font-size: 0.5em !important;
       line-height: 1;
       font-weight: 400;
-      color: #7c3aed;
+      color: #0d9488;
       white-space: nowrap;
       text-align: center;
       transition: all 0.2s ease;
@@ -250,7 +239,7 @@ import { Book, Chapter, Word, Kanji } from '../../core/models/index';
     }
 
     :host-context(.dark) ::ng-deep ruby rt {
-      color: #a78bfa;
+      color: #2dd4bf;
     }
 
     ::ng-deep ruby rb {
@@ -264,23 +253,54 @@ import { Book, Chapter, Word, Kanji } from '../../core/models/index';
     }
 
     ::ng-deep ruby[data-word-id]:hover {
-      background-color: rgba(124, 58, 237, 0.1);
+      background-color: rgba(13, 148, 136, 0.1);
       text-decoration: underline;
-      text-decoration-color: rgba(124, 58, 237, 0.3);
+      text-decoration-color: rgba(13, 148, 136, 0.3);
       text-underline-offset: 2px;
     }
 
     :host-context(.dark) ::ng-deep ruby[data-word-id]:hover {
-      background-color: rgba(167, 139, 250, 0.15);
-      text-decoration-color: rgba(167, 139, 250, 0.4);
+      background-color: rgba(45, 212, 191, 0.15);
+      text-decoration-color: rgba(45, 212, 191, 0.4);
     }
 
     ::ng-deep ruby[data-word-id]:active {
-      background-color: rgba(124, 58, 237, 0.15);
+      background-color: rgba(13, 148, 136, 0.15);
     }
 
     :host-context(.dark) ::ng-deep ruby[data-word-id]:active {
-      background-color: rgba(167, 139, 250, 0.2);
+      background-color: rgba(45, 212, 191, 0.2);
+    }
+
+    .word-popover {
+      position: fixed;
+      z-index: 35;
+    }
+
+    .popover-arrow {
+      position: absolute;
+      left: 50%;
+      width: 12px;
+      height: 12px;
+      transform: translateX(-50%) rotate(45deg);
+      border-right: 1px solid rgba(200, 58, 74, 0.25);
+      border-bottom: 1px solid rgba(200, 58, 74, 0.25);
+      background: white;
+    }
+
+    .popover-arrow-top {
+      bottom: -7px;
+    }
+
+    .popover-arrow-bottom {
+      top: -7px;
+      transform: translateX(-50%) rotate(225deg);
+    }
+
+    :host-context(.dark) .popover-arrow {
+      border-right-color: rgba(209, 74, 90, 0.35);
+      border-bottom-color: rgba(209, 74, 90, 0.35);
+      background: rgb(30 41 59);
     }
   `]
 })
@@ -293,8 +313,12 @@ export class BookReaderComponent implements OnInit, AfterViewInit {
   textSize = 50;
   currentTheme: Theme = 'light';
   selectedWord: { id: string; kanji: string; reading: string; meaning: string; pos: string } | null = null;
+  selectedWordPopoverLeft = 0;
+  selectedWordPopoverTop = 0;
+  selectedWordPopoverPlacement: 'top' | 'bottom' = 'top';
   showSaveConfirm = false;
   saveErrorMessage = '';
+  private selectedWordAnchor: HTMLElement | null = null;
 
   private hiddenFurigana = new Set<string>();
   private kanjiByCharacter = new Map<string, Kanji>();
@@ -447,9 +471,87 @@ export class BookReaderComponent implements OnInit, AfterViewInit {
         meaning: metadata.meaning,
         pos: metadata.pos
       };
+      this.selectedWordAnchor = rubyElement as HTMLElement;
+      this.updateWordPopoverPosition(this.selectedWordAnchor);
       this.showSaveConfirm = false;
       this.saveErrorMessage = '';
     }
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    if (this.selectedWordAnchor && this.selectedWord) {
+      this.updateWordPopoverPosition(this.selectedWordAnchor);
+    }
+  }
+
+  @HostListener('window:scroll')
+  onWindowScroll(): void {
+    if (this.selectedWordAnchor && this.selectedWord) {
+      this.updateWordPopoverPosition(this.selectedWordAnchor);
+    }
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (!this.selectedWord) {
+      return;
+    }
+
+    const target = event.target as HTMLElement;
+    if (!target) {
+      return;
+    }
+
+    if (target.closest('.word-popover') || target.closest('ruby[data-word-id]')) {
+      return;
+    }
+
+    this.closeWordModal();
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscapeKey(): void {
+    if (this.selectedWord) {
+      this.closeWordModal();
+    }
+  }
+
+  private updateWordPopoverPosition(anchor: HTMLElement): void {
+    const rect = anchor.getBoundingClientRect();
+    const margin = 12;
+    const safeTopBoundary = this.getTopSafeBoundary();
+    const estimatedPopoverHeight = 260;
+    const popoverWidth = Math.min(416, window.innerWidth * 0.92);
+    const halfWidth = popoverWidth / 2;
+    const desiredLeft = rect.left + rect.width / 2;
+
+    this.selectedWordPopoverLeft = Math.min(
+      window.innerWidth - halfWidth - margin,
+      Math.max(halfWidth + margin, desiredLeft)
+    );
+
+    const canPlaceAbove = rect.top - estimatedPopoverHeight - margin >= safeTopBoundary;
+    const canPlaceBelow = window.innerHeight - rect.bottom - margin >= 140;
+
+    this.selectedWordPopoverPlacement = (canPlaceAbove || !canPlaceBelow) ? 'top' : 'bottom';
+
+    if (this.selectedWordPopoverPlacement === 'top') {
+      // With translateY(-100%), top value anchors to popover bottom.
+      this.selectedWordPopoverTop = Math.max(rect.top - 10, safeTopBoundary + estimatedPopoverHeight + 8);
+    } else {
+      this.selectedWordPopoverTop = Math.max(safeTopBoundary + 8, rect.bottom + 10);
+    }
+  }
+
+  private getTopSafeBoundary(): number {
+    const stickyNav = document.querySelector('nav.sticky') as HTMLElement | null;
+    if (!stickyNav) {
+      return 8;
+    }
+
+    const navRect = stickyNav.getBoundingClientRect();
+    return Math.max(8, navRect.bottom + 8);
   }
 
   private getWordMetadata(wordText: string): { meaning: string; pos: string } {
@@ -479,6 +581,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit {
 
   closeWordModal(): void {
     this.selectedWord = null;
+    this.selectedWordAnchor = null;
     this.showSaveConfirm = false;
     this.saveErrorMessage = '';
   }

@@ -8,53 +8,60 @@ import { BookService } from '../../core/services/book.service';
 import { FolderService } from '../../core/services/folder.service';
 import { ThemeService, Theme } from '../../core/services/theme.service';
 import { VocabularyItem, Word, VocabularyFolder } from '../../core/models/index';
+import { pageEnter, cardStagger, listItem, fadeIn, scaleIn } from '../../core/animations/page.animations';
 
 @Component({
   selector: 'app-vocabulary-list',
   standalone: true,
   imports: [CommonModule, RouterLink, FormsModule],
+  animations: [pageEnter, cardStagger, listItem, fadeIn, scaleIn],
   template: `
-    <div class="min-h-screen transition-colors duration-300 bg-light-bg dark:bg-dark-bg text-light-paragraph dark:text-dark-paragraph">
+    <div class="themed-page min-h-screen transition-colors duration-300 bg-light-bg dark:bg-dark-bg text-light-paragraph dark:text-dark-paragraph" @pageEnter>
       <div class="container mx-auto px-4 py-8">
         <div class="flex gap-6">
           <!-- Folder Sidebar -->
           <div class="w-64 flex-shrink-0">
-            <div class="rounded-lg shadow border border-secondary dark:border-success bg-white dark:bg-slate-800 p-4 transition-colors sticky top-4">
+            <div class="rounded-xl shadow-lg border-2 border-primary/20 dark:border-primary-dark/20 bg-gradient-to-br from-white to-primary/5 dark:from-slate-800 dark:to-primary-dark/5 p-4 transition-colors sticky top-4">
               <div class="flex items-center justify-between mb-4">
-                <h3 class="font-bold transition-colors text-light-headline dark:text-dark-headline">📁 Folders</h3>
+                <h3 class="font-bold text-lg">
+                  <span class="inline-block">📁</span>
+                  <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary-dark dark:from-primary-dark dark:to-primary">Folders</span>
+                </h3>
                 <button (click)="toggleCreateFolderForm()"
-                        class="text-lg hover:opacity-80 transition"
+                        class="text-2xl hover:scale-125 transition-transform duration-300 text-primary dark:text-primary-dark hover:rotate-90"
                         title="Create folder">
                   +
                 </button>
               </div>
 
               <!-- Create Folder Form -->
-              <div *ngIf="showCreateFolderForm" class="mb-3 p-3 rounded bg-light-bg dark:bg-slate-700">
+              <div *ngIf="showCreateFolderForm" @scaleIn
+                   class="mb-4 p-4 rounded-xl bg-gradient-to-br from-primary/10 to-primary-dark/10 dark:from-primary-dark/10 dark:to-primary/10 border border-primary/30 dark:border-primary-dark/30">
                 <input [(ngModel)]="newFolderName"
-                       class="w-full mb-3 px-2 py-1 text-sm rounded border border-secondary dark:border-success bg-white dark:bg-slate-800"
+                       class="w-full mb-3 px-3 py-2 text-sm rounded-lg border-2 border-primary/30 dark:border-primary-dark/30 bg-white dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-primary-dark transition-all"
                        placeholder="Folder name">
-                <div class="mb-2">
-                  <p class="text-xs font-medium mb-2 text-light-paragraph dark:text-dark-paragraph">Choose color:</p>
-                  <div class="grid grid-cols-8 gap-2">
+                <div class="mb-3">
+                  <p class="text-xs font-bold mb-2 text-light-paragraph dark:text-dark-paragraph">Choose color:</p>
+                  <div class="grid grid-cols-8 gap-1.5">
                     <button *ngFor="let color of predefinedColors"
                             (click)="newFolderColor = color"
                             [style.background-color]="color"
-                            [class.ring-2]="newFolderColor === color"
-                            [class.ring-offset-1]="newFolderColor === color"
-                            [class.ring-white]="newFolderColor === color"
-                            class="w-6 h-6 rounded-full cursor-pointer hover:scale-110 transition-transform"
+                            [class.ring-4]="newFolderColor === color"
+                            [class.ring-offset-2]="newFolderColor === color"
+                            [class.ring-primary]="newFolderColor === color"
+                            [class.scale-125]="newFolderColor === color"
+                            class="w-6 h-6 rounded-full cursor-pointer hover:scale-110 transition-all shadow-md"
                             [title]="color">
                     </button>
                   </div>
                 </div>
-                <div class="flex gap-1">
+                <div class="flex gap-2">
                   <button (click)="createFolder()"
-                          class="flex-1 px-2 py-1 text-xs rounded bg-success text-white hover:opacity-80">
+                          class="flex-1 px-3 py-2 text-xs rounded-lg bg-gradient-to-r from-green-600 to-emerald-700 text-white hover:from-green-700 hover:to-emerald-800 transition-all font-bold shadow-md hover:shadow-lg hover:scale-105">
                     Create
                   </button>
                   <button (click)="toggleCreateFolderForm()"
-                          class="flex-1 px-2 py-1 text-xs rounded bg-gray-500 text-white hover:opacity-80">
+                          class="flex-1 px-3 py-2 text-xs rounded-lg bg-gray-500 text-white hover:bg-gray-600 transition-all font-bold shadow-md hover:scale-105">
                     Cancel
                   </button>
                 </div>
@@ -65,31 +72,41 @@ import { VocabularyItem, Word, VocabularyFolder } from '../../core/models/index'
                       (dragover)="onDragOver($event, null)"
                       (dragleave)="onDragLeave()"
                       (drop)="onDrop($event, null)"
-                      [class.bg-primary]="selectedFolderId === null"
+                      [class.bg-gradient-to-r]="selectedFolderId === null"
+                      [class.from-primary]="selectedFolderId === null"
+                      [class.to-primary-dark]="selectedFolderId === null"
                       [class.text-white]="selectedFolderId === null"
-                      [class.ring-2]="dragOverFolderId === null && draggedWordId !== null"
-                      [class.ring-indigo-500]="dragOverFolderId === null && draggedWordId !== null"
-                      class="w-full text-left px-3 py-2 rounded mb-1 hover:bg-light-bg dark:hover:bg-slate-700 transition text-sm">
-                All Words ({{ getFolderWordsCount(null) }})
+                      [class.shadow-lg]="selectedFolderId === null"
+                      [class.scale-105]="selectedFolderId === null"
+                      [class.ring-4]="dragOverFolderId === null && draggedWordId !== null"
+                      [class.ring-primary]="dragOverFolderId === null && draggedWordId !== null"
+                      [class.ring-offset-2]="dragOverFolderId === null && draggedWordId !== null"
+                      class="w-full text-left px-4 py-3 rounded-xl mb-2 hover:bg-light-bg dark:hover:bg-slate-700 transition-all duration-300 text-sm font-bold hover:scale-105 hover:shadow-md">
+                All Words <span class="opacity-75">({{ getFolderWordsCount(null) }})</span>
               </button>
 
               <!-- Folder List -->
-              <div *ngFor="let folder of folders" class="mb-1 group relative">
+              <div *ngFor="let folder of folders" class="mb-2 group relative">
                 <button (click)="selectFolder(folder.id)"
                         (dragover)="onDragOver($event, folder.id)"
                         (dragleave)="onDragLeave()"
                         (drop)="onDrop($event, folder.id)"
-                        [class.bg-primary]="selectedFolderId === folder.id"
+                        [class.bg-gradient-to-r]="selectedFolderId === folder.id"
+                        [class.from-primary]="selectedFolderId === folder.id"
+                        [class.to-primary-dark]="selectedFolderId === folder.id"
                         [class.text-white]="selectedFolderId === folder.id"
-                        [class.ring-2]="dragOverFolderId === folder.id"
-                        [class.ring-indigo-500]="dragOverFolderId === folder.id"
-                        class="w-full text-left pl-3 pr-10 py-2 rounded hover:bg-light-bg dark:hover:bg-slate-700 transition text-sm flex items-center gap-2">
-                  <span class="w-3 h-3 rounded-full flex-shrink-0" [style.backgroundColor]="folder.color"></span>
+                        [class.shadow-lg]="selectedFolderId === folder.id"
+                        [class.scale-105]="selectedFolderId === folder.id"
+                        [class.ring-4]="dragOverFolderId === folder.id"
+                        [class.ring-primary]="dragOverFolderId === folder.id"
+                        [class.ring-offset-2]="dragOverFolderId === folder.id"
+                        class="w-full text-left pl-4 pr-12 py-3 rounded-xl hover:bg-light-bg dark:hover:bg-slate-700 transition-all duration-300 text-sm flex items-center gap-2 font-bold hover:scale-105 hover:shadow-md">
+                  <span class="w-4 h-4 rounded-full flex-shrink-0 shadow-md" [style.backgroundColor]="folder.color"></span>
                   <span class="flex-1 truncate">{{ folder.name }}</span>
-                  <span class="text-xs opacity-70">({{ getFolderWordsCount(folder.id) }})</span>
+                  <span class="text-xs opacity-70 font-normal">({{ getFolderWordsCount(folder.id) }})</span>
                 </button>
                 <button (click)="confirmDeleteFolder(folder.id); $event.stopPropagation()"
-                        class="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 text-red-600 hover:text-red-700 text-lg px-2 py-1 leading-none"
+                        class="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 text-red-600 hover:text-white hover:bg-red-600 text-xl px-2 py-1 leading-none rounded-lg transition-all hover:scale-125"
                         title="Delete folder">
                   ×
                 </button>
@@ -99,183 +116,233 @@ import { VocabularyItem, Word, VocabularyFolder } from '../../core/models/index'
 
           <!-- Main Content -->
           <div class="flex-1 min-w-0">
-        <div class="flex justify-between items-center mb-8">
-          <div>
-            <h1 class="text-4xl font-bold mb-2 transition-colors text-primary dark:text-primary-dark">
-              My Vocabulary
-            </h1>
-            <p class="transition-colors text-light-paragraph dark:text-dark-paragraph">
-              {{ vocabulary.length }} / 10,000 words saved
-              <span *ngIf="vocabulary.length >= 10000" class="text-secondary dark:text-success font-semibold ml-2">
-                (Limit reached)
-              </span>
+            <!-- Header Section with Gradient -->
+            <div class="mb-8 text-center">
+              <h1 class="text-4xl font-bold mb-3">
+                <span class="inline-block text-3xl">📚</span>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary-dark dark:from-primary-dark dark:to-primary">My Vocabulary</span>
+              </h1>
+              <div class="flex items-center justify-center gap-3 mb-4">
+                <div class="px-4 py-2 rounded-full bg-gradient-to-r from-primary/20 to-primary-dark/20 dark:from-primary-dark/20 dark:to-primary/20 backdrop-blur-sm">
+                  <p class="text-base font-semibold">
+                    <span class="text-primary dark:text-primary-dark font-bold text-xl">{{ vocabulary.length }}</span>
+                    <span class="opacity-70"> / 10,000 words saved</span>
+                  </p>
+                </div>
+                <span *ngIf="vocabulary.length >= 10000" @scaleIn
+                      class="px-3 py-1.5 rounded-full bg-gradient-to-r from-red-600 to-rose-600 text-white text-sm font-bold shadow-lg">
+                  <span class="inline-block">🎯</span> Limit reached
+                </span>
+              </div>
+              <p class="text-sm text-light-paragraph dark:text-dark-paragraph opacity-75 max-w-2xl mx-auto">
+                Build your personal word collection and master Japanese vocabulary with spaced repetition learning
+              </p>
+            </div>
+
+            <!-- View Mode Toggle & Filters -->
+            <div class="flex justify-between items-center mb-6 gap-4 flex-wrap">
+              <div class="flex gap-2" @cardStagger>
+                <button (click)="filter = 'all'" @listItem
+                        [ngClass]="filter === 'all' 
+                          ? 'bg-gradient-to-r from-primary to-primary-dark text-white shadow-lg scale-105' 
+                          : 'bg-white dark:bg-slate-800 text-light-headline dark:text-dark-headline hover:shadow-md hover:scale-105'"
+                        class="px-4 py-2 rounded-xl transition-all duration-300 font-semibold text-sm border-2 border-transparent hover:border-primary dark:hover:border-primary-dark">
+                  All <span class="opacity-80">({{ vocabulary.length }})</span>
+                </button>
+                <button (click)="filter = 'new'" @listItem
+                        [ngClass]="filter === 'new'
+                          ? 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white shadow-lg scale-105'
+                          : 'bg-white dark:bg-slate-800 text-light-headline dark:text-dark-headline hover:shadow-md hover:scale-105'"
+                        class="px-4 py-2 rounded-xl transition-all duration-300 font-semibold text-sm border-2 border-transparent hover:border-yellow-500">
+                  <span class="inline-block">⭐</span> New <span class="opacity-80">({{ newCount }})</span>
+                </button>
+                <button (click)="filter = 'toBeReviewed'" @listItem
+                        [ngClass]="filter === 'toBeReviewed'
+                          ? 'bg-gradient-to-r from-rose-500 to-red-500 text-white shadow-lg scale-105'
+                          : 'bg-white dark:bg-slate-800 text-light-headline dark:text-dark-headline hover:shadow-md hover:scale-105'"
+                        class="px-4 py-2 rounded-xl transition-all duration-300 font-semibold text-sm border-2 border-transparent hover:border-blue-500">
+                  <span class="inline-block">🔔</span> To Review <span class="opacity-80">({{ toBeReviewedCount }})</span>
+                </button>
+                <button (click)="filter = 'reviewed'" @listItem
+                        [ngClass]="filter === 'reviewed'
+                          ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg scale-105'
+                          : 'bg-white dark:bg-slate-800 text-light-headline dark:text-dark-headline hover:shadow-md hover:scale-105'"
+                        class="px-4 py-2 rounded-xl transition-all duration-300 font-semibold text-sm border-2 border-transparent hover:border-green-500">
+                  ✓ Reviewed <span class="opacity-80">({{ reviewedCount }})</span>
+                </button>
+              </div>
+              
+              <div class="flex gap-2">
+                <button (click)="viewMode = 'list'"
+                        [ngClass]="viewMode === 'list'
+                          ? 'bg-gradient-to-r from-primary to-primary-dark text-white shadow-lg'
+                          : 'bg-white dark:bg-slate-800 text-light-headline dark:text-dark-headline hover:shadow-md'"
+                        class="px-3 py-2 rounded-xl transition-all duration-300 font-semibold text-sm hover:scale-105"
+                        title="List view">
+                  ≡ List
+                </button>
+                <button (click)="viewMode = 'card'"
+                        [ngClass]="viewMode === 'card'
+                          ? 'bg-gradient-to-r from-primary to-primary-dark text-white shadow-lg'
+                          : 'bg-white dark:bg-slate-800 text-light-headline dark:text-dark-headline hover:shadow-md'"
+                        class="px-3 py-2 rounded-xl transition-all duration-300 font-semibold text-sm hover:scale-105"
+                        title="Card view">
+                  ⊞ Card
+                </button>
+              </div>
+            </div>
+
+            <!-- Search Input -->
+            <div class="mb-6">
+              <div class="relative max-w-2xl mx-auto">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <span class="text-xl inline-block">🔍</span>
+                </div>
+                <input [(ngModel)]="searchTerm"
+                       class="w-full rounded-xl pl-11 pr-4 py-3 border-2 border-primary/20 dark:border-primary-dark/20 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary/30 dark:focus:ring-primary-dark/30 focus:border-primary dark:focus:border-primary-dark bg-white dark:bg-slate-800 text-light-paragraph dark:text-dark-paragraph placeholder-gray-400 dark:placeholder-gray-500 shadow-md hover:shadow-lg"
+                       placeholder="Search your vocabulary...">
+              </div>
+            </div>
+
+            <!-- Add Word Button -->
+            <div class="mb-6 text-center">
+              <button (click)="toggleAddWordForm()"
+                      [ngClass]="showAddWordForm
+                        ? 'bg-white dark:bg-slate-800 text-primary dark:text-primary-dark border-primary dark:border-primary-dark'
+                        : 'bg-gradient-to-r from-primary to-primary-dark text-white hover:shadow-xl hover:scale-105'"
+                      class="px-6 py-2.5 rounded-xl transition-all duration-300 font-semibold shadow-lg border-2">
+                <span class="inline-block">{{ showAddWordForm ? '✖' : '➕' }}</span> {{ showAddWordForm ? 'Hide Form' : 'Add New Word' }}
+              </button>
+            </div>
+
+        <!-- Add Custom Vocabulary Form -->
+        <div *ngIf="showAddWordForm" @scaleIn
+             class="rounded-xl shadow-xl p-6 border-2 border-primary/30 dark:border-primary-dark/30 mb-8 bg-gradient-to-br from-white to-primary/5 dark:from-slate-800 dark:to-primary-dark/5 transition-colors max-w-3xl mx-auto">
+          <div class="text-center mb-4">
+            <h2 class="text-2xl font-bold mb-2">
+              <span class="inline-block text-xl">✨</span>
+              <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary-dark dark:from-primary-dark dark:to-primary">Add Your Own Word</span>
+            </h2>
+            <p class="text-light-paragraph dark:text-dark-paragraph opacity-75">
+              Add kanji, kana-only words, or any term you want to study
             </p>
           </div>
-          <!-- View Mode Toggle -->
-          <div class="flex gap-2">
-            <button (click)="viewMode = 'list'"
-                    [ngClass]="viewMode === 'list'
-                      ? 'bg-light-button dark:bg-dark-button text-white'
-                      : 'bg-light-bg dark:bg-slate-700 text-light-headline dark:text-dark-headline hover:opacity-80'"
-                    class="px-3 py-2 rounded-lg transition font-medium"
-                    title="List view">
-              ≡ List
-            </button>
-            <button (click)="viewMode = 'card'"
-                    [ngClass]="viewMode === 'card'
-                      ? 'bg-light-button dark:bg-dark-button text-white'
-                      : 'bg-light-bg dark:bg-slate-700 text-light-headline dark:text-dark-headline hover:opacity-80'"
-                    class="px-3 py-2 rounded-lg transition font-medium"
-                    title="Card view">
-              ⊞ Card
-            </button>
-          </div>
-        </div>
 
-        <!-- Search Input -->
-        <div class="mb-6">
-          <input [(ngModel)]="searchTerm"
-                 class="w-full rounded-lg px-4 py-2 border border-secondary dark:border-success transition focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-slate-800 text-light-paragraph dark:text-dark-paragraph placeholder-gray-400 dark:placeholder-gray-500"
-                 placeholder="🔍 Search vocabulary...">
-        </div>
-
-        <!-- Filters -->
-        <div class="flex gap-4 mb-8">
-          <button (click)="filter = 'all'" 
-                  [ngClass]="filter === 'all' 
-                    ? 'bg-light-button dark:bg-dark-button text-white' 
-                    : 'bg-light-bg dark:bg-slate-700 text-light-headline dark:text-dark-headline hover:opacity-80'"
-                  class="px-4 py-2 rounded-lg transition font-medium">
-            All ({{ vocabulary.length }})
-          </button>
-          <button (click)="filter = 'new'"
-                  [ngClass]="filter === 'new'
-                    ? 'bg-yellow-600 text-white'
-                    : 'bg-light-bg dark:bg-slate-700 text-light-headline dark:text-dark-headline hover:opacity-80'"
-                  class="px-4 py-2 rounded-lg transition font-medium">
-            New ({{ newCount }})
-          </button>
-          <button (click)="filter = 'reviewed'"
-                  [ngClass]="filter === 'reviewed'
-                    ? 'bg-success text-white'
-                    : 'bg-light-bg dark:bg-slate-700 text-light-headline dark:text-dark-headline hover:opacity-80'"
-                  class="px-4 py-2 rounded-lg transition font-medium">
-            Reviewed ({{ reviewedCount }})
-          </button>
-        </div>
-
-        <div class="mb-4">\n          <button (click)="toggleAddWordForm()"
-                  [ngClass]="showAddWordForm
-                    ? 'bg-light-bg dark:bg-slate-700 text-light-headline dark:text-dark-headline hover:opacity-80'
-                    : 'bg-light-button dark:bg-dark-button text-white hover:opacity-90'"
-                  class="px-4 py-2 rounded-lg transition font-semibold">
-            {{ showAddWordForm ? '✖ Hide Form' : '➕ Add New Word' }}
-          </button>
-        </div>
-
-        <!-- Add Custom Vocabulary -->
-        <div *ngIf="showAddWordForm"
-             class="rounded-lg shadow p-6 border border-secondary dark:border-success mb-8 bg-white dark:bg-slate-800 transition-colors">
-          <h2 class="text-xl font-bold mb-4 transition-colors text-light-headline dark:text-dark-headline">
-            Add Your Own Word
-          </h2>
-          <p class="text-sm mb-4 transition-colors text-light-paragraph dark:text-dark-paragraph">
-            Add kanji, kana-only words, or any term you want to study.
-          </p>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-            <input [(ngModel)]="customWordText"
-                   class="rounded-lg px-3 py-2 border border-secondary dark:border-success transition focus:outline-none focus:ring-2 focus:ring-primary bg-light-bg dark:bg-slate-700 text-light-paragraph dark:text-dark-paragraph placeholder-gray-400 dark:placeholder-gray-500"
-                   placeholder="Word (e.g. ねこ / 猫) *">
-            <input [(ngModel)]="customWordReading"
-                   class="rounded-lg px-3 py-2 border border-secondary dark:border-success transition focus:outline-none focus:ring-2 focus:ring-primary bg-light-bg dark:bg-slate-700 text-light-paragraph dark:text-dark-paragraph placeholder-gray-400 dark:placeholder-gray-500"
-                   placeholder="Reading (optional if kana-only)">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label class="block text-sm font-bold mb-2 text-light-headline dark:text-dark-headline">Word *</label>
+              <input [(ngModel)]="customWordText"
+                     class="w-full rounded-xl px-4 py-3 border-2 border-primary/20 dark:border-primary-dark/20 transition-all focus:outline-none focus:ring-4 focus:ring-primary/30 dark:focus:ring-primary-dark/30 focus:border-primary dark:focus:border-primary-dark bg-white dark:bg-slate-700 text-light-paragraph dark:text-dark-paragraph placeholder-gray-400 dark:placeholder-gray-500"
+                     placeholder="e.g. ねこ / 猫">
+            </div>
+            <div>
+              <label class="block text-sm font-bold mb-2 text-light-headline dark:text-dark-headline">Reading</label>
+              <input [(ngModel)]="customWordReading"
+                     class="w-full rounded-xl px-4 py-3 border-2 border-primary/20 dark:border-primary-dark/20 transition-all focus:outline-none focus:ring-4 focus:ring-primary/30 dark:focus:ring-primary-dark/30 focus:border-primary dark:focus:border-primary-dark bg-white dark:bg-slate-700 text-light-paragraph dark:text-dark-paragraph placeholder-gray-400 dark:placeholder-gray-500"
+                     placeholder="Optional if kana-only">
+            </div>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-            <input [(ngModel)]="customWordMeaning"
-                   class="rounded-lg px-3 py-2 border border-secondary dark:border-success transition focus:outline-none focus:ring-2 focus:ring-primary bg-light-bg dark:bg-slate-700 text-light-paragraph dark:text-dark-paragraph placeholder-gray-400 dark:placeholder-gray-500"
-                   placeholder="Meaning in English *">
-            <input [(ngModel)]="customPartOfSpeech"
-                   class="rounded-lg px-3 py-2 border border-secondary dark:border-success transition focus:outline-none focus:ring-2 focus:ring-primary bg-light-bg dark:bg-slate-700 text-light-paragraph dark:text-dark-paragraph placeholder-gray-400 dark:placeholder-gray-500"
-                   placeholder="Part of speech (optional)">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label class="block text-sm font-bold mb-2 text-light-headline dark:text-dark-headline">Meaning *</label>
+              <input [(ngModel)]="customWordMeaning"
+                     class="w-full rounded-xl px-4 py-3 border-2 border-primary/20 dark:border-primary-dark/20 transition-all focus:outline-none focus:ring-4 focus:ring-primary/30 dark:focus:ring-primary-dark/30 focus:border-primary dark:focus:border-primary-dark bg-white dark:bg-slate-700 text-light-paragraph dark:text-dark-paragraph placeholder-gray-400 dark:placeholder-gray-500"
+                     placeholder="English meaning">
+            </div>
+            <div>
+              <label class="block text-sm font-bold mb-2 text-light-headline dark:text-dark-headline">Part of Speech</label>
+              <input [(ngModel)]="customPartOfSpeech"
+                     class="w-full rounded-xl px-4 py-3 border-2 border-primary/20 dark:border-primary-dark/20 transition-all focus:outline-none focus:ring-4 focus:ring-primary/30 dark:focus:ring-primary-dark/30 focus:border-primary dark:focus:border-primary-dark bg-white dark:bg-slate-700 text-light-paragraph dark:text-dark-paragraph placeholder-gray-400 dark:placeholder-gray-500"
+                     placeholder="e.g. noun, verb, adjective">
+            </div>
           </div>
 
-          <textarea [(ngModel)]="customExampleSentence"
-                    rows="2"
-                    class="w-full rounded-lg px-3 py-2 border border-secondary dark:border-success transition focus:outline-none focus:ring-2 focus:ring-primary mb-4 bg-light-bg dark:bg-slate-700 text-light-paragraph dark:text-dark-paragraph placeholder-gray-400 dark:placeholder-gray-500"
-                    placeholder="Example sentence (optional)"></textarea>
+          <div class="mb-6">
+            <label class="block text-sm font-bold mb-2 text-light-headline dark:text-dark-headline">Example Sentence</label>
+            <textarea [(ngModel)]="customExampleSentence"
+                      rows="3"
+                      class="w-full rounded-xl px-4 py-3 border-2 border-primary/20 dark:border-primary-dark/20 transition-all focus:outline-none focus:ring-4 focus:ring-primary/30 dark:focus:ring-primary-dark/30 focus:border-primary dark:focus:border-primary-dark bg-white dark:bg-slate-700 text-light-paragraph dark:text-dark-paragraph placeholder-gray-400 dark:placeholder-gray-500"
+                      placeholder="Add an example sentence (optional)"></textarea>
+          </div>
 
-          <div class="flex items-center gap-3">
+          <div class="flex items-center gap-4 justify-center">
             <button (click)="addCustomWord()"
                     [disabled]="!customWordText.trim() || !customWordMeaning.trim() || vocabulary.length >= 10000"
-                    class="px-4 py-2 rounded-lg transition font-semibold bg-light-button dark:bg-dark-button text-white hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed">
-              ➕ Add Word
+                    class="px-6 py-2.5 rounded-xl transition-all duration-300 font-semibold bg-gradient-to-r from-primary to-primary-dark text-white hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100">
+              <span class="inline-block">➕</span> Add Word
             </button>
-            <p *ngIf="customWordAddedMessage"
-               class="text-sm transition-colors text-success font-medium">
+            <p *ngIf="customWordAddedMessage" @scaleIn
+               class="px-4 py-2 rounded-lg bg-gradient-to-r from-green-600 to-emerald-700 text-white text-sm font-semibold shadow-md">
               {{ customWordAddedMessage }}
             </p>
-            <p *ngIf="customWordErrorMessage"
-               class="text-sm transition-colors text-secondary dark:text-success font-medium">
+            <p *ngIf="customWordErrorMessage" @scaleIn
+               class="px-4 py-2 rounded-lg bg-gradient-to-r from-red-600 to-rose-600 text-white text-sm font-semibold shadow-md">
               {{ customWordErrorMessage }}
             </p>
           </div>
         </div>
 
         <!-- View: List -->
-        <div *ngIf="viewMode === 'list' && filteredVocabulary.length > 0" class="space-y-3">
-          <div *ngFor="let item of filteredVocabulary"
+        <div *ngIf="viewMode === 'list' && filteredVocabulary.length > 0" class="space-y-3" @cardStagger>
+          <div *ngFor="let item of filteredVocabulary" @listItem
                [class.opacity-50]="draggedWordId === item.id"
-               class="rounded-lg shadow hover:shadow-lg transition p-6 border border-secondary dark:border-success bg-white dark:bg-slate-800 transition-colors flex gap-3">
+               class="group rounded-xl shadow-md hover:shadow-lg transition-all duration-300 p-4 border-2 border-transparent hover:border-primary/50 dark:hover:border-primary-dark/50 bg-gradient-to-r from-white to-primary/5 dark:from-slate-800 dark:to-primary-dark/5 hover:scale-[1.01] flex gap-3">
             <!-- Drag Handle -->
             <div [draggable]="true"
                  (dragstart)="onDragStart(item.id, $event)"
                  (dragend)="onDragEnd()"
-                 class="flex-shrink-0 cursor-grab active:cursor-grabbing flex items-center justify-center w-8 h-8 rounded hover:bg-light-bg dark:hover:bg-slate-700 transition text-gray-400 hover:text-primary dark:hover:text-primary-dark"
+                 class="flex-shrink-0 cursor-grab active:cursor-grabbing flex items-center justify-center w-8 h-8 rounded-lg hover:bg-primary/10 dark:hover:bg-primary-dark/10 transition-all text-gray-400 hover:text-primary dark:hover:text-primary-dark group-hover:scale-110"
                  title="Drag to move to folder">
               <span class="text-xl">⋮⋮</span>
             </div>
             <div class="flex justify-between items-start gap-4 flex-1">
-              <div class="flex-1">
-                <h3 class="text-2xl font-bold transition-colors text-light-headline dark:text-dark-headline">
+              <div class="flex-1 min-w-0">
+                <h3 class="text-2xl font-bold transition-colors text-transparent bg-clip-text bg-gradient-to-r from-light-headline to-primary dark:from-dark-headline dark:to-primary-dark mb-1">
                   {{ item.word.text }}
                 </h3>
-                <p class="text-lg mb-2 transition-colors text-primary dark:text-primary-dark">
+                <p class="text-base mb-2 font-semibold transition-colors text-primary dark:text-primary-dark">
                   {{ item.word.reading }}
                 </p>
                 <p class="mb-2 transition-colors text-light-paragraph dark:text-dark-paragraph">
                   {{ item.word.meaning }}
                 </p>
                 <p *ngIf="!isFromBook(item.exampleSentence)"
-                   class="text-sm transition-colors text-light-paragraph dark:text-dark-paragraph">
+                   class="text-sm italic opacity-75 transition-colors text-light-paragraph dark:text-dark-paragraph bg-light-bg dark:bg-slate-700 p-3 rounded-lg">
                   {{ item.exampleSentence }}
                 </p>
                 <p *ngIf="isFromBook(item.exampleSentence)"
-                   class="text-sm">
-                  <span class="text-light-paragraph dark:text-dark-paragraph">From: </span>
+                   class="text-sm bg-gradient-to-r from-primary/10 to-primary-dark/10 dark:from-primary-dark/10 dark:to-primary/10 p-3 rounded-lg">
+                  <span class="text-light-paragraph dark:text-dark-paragraph opacity-75">📖 From: </span>
                   <button (click)="navigateToBook(item.exampleSentence)"
-                          class="underline transition-colors cursor-pointer text-primary dark:text-primary-dark hover:opacity-80">
+                          class="font-bold underline transition-colors cursor-pointer text-primary dark:text-primary-dark hover:opacity-70">
                     {{ getBookInfo(item.exampleSentence)?.bookTitle }} - {{ getBookInfo(item.exampleSentence)?.chapterTitle }}
                   </button>
                 </p>
               </div>
-              <div class="flex items-center gap-3 whitespace-nowrap">
-                <span [ngClass]="item.reviewed 
-                        ? 'bg-success text-white'
-                        : 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200'"
-                      class="inline-block px-3 py-1 rounded-full text-sm font-semibold transition-colors">
-                  {{ item.reviewed ? 'Reviewed' : 'New' }}
+              <div class="flex flex-col items-end gap-2 flex-shrink-0">
+                <span [ngClass]="getWordStatus(item) === 'reviewed'
+                        ? 'bg-gradient-to-r from-green-600 to-emerald-700 text-white'
+                        : getWordStatus(item) === 'toBeReviewed'
+                        ? 'bg-gradient-to-r from-rose-600 to-red-600 text-white'
+                        : 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white'"
+                      class="inline-block px-3 py-1 rounded-full text-xs font-semibold shadow-md transition-all hover:scale-110">
+                  <span class="inline-block" *ngIf="getWordStatus(item) === 'reviewed'">✓</span>
+                  <span class="inline-block" *ngIf="getWordStatus(item) === 'toBeReviewed'">🔔</span>
+                  <span class="inline-block" *ngIf="getWordStatus(item) === 'new'">⭐</span>
+                  {{ getWordStatus(item) === 'reviewed' ? 'Reviewed' : getWordStatus(item) === 'toBeReviewed' ? 'To Review' : 'New' }}
                 </span>
-                <button (click)="scheduleForReview(item.id)"
-                        class="px-3 py-1 rounded-lg transition font-medium text-sm bg-indigo-600 hover:bg-indigo-700 text-white"
-                        title="Review this word now">
-                  ⚡ Review Now
-                </button>
-                <button (click)="confirmDelete(item.id)"
-                        class="px-3 py-1 rounded-lg transition font-medium text-sm bg-red-600 hover:bg-red-700 text-white">
-                  🗑️ Delete
-                </button>
+                <div class="flex gap-2">
+                  <button (click)="scheduleForReview(item.id)"
+                      class="px-3 py-1.5 rounded-lg transition-all duration-300 font-semibold text-xs bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700 text-white shadow-md hover:shadow-lg hover:scale-110"
+                          title="Review this word now">
+                    <span class="inline-block">⚡</span> Review
+                  </button>
+                  <button (click)="confirmDelete(item.id)"
+                          class="px-3 py-1.5 rounded-lg transition-all duration-300 font-semibold text-xs bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white shadow-md hover:shadow-lg hover:scale-110">
+                    <span class="inline-block">🗑️</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -283,84 +350,104 @@ import { VocabularyItem, Word, VocabularyFolder } from '../../core/models/index'
 
         <!-- View: Card Grid -->
         <div *ngIf="viewMode === 'card' && filteredVocabulary.length > 0" 
-             class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div *ngFor="let item of filteredVocabulary"
+             class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" @cardStagger>
+          <div *ngFor="let item of filteredVocabulary" @listItem
                [class.opacity-50]="draggedWordId === item.id"
-               class="rounded-lg shadow hover:shadow-lg transition p-6 border border-secondary dark:border-success bg-white dark:bg-slate-800 transition-colors flex flex-col relative">
+               class="group rounded-xl shadow-md hover:shadow-lg transition-all duration-300 p-4 border-2 border-transparent hover:border-primary/50 dark:hover:border-primary-dark/50 bg-gradient-to-br from-white via-white to-primary/5 dark:from-slate-800 dark:via-slate-800 dark:to-primary-dark/5 flex flex-col relative hover:scale-105">
             <!-- Drag Handle -->
             <div [draggable]="true"
                  (dragstart)="onDragStart(item.id, $event)"
                  (dragend)="onDragEnd()"
-                 class="absolute top-2 left-2 cursor-grab active:cursor-grabbing flex items-center justify-center w-8 h-8 rounded hover:bg-light-bg dark:hover:bg-slate-700 transition text-gray-400 hover:text-primary dark:hover:text-primary-dark"
+                 class="absolute top-2 left-2 cursor-grab active:cursor-grabbing flex items-center justify-center w-8 h-8 rounded-lg hover:bg-primary/10 dark:hover:bg-primary-dark/10 transition-all text-gray-400 hover:text-primary dark:hover:text-primary-dark opacity-0 group-hover:opacity-100"
                  title="Drag to move to folder">
               <span class="text-xl">⋮⋮</span>
             </div>
             <div class="flex-1 pt-6">
-              <h3 class="text-2xl font-bold transition-colors mb-2 text-light-headline dark:text-dark-headline">
+              <h3 class="text-2xl font-bold transition-colors mb-2 text-transparent bg-clip-text bg-gradient-to-r from-light-headline to-primary dark:from-dark-headline dark:to-primary-dark">
                 {{ item.word.text }}
               </h3>
-              <p class="text-base mb-3 transition-colors text-primary dark:text-primary-dark">
+              <p class="text-base mb-3 font-semibold transition-colors text-primary dark:text-primary-dark">
                 {{ item.word.reading }}
               </p>
               <p class="mb-3 transition-colors text-light-paragraph dark:text-dark-paragraph">
                 {{ item.word.meaning }}
               </p>
               <p *ngIf="!isFromBook(item.exampleSentence)"
-                 class="text-sm mb-4 transition-colors text-light-paragraph dark:text-dark-paragraph">
+                 class="text-sm mb-4 italic opacity-75 transition-colors text-light-paragraph dark:text-dark-paragraph bg-light-bg dark:bg-slate-700 p-3 rounded-lg">
                 {{ item.exampleSentence }}
               </p>
               <p *ngIf="isFromBook(item.exampleSentence)"
-                 class="text-sm mb-4">
-                <span class="text-light-paragraph dark:text-dark-paragraph">From: </span>
+                 class="text-sm mb-4 bg-gradient-to-r from-primary/10 to-primary-dark/10 dark:from-primary-dark/10 dark:to-primary/10 p-3 rounded-lg">
+                <span class="inline-block">📖</span> <span class="text-light-paragraph dark:text-dark-paragraph opacity-75">From: </span>
                 <button (click)="navigateToBook(item.exampleSentence)"
-                        class="underline transition-colors cursor-pointer text-primary dark:text-primary-dark hover:opacity-80">
+                        class="font-bold underline transition-colors cursor-pointer text-primary dark:text-primary-dark hover:opacity-70 block mt-1">
                   {{ getBookInfo(item.exampleSentence)?.bookTitle }}
                 </button>
               </p>
             </div>
-            <div class="flex items-center gap-2 pt-4 border-t border-secondary dark:border-success">
-              <span [ngClass]="item.reviewed 
-                      ? 'bg-success text-white'
-                      : 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200'"
-                    class="inline-block px-2 py-1 rounded text-xs font-semibold transition-colors">
-                {{ item.reviewed ? 'Reviewed' : 'New' }}
+            <div class="flex flex-col gap-2 pt-3 border-t-2 border-primary/10 dark:border-primary-dark/10">
+              <span [ngClass]="getWordStatus(item) === 'reviewed'
+                      ? 'bg-gradient-to-r from-green-600 to-emerald-700 text-white'
+                      : getWordStatus(item) === 'toBeReviewed'
+                      ? 'bg-gradient-to-r from-rose-600 to-red-600 text-white'
+                      : 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white'"
+                    class="inline-block px-3 py-1.5 rounded-lg text-xs font-semibold text-center shadow-md transition-all hover:scale-105">
+                <span class="inline-block" *ngIf="getWordStatus(item) === 'reviewed'">✓</span>
+                <span class="inline-block" *ngIf="getWordStatus(item) === 'toBeReviewed'">🔔</span>
+                <span class="inline-block" *ngIf="getWordStatus(item) === 'new'">⭐</span>
+                {{ getWordStatus(item) === 'reviewed' ? 'Reviewed' : getWordStatus(item) === 'toBeReviewed' ? 'To Review' : 'New' }}
               </span>
-              <button (click)="scheduleForReview(item.id)"
-                      class="ml-auto px-2 py-1 rounded transition font-medium text-sm bg-indigo-600 hover:bg-indigo-700 text-white"
-                      title="Review this word now">
-                ⚡
-              </button>
-              <button (click)="confirmDelete(item.id)"
-                      class="px-2 py-1 rounded transition font-medium text-sm bg-red-600 hover:bg-red-700 text-white">
-                🗑️
-              </button>
+              <div class="grid grid-cols-2 gap-2">
+                <button (click)="scheduleForReview(item.id)"
+                  class="px-2 py-1.5 rounded-lg transition-all duration-300 font-semibold text-xs bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700 text-white shadow-md hover:shadow-lg hover:scale-105"
+                        title="Review this word now">
+                  <span class="inline-block">⚡</span>
+                </button>
+                <button (click)="confirmDelete(item.id)"
+                        class="px-2 py-1.5 rounded-lg transition-all duration-300 font-semibold text-xs bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white shadow-md hover:shadow-lg hover:scale-105">
+                  <span class="inline-block">🗑️</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
-        <div *ngIf="filteredVocabulary.length === 0" class="text-center py-12">
-          <p class="text-lg transition-colors text-light-paragraph dark:text-dark-paragraph">
-            {{ searchTerm ? 'No vocabulary matches your search' : 'No vocabulary to show' }}
+        <div *ngIf="filteredVocabulary.length === 0" class="text-center py-16" @fadeIn>
+          <div class="text-6xl mb-4 inline-block">📚</div>
+          <p class="text-xl font-bold mb-2 text-light-headline dark:text-dark-headline">
+            {{ searchTerm ? 'No matches found' : 'No vocabulary yet' }}
+          </p>
+          <p class="text-sm opacity-75 text-light-paragraph dark:text-dark-paragraph">
+            {{ searchTerm ? 'Try a different search term' : 'Start adding words to build your collection!' }}
           </p>
         </div>
 
         <!-- Delete Confirmation Modal -->
-        <div *ngIf="showDeleteConfirm"
-             class="fixed inset-0 flex items-center justify-center z-50 transition-all bg-black/30 dark:bg-black/50">
-          <div class="rounded-lg shadow-2xl p-6 max-w-sm border border-secondary dark:border-success bg-white dark:bg-slate-800 transition-colors">
-            <h2 class="text-2xl font-bold mb-4 transition-colors text-light-headline dark:text-dark-headline">
-              Delete Word?
-            </h2>
-            <p class="mb-6 transition-colors text-light-paragraph dark:text-dark-paragraph">
-              Are you sure you want to delete "{{ getWordToDelete()?.word?.text }}"? This action cannot be undone.
-            </p>
-            <div class="flex gap-4">
+        <div *ngIf="showDeleteConfirm" @fadeIn
+             class="fixed inset-0 flex items-center justify-center z-50 transition-all backdrop-blur-sm bg-black/40 dark:bg-black/60 p-4">
+          <div @scaleIn class="rounded-xl shadow-xl p-6 max-w-md w-full border-2 border-red-500/30 bg-white dark:bg-slate-800 transition-colors">
+            <div class="text-center mb-4">
+              <div class="text-5xl mb-3 inline-block">🗑️</div>
+              <h2 class="text-2xl font-bold mb-2">
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-pink-500">Delete Word?</span>
+              </h2>
+              <p class="text-base transition-colors text-light-paragraph dark:text-dark-paragraph">
+                Are you sure you want to delete
+              </p>
+              <p class="text-xl font-bold mt-2 text-primary dark:text-primary-dark">
+                "{{ getWordToDelete()?.word?.text }}"
+              </p>
+              <p class="text-xs mt-2 opacity-75 transition-colors text-light-paragraph dark:text-dark-paragraph">
+                This action cannot be undone.
+              </p>
+            </div>
+            <div class="flex gap-3">
               <button (click)="deleteWord()"
-                      class="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition font-medium">
+                      class="flex-1 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white px-4 py-2.5 rounded-xl transition-all duration-300 font-semibold shadow-lg hover:shadow-xl hover:scale-105">
                 Delete
               </button>
               <button (click)="cancelDelete()"
-                      class="flex-1 bg-light-bg dark:bg-slate-700 text-light-headline dark:text-dark-headline px-4 py-2 rounded-lg transition font-medium hover:opacity-80">
+                      class="flex-1 bg-light-bg dark:bg-slate-700 text-light-headline dark:text-dark-headline px-4 py-2.5 rounded-xl transition-all duration-300 font-semibold hover:shadow-lg hover:scale-105">
                 Cancel
               </button>
             </div>
@@ -368,22 +455,31 @@ import { VocabularyItem, Word, VocabularyFolder } from '../../core/models/index'
         </div>
 
         <!-- Delete Folder Confirmation Modal -->
-        <div *ngIf="showDeleteFolderConfirm"
-             class="fixed inset-0 flex items-center justify-center z-50 transition-all bg-black/30 dark:bg-black/50">
-          <div class="rounded-lg shadow-2xl p-6 max-w-sm border border-secondary dark:border-success bg-white dark:bg-slate-800 transition-colors">
-            <h2 class="text-2xl font-bold mb-4 transition-colors text-light-headline dark:text-dark-headline">
-              Delete Folder?
-            </h2>
-            <p class="mb-6 transition-colors text-light-paragraph dark:text-dark-paragraph">
-              Are you sure you want to delete "{{ getFolderToDelete()?.name }}"? Words in this folder will be moved to "No Folder". This action cannot be undone.
-            </p>
-            <div class="flex gap-4">
+        <div *ngIf="showDeleteFolderConfirm" @fadeIn
+             class="fixed inset-0 flex items-center justify-center z-50 transition-all backdrop-blur-sm bg-black/40 dark:bg-black/60 p-4">
+          <div @scaleIn class="rounded-xl shadow-xl p-6 max-w-md w-full border-2 border-red-500/30 bg-white dark:bg-slate-800 transition-colors">
+            <div class="text-center mb-4">
+              <div class="text-5xl mb-3 inline-block">📁</div>
+              <h2 class="text-2xl font-bold mb-2">
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-pink-500">Delete Folder?</span>
+              </h2>
+              <p class="text-base transition-colors text-light-paragraph dark:text-dark-paragraph">
+                Are you sure you want to delete
+              </p>
+              <p class="text-xl font-bold mt-2 text-primary dark:text-primary-dark">
+                "{{ getFolderToDelete()?.name }}"
+              </p>
+              <p class="text-xs mt-2 opacity-75 transition-colors text-light-paragraph dark:text-dark-paragraph">
+                Words in this folder will be moved to "No Folder". This action cannot be undone.
+              </p>
+            </div>
+            <div class="flex gap-3">
               <button (click)="deleteFolder()"
-                      class="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition font-medium">
+                      class="flex-1 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white px-4 py-2.5 rounded-xl transition-all duration-300 font-semibold shadow-lg hover:shadow-xl hover:scale-105">
                 Delete
               </button>
               <button (click)="cancelDeleteFolder()"
-                      class="flex-1 bg-light-bg dark:bg-slate-700 text-light-headline dark:text-dark-headline px-4 py-2 rounded-lg transition font-medium hover:opacity-80">
+                      class="flex-1 bg-light-bg dark:bg-slate-700 text-light-headline dark:text-dark-headline px-4 py-2.5 rounded-xl transition-all duration-300 font-semibold hover:shadow-lg hover:scale-105">
                 Cancel
               </button>
             </div>
@@ -398,7 +494,7 @@ export class VocabularyListComponent implements OnInit {
   vocabulary: VocabularyItem[] = [];
   folders: VocabularyFolder[] = [];
   selectedFolderId: string | null = null;
-  filter: 'all' | 'new' | 'reviewed' = 'all';
+  filter: 'all' | 'new' | 'toBeReviewed' | 'reviewed' = 'all';
   viewMode: 'list' | 'card' = 'list';
   searchTerm: string = '';
   customWordText: string = '';
@@ -417,27 +513,27 @@ export class VocabularyListComponent implements OnInit {
   books: any[] = [];
   showCreateFolderForm = false;
   newFolderName = '';
-  newFolderColor = '#7c3aed';
+  newFolderColor = '#D14A5A';
   draggedWordId: string | null = null;
   dragOverFolderId: string | null = null;
 
   predefinedColors = [
-    '#7c3aed', // purple
+    '#D14A5A', // lantern red
     '#ef4444', // red
     '#f59e0b', // orange
     '#10b981', // green
     '#3b82f6', // blue
     '#ec4899', // pink
     '#eab308', // yellow
-    '#14b8a6', // teal
+    '#C97A8B', // night sakura
     '#f97316', // deep orange
     '#06b6d4', // cyan
     '#84cc16', // lime
     '#6366f1', // indigo
-    '#8b5cf6', // violet
-    '#d946ef', // fuchsia
+    '#0ea5e9', // sky-deep
+    '#06b6d4', // cyan-bright
     '#22c55e', // emerald
-    '#a855f7', // purple-light
+    '#2dd4bf', // teal-light
     '#fb923c', // orange-light
     '#38bdf8', // sky
     '#f43f5e', // rose
@@ -448,8 +544,28 @@ export class VocabularyListComponent implements OnInit {
     return this.vocabulary.filter(v => !v.reviewed).length;
   }
 
+  get toBeReviewedCount(): number {
+    return this.vocabulary.filter(v => this.isWordDueForReview(v)).length;
+  }
+
   get reviewedCount(): number {
-    return this.vocabulary.filter(v => v.reviewed).length;
+    return this.vocabulary.filter(v => v.reviewed && !this.isWordDueForReview(v)).length;
+  }
+
+  getWordStatus(item: VocabularyItem): 'new' | 'toBeReviewed' | 'reviewed' {
+    if (!item.reviewed) {
+      return 'new';
+    }
+    if (this.isWordDueForReview(item)) {
+      return 'toBeReviewed';
+    }
+    return 'reviewed';
+  }
+
+  private isWordDueForReview(item: VocabularyItem): boolean {
+    const flashcard = this.srsService.getFlashcard(item.id);
+    if (!flashcard) return false;
+    return new Date() >= flashcard.nextReview;
   }
 
   get filteredVocabulary(): VocabularyItem[] {
@@ -463,8 +579,10 @@ export class VocabularyListComponent implements OnInit {
     // Apply status filter
     if (this.filter === 'new') {
       result = result.filter(v => !v.reviewed);
+    } else if (this.filter === 'toBeReviewed') {
+      result = result.filter(v => this.isWordDueForReview(v));
     } else if (this.filter === 'reviewed') {
-      result = result.filter(v => v.reviewed);
+      result = result.filter(v => v.reviewed && !this.isWordDueForReview(v));
     }
 
     // Apply search filter
@@ -635,7 +753,7 @@ export class VocabularyListComponent implements OnInit {
       next: () => {
         this.folderService.refreshFolders();
         this.newFolderName = '';
-        this.newFolderColor = '#7c3aed';
+        this.newFolderColor = '#D14A5A';
         this.showCreateFolderForm = false;
       },
       error: (err) => {
@@ -686,6 +804,10 @@ export class VocabularyListComponent implements OnInit {
   }
 
   getFolderWordsCount(folderId: string | null): number {
+    if (folderId === null) {
+      // "All Words" should count all vocabulary regardless of folder
+      return this.vocabulary.length;
+    }
     return this.vocabulary.filter(v => v.folderId === folderId).length;
   }
 

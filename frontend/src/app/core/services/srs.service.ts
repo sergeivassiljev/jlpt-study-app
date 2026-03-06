@@ -108,6 +108,10 @@ export class SrsService {
     return this.flashcards.filter(fc => new Date() >= fc.nextReview).length;
   }
 
+  getFlashcard(vocabularyId: string): FlashCard | undefined {
+    return this.flashcards.find(fc => fc.vocabularyId === vocabularyId);
+  }
+
   scheduleFlashcardForImmediateReview(vocabularyId: string): void {
     this.http.patch<ApiFlashCard>(
       `${this.apiBaseUrl}/flashcards/by-vocabulary/${vocabularyId}/schedule-now`,

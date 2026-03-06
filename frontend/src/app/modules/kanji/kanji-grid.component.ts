@@ -11,14 +11,15 @@ import { Kanji, Word } from '../../core/models/index';
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div class="min-h-screen transition-colors duration-300 bg-light-bg dark:bg-dark-bg text-light-paragraph dark:text-dark-paragraph">
-      <div class="container mx-auto px-4 py-8">
-        <h1 class="text-4xl font-bold mb-2 transition-colors text-primary dark:text-primary-dark">
-          N5 Kanji
-        </h1>
-        <p class="mb-8 transition-colors text-light-paragraph dark:text-dark-paragraph">
-          Master essential N5 kanji characters ({{ filteredKanji.length }} / {{ allKanji.length }})
-        </p>
+    <div class="themed-page min-h-screen transition-colors duration-300 bg-light-bg dark:bg-dark-bg text-light-paragraph dark:text-dark-paragraph">
+      <div class="container mx-auto max-w-6xl px-4 py-8">
+        <section class="rounded-3xl border border-secondary/20 dark:border-success/20 bg-white/90 dark:bg-slate-900/90 p-6 sm:p-8 shadow-md mb-7">
+          <p class="text-xs uppercase tracking-[0.16em] font-semibold text-secondary dark:text-success">Kanji Focus</p>
+          <h1 class="mt-2 text-3xl sm:text-4xl font-bold text-light-headline dark:text-dark-headline">N5 Kanji</h1>
+          <p class="mt-2 text-sm sm:text-base text-light-paragraph dark:text-dark-paragraph">
+            Master essential N5 kanji characters ({{ filteredKanji.length }} / {{ allKanji.length }})
+          </p>
+        </section>
 
         <!-- Search Input -->
         <div class="mb-6">
@@ -26,7 +27,7 @@ import { Kanji, Word } from '../../core/models/index';
                  (input)="filterKanji()"
                  type="text" 
                  placeholder="Search by character or meaning..."
-                 class="w-full px-4 py-2 border border-secondary dark:border-success rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-slate-800 text-light-paragraph dark:text-dark-paragraph placeholder-gray-400 dark:placeholder-gray-500">
+                 class="w-full px-4 py-3 border border-secondary/40 dark:border-success/35 rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-primary bg-white/95 dark:bg-slate-900/90 text-light-paragraph dark:text-dark-paragraph placeholder-gray-400 dark:placeholder-gray-500 shadow-sm">
         </div>
 
         <!-- Category Filter -->
@@ -34,13 +35,13 @@ import { Kanji, Word } from '../../core/models/index';
           <button *ngFor="let category of categories"
                   (click)="toggleCategory(category)"
                   [ngClass]="selectedCategory === category 
-                    ? 'bg-light-button dark:bg-dark-button text-white'
-                    : 'bg-light-bg dark:bg-slate-700 text-light-headline dark:text-dark-headline border border-secondary dark:border-success hover:opacity-80'"
+                    ? 'bg-light-button dark:bg-dark-button text-white shadow-sm'
+                    : 'bg-white/95 dark:bg-slate-900/90 text-light-headline dark:text-dark-headline border border-secondary/30 dark:border-success/30 hover:bg-light-bg dark:hover:bg-slate-800'"
                   class="px-4 py-2 rounded-full transition font-medium text-sm">
             {{ category }}
           </button>
           <button (click)="clearFilters()"
-                  class="px-4 py-2 text-sm transition text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark">
+                  class="px-4 py-2 text-sm rounded-full border border-secondary/25 dark:border-success/25 transition text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark hover:bg-white dark:hover:bg-slate-800">
             Clear All
           </button>
         </div>
@@ -53,7 +54,7 @@ import { Kanji, Word } from '../../core/models/index';
         <div class="grid grid-cols-3 md:grid-cols-5 gap-3 mb-8">
           <div *ngFor="let k of filteredKanji"
                (click)="selectKanji(k)"
-               class="aspect-square rounded-lg shadow hover:shadow-lg transition cursor-pointer flex items-center justify-center group border border-primary-dark bg-white dark:bg-slate-800">
+               class="aspect-square rounded-xl shadow-sm hover:shadow-md transition cursor-pointer flex items-center justify-center group border border-secondary/30 dark:border-success/30 bg-white/95 dark:bg-slate-900/90 hover:-translate-y-0.5">
             <div class="text-center">
               <p class="text-5xl font-bold group-hover:scale-110 transition text-primary dark:text-primary-dark">
                 {{ k.character }}
@@ -69,7 +70,7 @@ import { Kanji, Word } from '../../core/models/index';
         <div *ngIf="selectedKanji" 
              class="fixed inset-0 flex items-center justify-center z-50 p-4 backdrop-blur-sm transition-colors bg-black/40 dark:bg-black/60"
              (click)="selectedKanji = undefined">
-          <div class="rounded-lg shadow-xl p-8 max-w-2xl w-full max-h-96 overflow-y-auto border border-primary-dark transition-colors bg-white dark:bg-slate-800"
+          <div class="rounded-2xl shadow-xl p-8 max-w-2xl w-full max-h-96 overflow-y-auto border border-secondary/35 dark:border-success/35 transition-colors bg-white dark:bg-slate-900"
                (click)="$event.stopPropagation()">
             <div *ngIf="selectedKanji" class="flex justify-between items-start mb-6">
               <p class="text-6xl font-bold transition-colors text-primary dark:text-primary-dark">
@@ -105,8 +106,8 @@ import { Kanji, Word } from '../../core/models/index';
                 On'yomi (音読み)
               </p>
               <div class="flex gap-2 flex-wrap">
-                <span *ngFor="let onyomi of selectedKanji.onyomi"
-                      class="px-3 py-1 rounded-full text-sm font-semibold transition-colors bg-primary text-white">
+                    <span *ngFor="let onyomi of selectedKanji.onyomi"
+                      class="px-3 py-1 rounded-full text-sm font-semibold transition-colors bg-primary text-white shadow-sm">
                   {{ onyomi }}
                 </span>
               </div>
@@ -117,8 +118,8 @@ import { Kanji, Word } from '../../core/models/index';
                 Kun'yomi (訓読み)
               </p>
               <div class="flex gap-2 flex-wrap">
-                <span *ngFor="let kunyomi of selectedKanji.kunyomi"
-                      class="px-3 py-1 rounded-full text-sm font-semibold transition-colors bg-success text-white">
+                    <span *ngFor="let kunyomi of selectedKanji.kunyomi"
+                      class="px-3 py-1 rounded-full text-sm font-semibold transition-colors bg-success text-white shadow-sm">
                   {{ kunyomi }}
                 </span>
               </div>
@@ -138,7 +139,7 @@ import { Kanji, Word } from '../../core/models/index';
 
             <button *ngIf="selectedKanji"
                     (click)="addKanjiToVocabulary(selectedKanji)"
-                    class="w-full px-4 py-2 bg-success hover:opacity-90 text-white rounded-lg transition font-semibold shadow-sm hover:shadow-md mt-6">
+                    class="w-full px-4 py-2.5 bg-success hover:opacity-90 text-white rounded-xl transition font-semibold shadow-sm hover:shadow-md mt-6">
               ➕ Add to Vocabulary
             </button>
           </div>

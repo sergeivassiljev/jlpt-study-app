@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Query, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, DefaultValuePipe, Get, ParseIntPipe, Post, Query, Request, UseGuards } from '@nestjs/common';
 import { KanaService } from './kana.service';
 import { KanaStatsService, RecordAttemptDto } from './kana-stats.service';
 import { RecordKanaAttemptDto } from './dto/record-kana-attempt.dto';
 import { RecordKanaSessionDto } from './dto/record-kana-session.dto';
+import { SubmitKanaScoreDto } from './dto/submit-kana-score.dto';
 import { KanaType } from '../types';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -35,6 +36,26 @@ export class KanaController {
       return [];
     }
     return this.kanaService.searchKana(query);
+  }
+
+  // Kana Ninja leaderboard endpoints
+  @Get('leaderboard')
+  async getLeaderboard(
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+  ) {
+    return this.kanaStatsService.getLeaderboard(limit);
+  }
+
+  @Get('leaderboard/me')
+  @UseGuards(JwtAuthGuard)
+  async getMyLeaderboardEntry(@Request() req) {
+    return this.kanaStatsService.getMyBestScore(req.user.userId);
+  }
+
+  @Post('leaderboard/score')
+  @UseGuards(JwtAuthGuard)
+  async submitScore(@Request() req, @Body() body: SubmitKanaScoreDto) {
+    return this.kanaStatsService.submitBestScore(req.user.userId, body.score);
   }
 
   // Stats endpoints

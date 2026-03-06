@@ -12,27 +12,27 @@ module.exports = {
         mono: ['Courier New', 'monospace'],
       },
       colors: {
-        // Light mode colors
-        'light-bg': '#f8f5f2',
-        'light-headline': '#232323',
-        'light-paragraph': '#222525',
-        'light-button': '#078080',
-        'light-accent-secondary': '#078080',
-        'light-accent-tertiary': '#f8f5f2',
+        // Light mode colors — Sakura Day
+        'light-bg': '#FAF6F3',
+        'light-headline': '#2B2B2B',
+        'light-paragraph': '#6B6B6B',
+        'light-button': '#C83A4A',
+        'light-accent-secondary': '#F2A7B8',
+        'light-accent-tertiary': '#F4E8EC',
         
-        // Dark mode colors
-        'dark-bg': '#0b1418',
-        'dark-headline': '#e6f1f5',
-        'dark-paragraph': '#c6d4df',
-        'dark-button': '#14b8a6',
-        'dark-accent-secondary': '#14b8a6',
-        'dark-accent-tertiary': '#122027',
+        // Dark mode colors — Temple Night
+        'dark-bg': '#141417',
+        'dark-headline': '#F2F2F2',
+        'dark-paragraph': '#B9B9C0',
+        'dark-button': '#D14A5A',
+        'dark-accent-secondary': '#C97A8B',
+        'dark-accent-tertiary': '#1E1E24',
         
         // Semantic color names
-        'primary': '#078080', // Light mode primary (teal)
-        'primary-dark': '#14b8a6', // Dark mode primary (teal)
-        'secondary': '#078080', // Secondary (teal)
-        'success': '#14b8a6', // Accent/success (teal)
+        'primary': '#C83A4A', // Light mode primary (shrine red)
+        'primary-dark': '#D14A5A', // Dark mode primary (lantern red)
+        'secondary': '#F2A7B8', // Secondary (sakura pink)
+        'success': '#C97A8B', // Accent/success (night sakura)
       },
     },
   },

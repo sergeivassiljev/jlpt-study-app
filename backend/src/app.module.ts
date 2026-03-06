@@ -13,8 +13,10 @@ import { KanjiEntity } from './kanji/entities/kanji.entity';
 import { KanjiModule } from './kanji/kanji.module';
 import { UserEntity } from './auth/entities/user.entity';
 import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
 import { KanaModule } from './kana/kana.module';
 import { KanaStats } from './kana/kana-stats.entity';
+import { KanaLeaderboardEntity } from './kana/kana-leaderboard.entity';
 import { LessonWordEntity } from './study-data/entities/lesson-word.entity';
 import { LessonWordProgressEntity } from './study-data/entities/lesson-word-progress.entity';
 
@@ -32,6 +34,7 @@ import { LessonWordProgressEntity } from './study-data/entities/lesson-word-prog
         KanjiEntity,
         UserEntity,
         KanaStats,
+        KanaLeaderboardEntity,
         LessonWordEntity,
         LessonWordProgressEntity,
       ],
@@ -39,6 +42,7 @@ import { LessonWordProgressEntity } from './study-data/entities/lesson-word-prog
     }),
     StudyDataModule,
     AuthModule,
+    UsersModule,
     VocabularyModule,
     FlashcardsModule,
     BooksModule,

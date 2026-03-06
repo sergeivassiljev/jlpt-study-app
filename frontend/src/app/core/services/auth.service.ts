@@ -56,6 +56,10 @@ export class AuthService {
     return this.userSubject.value;
   }
 
+  getCurrentUserId(): string | null {
+    return this.userSubject.value?.id || null;
+  }
+
   private persistSession(response: AuthResponse): void {
     localStorage.setItem(this.tokenStorageKey, response.accessToken);
     localStorage.setItem(this.userStorageKey, JSON.stringify(response.user));

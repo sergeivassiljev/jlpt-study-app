@@ -104,7 +104,7 @@ import { ThemeService, Theme } from '../../../core/services/theme.service';
             Work (25m)
           </button>
           <button (click)="startShortBreak()"
-                  class="flex-1 py-1.5 rounded transition font-medium bg-teal-600 hover:bg-teal-700 text-white">
+                  class="flex-1 py-1.5 rounded transition font-medium bg-rose-600 hover:bg-rose-700 text-white">
             Break (5m)
           </button>
           <button (click)="startLongBreak()"
@@ -263,7 +263,7 @@ export class PomodoroTimerComponent implements OnInit, OnDestroy {
       ? 'bg-red-600 text-white'
       : this.pomodoroState.phase === 'shortBreak'
         ? 'bg-blue-600 text-white'
-        : 'bg-purple-600 text-white';
+        : 'bg-rose-600 text-white';
     
     return this.currentTheme === 'dark' 
       ? base
@@ -272,10 +272,10 @@ export class PomodoroTimerComponent implements OnInit, OnDestroy {
 
   getPhaseBarColor(): string {
     return this.pomodoroState.phase === 'work'
-      ? 'bg-red-500'
+      ? 'bg-red-600'
       : this.pomodoroState.phase === 'shortBreak'
-        ? 'bg-blue-500'
-        : 'bg-purple-500';
+        ? 'bg-blue-600'
+        : 'bg-rose-600';
   }
 
   getProgress(): number {

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { KanaService, Kana } from '../../core/services/kana.service';
+import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
 
 type PracticeMode = 'hiragana' | 'katakana' | 'mixed' | 'custom';
 type PracticeDirection = 'kana-to-romaji' | 'romaji-to-kana' | 'mixed-direction';
@@ -13,18 +14,18 @@ type SessionAttempt = { kanaId: number; character: string; romaji: string; type:
 @Component({
   selector: 'app-kana-typing',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, RouterLink, FormsModule, LoadingSpinnerComponent],
   template: `
-    <div class="min-h-screen bg-light-bg dark:bg-dark-bg">
-      <div class="container mx-auto px-4 py-8">
+    <div class="themed-page min-h-screen bg-light-bg dark:bg-dark-bg">
+      <div class="container mx-auto max-w-6xl px-4 py-8">
         <!-- Header -->
-        <div class="mb-8">
-          <div class="flex items-center gap-4 mb-4">
+        <div class="mb-8 rounded-3xl border border-secondary/20 dark:border-success/20 bg-white/90 dark:bg-slate-900/90 p-6 sm:p-8 shadow-md">
+          <div class="flex items-center gap-4 mb-4 flex-wrap">
             <a routerLink="/kana"
-               class="px-4 py-2 bg-light-surface dark:bg-slate-700 hover:bg-primary hover:text-white text-light-headline dark:text-dark-headline rounded-lg transition font-medium">
+               class="px-4 py-2 bg-light-bg dark:bg-slate-800 hover:bg-primary hover:text-white text-light-headline dark:text-dark-headline rounded-lg transition font-medium border border-secondary/25 dark:border-success/25">
               ← Back
             </a>
-            <h1 class="text-4xl font-bold text-light-headline dark:text-dark-headline">
+            <h1 class="text-3xl sm:text-4xl font-bold text-light-headline dark:text-dark-headline">
               ⌨️ Typing Practice
             </h1>
           </div>
@@ -361,7 +362,7 @@ type SessionAttempt = { kanaId: number; character: string; romaji: string; type:
           <!-- Practice Area -->
           <div class="bg-white dark:bg-slate-800 rounded-lg p-8 shadow-lg max-w-2xl mx-auto">
             <div *ngIf="loading$ | async" class="text-center py-8">
-              <p class="text-light-paragraph dark:text-dark-paragraph">Loading...</p>
+              <app-loading-spinner [size]="48" message="Loading practice data..."></app-loading-spinner>
             </div>
 
             <div *ngIf="!(loading$ | async) && currentKana" class="text-center">

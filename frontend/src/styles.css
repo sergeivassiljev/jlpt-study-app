@@ -11,35 +11,35 @@
 
 /* CSS Variables for themes */
 :root {
-  /* Light Mode (default) */
-  --bg-color: #f8f5f2;
-  --headline-color: #232323;
-  --paragraph-color: #222525;
-  --button-color: #078080;
-  --button-text: #232323;
-  --accent-secondary: #078080;
-  --accent-tertiary: #f8f5f2;
-  --illustration-main: #fffffe;
-  --illustration-highlight: #078080;
+  /* Light Mode — Sakura Day */
+  --bg-color: #FAF6F3;
+  --headline-color: #2B2B2B;
+  --paragraph-color: #6B6B6B;
+  --button-color: #C83A4A;
+  --button-text: #FFFFFF;
+  --accent-secondary: #F2A7B8;
+  --accent-tertiary: #F4E8EC;
+  --illustration-main: #FFFFFE;
+  --illustration-highlight: #E05A47;
   --scrollbar-track: var(--accent-tertiary);
   --scrollbar-thumb: var(--button-color);
-  --scrollbar-thumb-hover: var(--accent-secondary);
+  --scrollbar-thumb-hover: #A12D3A;
 }
 
 html.dark {
-  /* Dark Mode */
-  --bg-color: #0b1418;
-  --headline-color: #e6f1f5;
-  --paragraph-color: #c6d4df;
-  --button-color: #14b8a6;
-  --button-text: #fffffe;
-  --accent-secondary: #14b8a6;
-  --accent-tertiary: #122027;
-  --illustration-main: #122027;
-  --illustration-highlight: #14b8a6;
+  /* Dark Mode — Temple Night */
+  --bg-color: #141417;
+  --headline-color: #F2F2F2;
+  --paragraph-color: #B9B9C0;
+  --button-color: #D14A5A;
+  --button-text: #FFFFFF;
+  --accent-secondary: #C97A8B;
+  --accent-tertiary: #1E1E24;
+  --illustration-main: #1E1E24;
+  --illustration-highlight: #FF9B7A;
   --scrollbar-track: var(--accent-tertiary);
   --scrollbar-thumb: var(--button-color);
-  --scrollbar-thumb-hover: var(--illustration-highlight);
+  --scrollbar-thumb-hover: #FF7A6A;
 }
 
 body {
@@ -52,8 +52,49 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-html, body {
+html,
+body {
   height: 100%;
+  overflow-x: hidden;
+}
+
+/* Keep one vertical scrollbar source to prevent double right-edge scrollbars. */
+html {
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100%;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+
+/* Shared page shell used across authenticated modules. */
+.themed-page {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.themed-page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    linear-gradient(to right, rgba(200, 58, 74, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(200, 58, 74, 0.035) 1px, transparent 1px),
+    radial-gradient(42% 52% at 4% 0%, rgba(242, 167, 184, 0.18), transparent 72%),
+    radial-gradient(45% 55% at 96% 100%, rgba(224, 90, 71, 0.12), transparent 74%);
+  background-size: 38px 38px, 38px 38px, auto, auto;
+  opacity: 0.9;
+}
+
+.themed-page > * {
+  position: relative;
+  z-index: 1;
 }
 
 /* Global custom scrollbar */
@@ -168,11 +209,11 @@ input, textarea, select {
 input:focus, textarea:focus, select:focus {
   outline: none;
   border-color: var(--button-color);
-  box-shadow: 0 0 0 3px rgba(7, 128, 128, 0.1);
+  box-shadow: 0 0 0 3px rgba(200, 58, 74, 0.15);
 }
 
 html.dark input:focus,
 html.dark textarea:focus,
 html.dark select:focus {
-  box-shadow: 0 0 0 3px rgba(127, 90, 240, 0.1);
+  box-shadow: 0 0 0 3px rgba(209, 74, 90, 0.2);
 }

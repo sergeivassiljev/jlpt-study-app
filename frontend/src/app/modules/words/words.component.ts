@@ -5,6 +5,8 @@ import { RouterLink } from '@angular/router';
 import { VocabularyService } from '../../core/services/vocabulary.service';
 import { ThemeService, Theme } from '../../core/services/theme.service';
 import { JLPTLevel, TopicProgressSummary, Word } from '../../core/models/index';
+import { pageEnter, cardStagger, fadeIn, scaleIn, listItem } from '../../core/animations/page.animations';
+import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
 
 interface WordListItem {
   id: string;
@@ -50,9 +52,10 @@ type WordsViewMode = 'browse' | 'structured' | 'lesson-play' | 'lesson-test';
 @Component({
   selector: 'app-words',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, LoadingSpinnerComponent],
+  animations: [pageEnter, cardStagger, fadeIn, scaleIn, listItem],
   template: `
-    <div class="min-h-screen transition-colors duration-300 bg-light-bg dark:bg-dark-bg text-light-paragraph dark:text-dark-paragraph">
+    <div class="themed-page min-h-screen transition-colors duration-300 bg-light-bg dark:bg-dark-bg text-light-paragraph dark:text-dark-paragraph" @pageEnter>
       <div class="container mx-auto px-4 py-8 max-w-6xl">
         <h1 class="text-5xl font-bold mb-8 text-center transition-colors text-primary dark:text-primary-dark">
           Words
@@ -63,7 +66,7 @@ type WordsViewMode = 'browse' | 'structured' | 'lesson-play' | 'lesson-test';
             Choose a JLPT level to start your journey
           </p>
 
-          <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-5 gap-4" @cardStagger>
             <button *ngFor="let level of jlptLevels"
                     (click)="selectLevel(level)"
                     class="bg-white dark:bg-slate-800 rounded-xl py-8 px-6 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 border-2 border-transparent hover:border-primary dark:hover:border-primary-dark group">
@@ -87,7 +90,7 @@ type WordsViewMode = 'browse' | 'structured' | 'lesson-play' | 'lesson-test';
             </span>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8" @cardStagger>
             <button (click)="setViewMode('structured')"
                     class="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg transition-all duration-300 border-2 group"
                     [class.border-primary]="viewMode === 'structured'"
@@ -130,16 +133,15 @@ type WordsViewMode = 'browse' | 'structured' | 'lesson-play' | 'lesson-test';
             </div>
 
             <div *ngIf="selectedLevel === 'N5'" class="space-y-6">
-              <div *ngIf="isLoadingLessonTopics" class="text-center py-8 text-light-paragraph dark:text-dark-paragraph">
-                <div class="text-3xl mb-2">⏳</div>
-                <p class="text-lg">Loading topics...</p>
+              <div *ngIf="isLoadingLessonTopics" class="text-center py-8">
+                <app-loading-spinner [size]="48" message="Loading topics..."></app-loading-spinner>
               </div>
               <div *ngIf="!isLoadingLessonTopics && lessonTopics.length === 0" class="bg-white dark:bg-slate-800 rounded-xl p-8 shadow-lg text-center">
                 <p class="text-light-paragraph dark:text-dark-paragraph">No structured topics found for this level yet.</p>
               </div>
 
-              <div *ngIf="lessonTopics.length > 0" class="space-y-6">
-                <div *ngFor="let topic of lessonTopics" class="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-primary dark:hover:border-primary-dark">
+              <div *ngIf="lessonTopics.length > 0" class="space-y-6" @cardStagger>
+                <div *ngFor="let topic of lessonTopics" @listItem class="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-primary dark:hover:border-primary-dark">
                   <div class="flex items-center justify-between mb-4">
                     <h3 class="text-2xl font-bold text-light-headline dark:text-dark-headline">{{ topic.topic }}</h3>
                     <span class="text-sm px-4 py-2 rounded-full bg-primary dark:bg-primary-dark text-white font-semibold shadow">
@@ -278,10 +280,10 @@ type WordsViewMode = 'browse' | 'structured' | 'lesson-play' | 'lesson-test';
 
               <div class="pt-6 border-t-2 border-gray-200 dark:border-gray-700 space-y-3">
                 <!-- Success/Error Messages -->
-                <div *ngIf="successById[getCurrentWord()!.id]" class="p-4 rounded-lg bg-green-50 dark:bg-green-900 dark:bg-opacity-20 border-2 border-success animate-fadeIn">
+                <div *ngIf="successById[getCurrentWord()!.id]" @scaleIn class="p-4 rounded-lg bg-green-50 dark:bg-green-900 dark:bg-opacity-20 border-2 border-success animate-fadeIn">
                   <p class="text-success font-semibold text-center">✓ {{ successById[getCurrentWord()!.id] }}</p>
                 </div>
-                <div *ngIf="errorById[getCurrentWord()!.id]" class="p-4 rounded-lg bg-orange-50 dark:bg-orange-900 dark:bg-opacity-20 border-2 border-orange-400 dark:border-orange-500 animate-fadeIn">
+                <div *ngIf="errorById[getCurrentWord()!.id]" @scaleIn class="p-4 rounded-lg bg-orange-50 dark:bg-orange-900 dark:bg-opacity-20 border-2 border-orange-400 dark:border-orange-500 animate-fadeIn">
                   <p class="text-orange-600 dark:text-orange-400 font-semibold text-center">⚠️ {{ errorById[getCurrentWord()!.id] }}</p>
                 </div>
 
@@ -440,9 +442,9 @@ type WordsViewMode = 'browse' | 'structured' | 'lesson-play' | 'lesson-test';
               </div>
             </div>
 
-            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 transition-colors overflow-hidden">
+            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 transition-colors overflow-hidden" @fadeIn>
               <div class="divide-y divide-gray-200 dark:divide-gray-700">
-                <div *ngFor="let item of paginatedWords"
+                <div *ngFor="let item of paginatedWords" @listItem
                      (click)="toggleExpand(item.id)"
                      [class.bg-light-bg]="expandedId === item.id && currentTheme === 'light'"
                      [class.dark:bg-slate-700]="expandedId === item.id"

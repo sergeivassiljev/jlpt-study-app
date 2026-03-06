@@ -11,53 +11,56 @@ import { Subscription } from 'rxjs';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="min-h-screen transition-colors duration-300 bg-light-bg dark:bg-dark-bg text-light-paragraph dark:text-dark-paragraph">
-      <div class="container mx-auto px-4 py-8">
-        <h1 class="text-4xl font-bold mb-2 transition-colors text-primary dark:text-primary-dark">
-          Review Flashcards
-        </h1>
-        <p class="mb-8 transition-colors text-light-paragraph dark:text-dark-paragraph">
-          {{ reviewDue.length }} cards due for review
-        </p>
+    <div class="themed-page min-h-screen transition-colors duration-300 bg-light-bg dark:bg-dark-bg text-light-paragraph dark:text-dark-paragraph">
+      <div class="container mx-auto max-w-5xl px-4 py-8">
+        <section class="rounded-3xl border border-secondary/20 dark:border-success/20 bg-white/90 dark:bg-slate-900/90 p-6 sm:p-8 shadow-md mb-7">
+          <p class="text-xs uppercase tracking-[0.16em] font-semibold text-secondary dark:text-success">SRS Session</p>
+          <h1 class="mt-2 text-3xl sm:text-4xl font-bold text-light-headline dark:text-dark-headline">
+            Review Flashcards
+          </h1>
+          <p class="mt-2 text-sm sm:text-base text-light-paragraph dark:text-dark-paragraph">
+            {{ reviewDue.length }} cards are due right now. Keep momentum with focused recall.
+          </p>
+        </section>
 
         <div *ngIf="reviewDue.length > 0">
           <!-- Progress -->
-          <div class="mb-8">
+          <div class="mb-8 rounded-2xl border border-secondary/20 dark:border-success/20 bg-white/90 dark:bg-slate-900/90 p-4 sm:p-5 shadow-sm">
             <div class="flex justify-between mb-2">
-              <span class="transition-colors text-light-paragraph dark:text-dark-paragraph">
+              <span class="text-sm transition-colors text-light-paragraph dark:text-dark-paragraph">
                 Card {{ currentIndex + 1 }} / {{ reviewDue.length }}
               </span>
-              <span class="transition-colors text-light-paragraph dark:text-dark-paragraph">
+              <span class="text-sm font-semibold transition-colors text-primary dark:text-primary-dark">
                 {{ Math.round((currentIndex + 1) / reviewDue.length * 100) }}%
               </span>
             </div>
-            <div class="w-full rounded-full h-2 transition-colors overflow-hidden bg-light-accent-tertiary dark:bg-dark-accent-tertiary">
+            <div class="w-full rounded-full h-2.5 transition-colors overflow-hidden bg-light-accent-tertiary dark:bg-dark-accent-tertiary">
               <div class="h-2 rounded-full transition-all bg-primary dark:bg-primary-dark" 
                    [style.width.%]="((currentIndex + 1) / reviewDue.length) * 100"></div>
             </div>
           </div>
 
           <!-- Flashcard -->
-          <div class="rounded-lg shadow-lg p-12 mb-8 h-80 flex flex-col justify-center items-center cursor-pointer hover:shadow-2xl transition border bg-white dark:bg-dark-accent-tertiary border-secondary dark:border-primary-dark hover:border-primary dark:hover:border-primary-dark"
+          <div class="rounded-3xl shadow-md p-8 sm:p-12 mb-8 min-h-[22rem] flex flex-col justify-center items-center cursor-pointer transition border bg-white/95 dark:bg-slate-900/95 border-secondary/30 dark:border-success/30 hover:border-primary dark:hover:border-primary-dark"
                (click)="toggleFlip()">
             <div class="text-center w-full">
-              <p class="text-sm mb-4 transition-colors text-light-paragraph dark:text-dark-paragraph">
+              <p class="text-xs uppercase tracking-[0.14em] mb-4 transition-colors text-secondary dark:text-success font-semibold">
                 {{ flipped ? 'Answer' : 'Question' }}
               </p>
               <div class="overflow-hidden">
                 <p *ngIf="!flipped" 
-                   class="text-5xl font-bold transition-all text-light-headline dark:text-dark-headline"
+                   class="flip-pane text-5xl sm:text-6xl font-bold text-light-headline dark:text-dark-headline"
                    [style.opacity]="flipped ? '0' : '1'"
                    [style.transform]="flipped ? 'translateY(20px)' : 'translateY(0)'">
                   {{ currentCard?.front }}
                 </p>
                 <div *ngIf="flipped && currentVocab" 
-                     class="transition-all text-light-headline dark:text-dark-headline"
+                     class="flip-pane text-light-headline dark:text-dark-headline"
                      [style.opacity]="flipped ? '1' : '0'"
                      [style.transform]="flipped ? 'translateY(0)' : 'translateY(20px)'">
-                  <div class="text-3xl font-semibold">{{ currentVocab.word.reading }}</div>
-                  <div class="text-2xl mt-4">{{ currentVocab.word.meaning }}</div>
-                  <div class="text-sm mt-4 italic transition-colors text-light-paragraph dark:text-dark-paragraph">
+                  <div class="text-3xl sm:text-4xl font-semibold">{{ currentVocab.word.reading }}</div>
+                  <div class="text-2xl sm:text-3xl mt-3">{{ currentVocab.word.meaning }}</div>
+                  <div class="text-sm mt-4 italic transition-colors text-light-paragraph dark:text-dark-paragraph max-w-2xl mx-auto">
                     {{ currentVocab.exampleSentence }}
                   </div>
                 </div>
@@ -69,27 +72,27 @@ import { Subscription } from 'rxjs';
           </div>
 
           <!-- Review Buttons -->
-          <div *ngIf="flipped && currentCard" class="flex gap-4 justify-center">
+          <div *ngIf="flipped && currentCard" class="grid gap-3 sm:grid-cols-3">
             <button (click)="reviewCard('hard')"
-                    class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition font-semibold shadow-md hover:shadow-lg">
+                    class="w-full px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl transition font-semibold shadow-sm hover:shadow-md">
               Hard (Tomorrow)
             </button>
             <button (click)="reviewCard('medium')"
-                    class="px-6 py-3 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition font-semibold shadow-md hover:shadow-lg">
+                    class="w-full px-4 py-3 bg-yellow-600 hover:bg-yellow-700 text-white rounded-xl transition font-semibold shadow-sm hover:shadow-md">
               Medium (+3 days)
             </button>
             <button (click)="reviewCard('easy')"
-                    class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition font-semibold shadow-md hover:shadow-lg">
+                    class="w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl transition font-semibold shadow-sm hover:shadow-md">
               Easy (+7 days)
             </button>
           </div>
         </div>
 
-        <div *ngIf="reviewDue.length === 0" class="text-center py-12">
+        <div *ngIf="reviewDue.length === 0" class="text-center rounded-3xl border border-secondary/20 dark:border-success/20 bg-white/90 dark:bg-slate-900/90 py-16 px-6 shadow-sm">
           <p class="text-2xl mb-4 transition-colors text-light-headline dark:text-dark-headline">
             🎉 No cards due for review!
           </p>
-          <p class="transition-colors text-light-paragraph dark:text-dark-paragraph">
+          <p class="transition-colors text-light-paragraph dark:text-dark-paragraph max-w-xl mx-auto">
             Come back later or add new vocabulary from the reader.
           </p>
         </div>
@@ -97,8 +100,7 @@ import { Subscription } from 'rxjs';
     </div>
   `,
   styles: [`
-    /* Smooth fade and slide animation for card flip */
-    div {
+    .flip-pane {
       transition: opacity 0.3s ease, transform 0.3s ease;
     }
   `]

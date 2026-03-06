@@ -9,22 +9,22 @@ import { KanaService, Kana } from '../../core/services/kana.service';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
   template: `
-    <div class="min-h-screen bg-light-bg dark:bg-slate-900 transition-colors p-4">
+    <div class="themed-page min-h-screen bg-light-bg dark:bg-slate-900 transition-colors p-4">
       <div class="max-w-5xl mx-auto">
         <!-- Header with Navigation -->
-        <div class="mb-8">
-          <div class="flex items-center justify-between mb-4">
+        <div class="mb-8 rounded-3xl border border-secondary/20 dark:border-success/20 bg-white/90 dark:bg-slate-900/90 p-6 shadow-md">
+          <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-4">
             <div class="flex items-center gap-4">
               <a routerLink="/kana"
-                 class="px-4 py-2 bg-light-surface dark:bg-slate-700 hover:bg-primary hover:text-white text-light-headline dark:text-dark-headline rounded-lg transition font-medium">
+                 class="px-4 py-2 bg-light-bg dark:bg-slate-800 hover:bg-primary hover:text-white text-light-headline dark:text-dark-headline rounded-lg transition font-medium border border-secondary/25 dark:border-success/25">
                 ← Back
               </a>
-              <h1 class="text-4xl font-bold text-light-headline dark:text-dark-headline">
+              <h1 class="text-3xl sm:text-4xl font-bold text-light-headline dark:text-dark-headline">
                 カタカナ Katakana
               </h1>
             </div>
             <a routerLink="/kana/hiragana"
-               class="px-4 py-2 bg-light-surface dark:bg-slate-700 hover:bg-primary hover:text-white text-light-headline dark:text-dark-headline rounded-lg transition font-medium">
+               class="px-4 py-2 bg-light-bg dark:bg-slate-800 hover:bg-primary hover:text-white text-light-headline dark:text-dark-headline rounded-lg transition font-medium border border-secondary/25 dark:border-success/25">
               ← Switch to ひらがな
             </a>
           </div>
@@ -34,7 +34,7 @@ import { KanaService, Kana } from '../../core/services/kana.service';
         </div>
 
         <!-- Katakana Table -->
-        <div class="bg-white dark:bg-slate-800 rounded-lg p-6 shadow">
+        <div class="bg-white/95 dark:bg-slate-900/90 rounded-2xl p-6 shadow-sm border border-secondary/30 dark:border-success/30">
           <div class="overflow-x-auto">
             <table class="w-full text-center border-collapse">
               <thead>

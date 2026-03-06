@@ -11,27 +11,28 @@ type AdminTab = 'manage-books' | 'create-book' | 'create-chapter';
   standalone: true,
   imports: [CommonModule, BookFormComponent, ChapterEditorComponent, BooksManagementComponent],
   template: `
-    <div class="min-h-screen transition-colors duration-300 bg-light-bg dark:bg-dark-bg text-light-paragraph dark:text-dark-paragraph">
+    <div class="themed-page min-h-screen transition-colors duration-300 bg-light-bg dark:bg-dark-bg text-light-paragraph dark:text-dark-paragraph">
       <div class="max-w-7xl mx-auto px-6 py-12">
         <!-- Header -->
-        <div class="mb-12">
-          <h1 class="text-5xl font-bold mb-3 transition-colors text-light-headline dark:text-dark-headline">
+        <div class="mb-10 rounded-3xl border border-secondary/20 dark:border-success/20 bg-white/90 dark:bg-slate-900/90 p-6 sm:p-8 shadow-md">
+          <p class="text-xs uppercase tracking-[0.16em] font-semibold text-secondary dark:text-success">Workspace Control</p>
+          <h1 class="text-4xl sm:text-5xl font-bold mt-2 mb-2 transition-colors text-light-headline dark:text-dark-headline">
             Admin Panel
           </h1>
-          <p class="text-lg transition-colors text-light-paragraph dark:text-dark-paragraph">
+          <p class="text-base sm:text-lg transition-colors text-light-paragraph dark:text-dark-paragraph">
             Manage books, chapters, and content
           </p>
         </div>
 
         <!-- Tabs -->
-        <div class="flex gap-4 mb-8 border-b border-secondary dark:border-success overflow-x-auto">
+        <div class="flex gap-3 mb-8 border-b border-secondary/20 dark:border-success/20 overflow-x-auto pb-2">
           <button
             (click)="currentTab = 'manage-books'"
             [class.active]="currentTab === 'manage-books'"
-            class="px-6 py-3 font-medium transition-all whitespace-nowrap"
+            class="px-5 py-2.5 font-medium transition-all whitespace-nowrap rounded-full border border-secondary/20 dark:border-success/20"
             [ngClass]="{
-              'text-primary dark:text-primary-dark border-b-2 border-primary dark:border-primary-dark': currentTab === 'manage-books',
-              'text-light-paragraph dark:text-dark-paragraph': currentTab !== 'manage-books'
+              'text-white bg-primary dark:bg-primary-dark border-primary dark:border-primary-dark shadow-sm': currentTab === 'manage-books',
+              'text-light-paragraph dark:text-dark-paragraph bg-white dark:bg-slate-900': currentTab !== 'manage-books'
             }"
           >
             📚 Manage Books
@@ -39,10 +40,10 @@ type AdminTab = 'manage-books' | 'create-book' | 'create-chapter';
           <button
             (click)="currentTab = 'create-book'"
             [class.active]="currentTab === 'create-book'"
-            class="px-6 py-3 font-medium transition-all whitespace-nowrap"
+            class="px-5 py-2.5 font-medium transition-all whitespace-nowrap rounded-full border border-secondary/20 dark:border-success/20"
             [ngClass]="{
-              'text-primary dark:text-primary-dark border-b-2 border-primary dark:border-primary-dark': currentTab === 'create-book',
-              'text-light-paragraph dark:text-dark-paragraph': currentTab !== 'create-book'
+              'text-white bg-primary dark:bg-primary-dark border-primary dark:border-primary-dark shadow-sm': currentTab === 'create-book',
+              'text-light-paragraph dark:text-dark-paragraph bg-white dark:bg-slate-900': currentTab !== 'create-book'
             }"
           >
             ➕ Create Book
@@ -50,10 +51,10 @@ type AdminTab = 'manage-books' | 'create-book' | 'create-chapter';
           <button
             (click)="currentTab = 'create-chapter'"
             [class.active]="currentTab === 'create-chapter'"
-            class="px-6 py-3 font-medium transition-all whitespace-nowrap"
+            class="px-5 py-2.5 font-medium transition-all whitespace-nowrap rounded-full border border-secondary/20 dark:border-success/20"
             [ngClass]="{
-              'text-primary dark:text-primary-dark border-b-2 border-primary dark:border-primary-dark': currentTab === 'create-chapter',
-              'text-light-paragraph dark:text-dark-paragraph': currentTab !== 'create-chapter'
+              'text-white bg-primary dark:bg-primary-dark border-primary dark:border-primary-dark shadow-sm': currentTab === 'create-chapter',
+              'text-light-paragraph dark:text-dark-paragraph bg-white dark:bg-slate-900': currentTab !== 'create-chapter'
             }"
           >
             📝 Create Chapter
@@ -77,7 +78,7 @@ type AdminTab = 'manage-books' | 'create-book' | 'create-chapter';
         </div>
 
         <!-- Info Box -->
-        <div class="mt-12 p-6 rounded-lg transition-colors bg-light-bg dark:bg-slate-800 border border-secondary dark:border-success">
+        <div class="mt-12 p-6 rounded-2xl transition-colors bg-white/95 dark:bg-slate-900/95 border border-secondary/25 dark:border-success/25 shadow-sm">
           <h3 class="font-bold mb-3 transition-colors text-light-headline dark:text-dark-headline">💡 Tips:</h3>
           <ul class="space-y-2 text-sm transition-colors text-light-paragraph dark:text-dark-paragraph">
             <li><strong>Ruby Notation:</strong> Use <code class="bg-light-bg dark:bg-slate-700 px-1.5 py-0.5 rounded">kanji[reading]</code> for furigana</li>

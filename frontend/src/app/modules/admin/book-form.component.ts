@@ -17,72 +17,74 @@ interface BookForm {
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div class="max-w-2xl mx-auto p-6 rounded-lg transition-colors bg-white dark:bg-slate-800 border border-secondary dark:border-success">
-      <h2 class="text-2xl font-bold mb-6 transition-colors text-light-headline dark:text-dark-headline">Create New Book</h2>
+    <div class="max-w-3xl mx-auto rounded-3xl border border-secondary/25 dark:border-success/25 bg-white/95 dark:bg-slate-900/95 p-6 sm:p-8 shadow-md">
+      <p class="text-xs uppercase tracking-[0.16em] font-semibold text-secondary dark:text-success mb-2">Create Content</p>
+      <h2 class="text-3xl font-bold transition-colors text-light-headline dark:text-dark-headline">Create New Book</h2>
+      <p class="mt-2 text-sm transition-colors text-light-paragraph dark:text-dark-paragraph">
+        Add a new graded reader and define its metadata before creating chapters.
+      </p>
 
-      <form (ngSubmit)="submitBook()" class="space-y-4">
-        <!-- Book ID -->
-        <div>
-          <label class="block text-sm font-semibold transition-colors text-light-paragraph dark:text-dark-paragraph mb-1">
-            Book ID (e.g., beginner-3)
-          </label>
-          <input
-            type="text"
-            [(ngModel)]="form.id"
-            name="id"
-            class="w-full px-3 py-2 rounded border transition-colors bg-white dark:bg-slate-700 border-secondary dark:border-success text-light-headline dark:text-dark-headline"
-            placeholder="beginner-3"
-          />
+      <form (ngSubmit)="submitBook()" class="mt-6 space-y-5">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-semibold transition-colors text-light-paragraph dark:text-dark-paragraph mb-1.5">
+              Book ID
+            </label>
+            <input
+              type="text"
+              [(ngModel)]="form.id"
+              name="id"
+              class="w-full px-3.5 py-2.5 rounded-xl border transition-colors bg-white dark:bg-slate-800 border-secondary/40 dark:border-success/35 text-light-headline dark:text-dark-headline"
+              placeholder="beginner-3"
+            />
+            <p class="mt-1 text-xs text-light-paragraph/80 dark:text-dark-paragraph/80">Example: beginner-3</p>
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold transition-colors text-light-paragraph dark:text-dark-paragraph mb-1.5">
+              JLPT Level
+            </label>
+            <select
+              [(ngModel)]="form.level"
+              name="level"
+              class="w-full px-3.5 py-2.5 rounded-xl border transition-colors bg-white dark:bg-slate-800 border-secondary/40 dark:border-success/35 text-light-headline dark:text-dark-headline"
+            >
+              <option value="beginner">Beginner</option>
+              <option value="N5">N5</option>
+              <option value="N4">N4</option>
+              <option value="N3">N3</option>
+            </select>
+          </div>
         </div>
 
-        <!-- Title -->
         <div>
-          <label class="block text-sm font-semibold transition-colors text-light-paragraph dark:text-dark-paragraph mb-1">
+          <label class="block text-sm font-semibold transition-colors text-light-paragraph dark:text-dark-paragraph mb-1.5">
             Book Title
           </label>
           <input
             type="text"
             [(ngModel)]="form.title"
             name="title"
-            class="w-full px-3 py-2 rounded border transition-colors bg-white dark:bg-slate-700 border-secondary dark:border-success text-light-headline dark:text-dark-headline"
+            class="w-full px-3.5 py-2.5 rounded-xl border transition-colors bg-white dark:bg-slate-800 border-secondary/40 dark:border-success/35 text-light-headline dark:text-dark-headline"
             placeholder="新しい物語"
           />
         </div>
 
-        <!-- Description -->
         <div>
-          <label class="block text-sm font-semibold transition-colors text-light-paragraph dark:text-dark-paragraph mb-1">
+          <label class="block text-sm font-semibold transition-colors text-light-paragraph dark:text-dark-paragraph mb-1.5">
             Description
           </label>
           <textarea
             [(ngModel)]="form.description"
             name="description"
-            rows="3"
-            class="w-full px-3 py-2 rounded border transition-colors bg-white dark:bg-slate-700 border-secondary dark:border-success text-light-headline dark:text-dark-headline"
+            rows="4"
+            class="w-full px-3.5 py-2.5 rounded-xl border transition-colors bg-white dark:bg-slate-800 border-secondary/40 dark:border-success/35 text-light-headline dark:text-dark-headline"
             placeholder="Book description..."
           ></textarea>
         </div>
 
-        <!-- Level -->
         <div>
-          <label class="block text-sm font-semibold transition-colors text-light-paragraph dark:text-dark-paragraph mb-1">
-            JLPT Level
-          </label>
-          <select
-            [(ngModel)]="form.level"
-            name="level"
-            class="w-full px-3 py-2 rounded border transition-colors bg-white dark:bg-slate-700 border-secondary dark:border-success text-light-headline dark:text-dark-headline"
-          >
-            <option value="beginner">Beginner</option>
-            <option value="N5">N5</option>
-            <option value="N4">N4</option>
-            <option value="N3">N3</option>
-          </select>
-        </div>
-
-        <!-- Chapters Count -->
-        <div>
-          <label class="block text-sm font-semibold transition-colors text-light-paragraph dark:text-dark-paragraph mb-1">
+          <label class="block text-sm font-semibold transition-colors text-light-paragraph dark:text-dark-paragraph mb-1.5">
             Number of Chapters
           </label>
           <input
@@ -90,44 +92,42 @@ interface BookForm {
             [(ngModel)]="form.chaptersCount"
             name="chaptersCount"
             min="1"
-            class="w-full px-3 py-2 rounded border transition-colors bg-white dark:bg-slate-700 border-secondary dark:border-success text-light-headline dark:text-dark-headline"
+            class="w-full px-3.5 py-2.5 rounded-xl border transition-colors bg-white dark:bg-slate-800 border-secondary/40 dark:border-success/35 text-light-headline dark:text-dark-headline"
           />
         </div>
 
-        <!-- Cover Image -->
-        <div>
-          <label class="block text-sm font-semibold transition-colors text-light-paragraph dark:text-dark-paragraph mb-1">
+        <div class="rounded-2xl border border-secondary/30 dark:border-success/25 bg-light-bg/55 dark:bg-slate-800/60 p-4">
+          <label class="block text-sm font-semibold transition-colors text-light-paragraph dark:text-dark-paragraph mb-1.5">
             Cover Image
           </label>
           <input
             type="file"
             accept="image/*"
             (change)="onCoverImageSelected($event)"
-            class="w-full px-3 py-2 rounded border transition-colors bg-white dark:bg-slate-700 border-secondary dark:border-success text-light-headline dark:text-dark-headline"
+            class="w-full px-3.5 py-2.5 rounded-xl border transition-colors bg-white dark:bg-slate-900 border-secondary/40 dark:border-success/35 text-light-headline dark:text-dark-headline"
           />
 
-          <div *ngIf="coverImagePreview" class="mt-3 p-3 rounded border border-secondary dark:border-success bg-light-bg dark:bg-slate-700">
+          <div *ngIf="coverImagePreview" class="mt-3 p-3 rounded-xl border border-secondary/35 dark:border-success/30 bg-white dark:bg-slate-900">
             <p class="text-xs mb-2 transition-colors text-light-paragraph dark:text-dark-paragraph">Preview</p>
             <img
               [src]="coverImagePreview"
               alt="Cover preview"
-              class="h-40 w-auto object-contain rounded"
+              class="h-44 w-auto object-contain rounded-lg"
             />
             <button
               type="button"
               (click)="removeCoverImage()"
-              class="mt-3 px-3 py-1 text-sm rounded transition-colors bg-red-600 hover:bg-red-700 text-white"
+              class="mt-3 px-3 py-1.5 text-sm rounded-lg transition-colors bg-red-600 hover:bg-red-700 text-white"
             >
               Remove Image
             </button>
           </div>
         </div>
 
-        <!-- Submit -->
         <button
           type="submit"
           [disabled]="isSubmitting"
-          class="w-full px-4 py-2 bg-success hover:opacity-90 text-white rounded-md transition-all font-medium disabled:opacity-50"
+          class="w-full px-4 py-3 bg-success hover:opacity-90 text-white rounded-xl transition-all font-semibold disabled:opacity-50"
         >
           {{ isSubmitting ? 'Creating...' : 'Create Book' }}
         </button>
@@ -140,7 +140,12 @@ interface BookForm {
         </p>
       </form>
     </div>
-  `
+  `,
+  styles: [`
+    :host {
+      display: block;
+    }
+  `]
 })
 export class BookFormComponent {
   @Output() bookCreated = new EventEmitter<void>();

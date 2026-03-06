@@ -1,4 +1,4 @@
-<div class="min-h-screen transition-colors duration-300 bg-light-bg dark:bg-dark-bg text-light-paragraph dark:text-dark-paragraph">
+<div class="app-shell transition-colors duration-300 bg-light-bg dark:bg-dark-bg text-light-paragraph dark:text-dark-paragraph">
   <!-- Navigation Bar (only for authenticated users) -->
   <nav *ngIf="currentUserEmail"
        class="sticky top-0 z-40 transition-colors duration-300 bg-white/95 dark:bg-dark-accent-tertiary/95 backdrop-blur-md border-b border-secondary dark:border-success shadow dark:shadow-lg">
@@ -7,7 +7,7 @@
         <!-- Logo -->
         <div class="flex items-center gap-2">
           <span class="text-2xl">📚</span>
-          <a routerLink="/books" 
+          <a routerLink="/dashboard" 
              class="text-2xl font-bold transition text-primary dark:text-primary-dark hover:opacity-80">
             {{ title }}
           </a>
@@ -15,23 +15,53 @@
 
         <!-- Navigation Links -->
         <div class="hidden md:flex items-center gap-1">
+          <!-- Dashboard -->
+          <a routerLink="/dashboard"
+             routerLinkActive="border-b-2"
+             [routerLinkActiveOptions]="{'exact': true}"
+             class="px-4 py-2 transition text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark border-primary">
+            🏠 Dashboard
+          </a>
+
+          <!-- Books -->
           <a routerLink="/books" 
              routerLinkActive="border-b-2"
              [routerLinkActiveOptions]="{'exact': true}"
-             class="px-4 py-2 transition text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark border-primary"
-             routerLinkActive="border-b-2">
+             class="px-4 py-2 transition text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark border-primary">
             📖 Read
           </a>
-          <a routerLink="/vocabulary" 
-             routerLinkActive="border-b-2"
-             class="px-4 py-2 transition text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark border-primary">
-            📝 Vocab
-          </a>
-           <a routerLink="/words" 
-             routerLinkActive="border-b-2"
-             class="px-4 py-2 transition text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark border-primary">
-            🔤 Words
-           </a>
+
+          <!-- Learning Dropdown -->
+          <div class="relative group">
+            <button class="px-4 py-2 transition text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark flex items-center gap-1 rounded-lg hover:bg-light-bg dark:hover:bg-slate-800">
+              📚 Learn
+              <span class="text-xs">▼</span>
+            </button>
+            <div class="absolute left-0 mt-0 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-secondary dark:border-slate-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 py-2 z-50">
+              <a routerLink="/vocabulary" (click)="closeMobileMenu()"
+                 class="block px-4 py-2 text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark hover:bg-light-bg dark:hover:bg-slate-700">
+                📝 Vocabulary
+              </a>
+              <a routerLink="/words" (click)="closeMobileMenu()"
+                 class="block px-4 py-2 text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark hover:bg-light-bg dark:hover:bg-slate-700">
+                🔤 Words
+              </a>
+              <a routerLink="/kanji" (click)="closeMobileMenu()"
+                 class="block px-4 py-2 text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark hover:bg-light-bg dark:hover:bg-slate-700">
+                漢字 Kanji
+              </a>
+              <a routerLink="/kana" (click)="closeMobileMenu()"
+                 class="block px-4 py-2 text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark hover:bg-light-bg dark:hover:bg-slate-700">
+                あ Kana
+              </a>
+              <a routerLink="/grammar" (click)="closeMobileMenu()"
+                 class="block px-4 py-2 text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark hover:bg-light-bg dark:hover:bg-slate-700">
+                📚 Grammar
+              </a>
+            </div>
+          </div>
+
+          <!-- Review -->
           <a routerLink="/review" 
              routerLinkActive="border-b-2"
              class="px-4 py-2 transition text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark border-primary relative">
@@ -40,21 +70,15 @@
               {{ dueCount }}
             </span>
           </a>
-          <a routerLink="/kanji" 
+
+          <!-- Games -->
+          <a routerLink="/games" 
              routerLinkActive="border-b-2"
              class="px-4 py-2 transition text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark border-primary">
-            漢字 Kanji
+            🥷 Games
           </a>
-          <a routerLink="/grammar" 
-             routerLinkActive="border-b-2"
-             class="px-4 py-2 transition text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark border-primary">
-            📚 Grammar
-          </a>
-          <a routerLink="/kana" 
-             routerLinkActive="border-b-2"
-             class="px-4 py-2 transition text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark border-primary">
-            あ Kana
-          </a>
+
+          <!-- Admin -->
           <a routerLink="/admin" 
              routerLinkActive="border-b-2"
              class="px-4 py-2 transition text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark border-primary">
@@ -62,14 +86,17 @@
           </a>
         </div>
 
-        <!-- Theme Toggle & Mobile Toggle -->
+        <!-- Theme Toggle & Mobile Toggle & Profile -->
         <div class="flex items-center gap-4">
           <ng-container *ngIf="currentUserEmail; else loginLink">
-            <span class="text-sm text-light-paragraph dark:text-dark-paragraph">
-              {{ currentUserEmail }}
-            </span>
+            <a routerLink="/profile"
+               routerLinkActive="text-primary dark:text-primary-dark"
+               class="flex items-center gap-2 px-3 py-1.5 rounded-lg transition hover:bg-light-bg dark:hover:bg-slate-800"
+               title="Profile Settings">
+              <span class="text-2xl">{{ currentUserAvatar }}</span>
+            </a>
             <button (click)="logout()"
-                    class="transition text-sm font-medium text-secondary dark:text-success hover:opacity-80">
+                    class="hidden sm:block transition text-sm font-medium text-secondary dark:text-success hover:opacity-80">
               Logout
             </button>
           </ng-container>
@@ -96,56 +123,88 @@
         </div>
       </div>
 
-      <div *ngIf="mobileMenuOpen" class="md:hidden pb-4">
-        <div class="flex flex-col gap-1">
+      <!-- Mobile Menu -->
+      <div *ngIf="mobileMenuOpen" class="md:hidden pb-4 border-t border-secondary/20 dark:border-slate-700">
+        <div class="flex flex-col gap-1 pt-4">
+          <a routerLink="/dashboard" (click)="closeMobileMenu()"
+             class="px-3 py-2 rounded transition text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark hover:bg-light-bg dark:hover:bg-slate-800">
+            🏠 Dashboard
+          </a>
+
           <a routerLink="/books" (click)="closeMobileMenu()"
              class="px-3 py-2 rounded transition text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark hover:bg-light-bg dark:hover:bg-slate-800">
             📖 Read
           </a>
-          <a routerLink="/vocabulary" (click)="closeMobileMenu()"
-             class="px-3 py-2 rounded transition text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark hover:bg-light-bg dark:hover:bg-slate-800">
-            📝 Vocab
-          </a>
-          <a routerLink="/words" (click)="closeMobileMenu()"
-             class="px-3 py-2 rounded transition text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark hover:bg-light-bg dark:hover:bg-slate-800">
-            🔤 Words
-          </a>
+
+          <!-- Learning Section (Mobile) -->
+          <button (click)="toggleLearningDropdown()"
+                  class="px-3 py-2 rounded transition text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark hover:bg-light-bg dark:hover:bg-slate-800 w-full text-left flex justify-between items-center">
+            📚 Learn
+            <span [class.rotate-180]="learningDropdownOpen" class="transition">▼</span>
+          </button>
+          <div *ngIf="learningDropdownOpen" class="pl-4 flex flex-col gap-1">
+            <a routerLink="/vocabulary" (click)="closeMobileMenu()"
+               class="px-3 py-2 rounded transition text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark hover:bg-light-bg dark:hover:bg-slate-800">
+              📝 Vocabulary
+            </a>
+            <a routerLink="/words" (click)="closeMobileMenu()"
+               class="px-3 py-2 rounded transition text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark hover:bg-light-bg dark:hover:bg-slate-800">
+              🔤 Words
+            </a>
+            <a routerLink="/kanji" (click)="closeMobileMenu()"
+               class="px-3 py-2 rounded transition text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark hover:bg-light-bg dark:hover:bg-slate-800">
+              漢字 Kanji
+            </a>
+            <a routerLink="/kana" (click)="closeMobileMenu()"
+               class="px-3 py-2 rounded transition text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark hover:bg-light-bg dark:hover:bg-slate-800">
+              あ Kana
+            </a>
+            <a routerLink="/grammar" (click)="closeMobileMenu()"
+               class="px-3 py-2 rounded transition text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark hover:bg-light-bg dark:hover:bg-slate-800">
+              📚 Grammar
+            </a>
+          </div>
+
           <a routerLink="/review" (click)="closeMobileMenu()"
              class="px-3 py-2 rounded transition text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark hover:bg-light-bg dark:hover:bg-slate-800">
-            🎴 Review <span *ngIf="dueCount > 0">({{ dueCount }})</span>
+            🎴 Review <span *ngIf="dueCount > 0" class="ml-2 bg-secondary dark:bg-success text-white text-xs font-bold rounded px-2">{{ dueCount }}</span>
           </a>
-          <a routerLink="/kanji" (click)="closeMobileMenu()"
+
+          <a routerLink="/games" (click)="closeMobileMenu()"
              class="px-3 py-2 rounded transition text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark hover:bg-light-bg dark:hover:bg-slate-800">
-            漢字 Kanji
+            🥷 Games
           </a>
-          <a routerLink="/grammar" (click)="closeMobileMenu()"
-             class="px-3 py-2 rounded transition text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark hover:bg-light-bg dark:hover:bg-slate-800">
-            📚 Grammar
-          </a>
-          <a routerLink="/kana" (click)="closeMobileMenu()"
-             class="px-3 py-2 rounded transition text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark hover:bg-light-bg dark:hover:bg-slate-800">
-            あ Kana
-          </a>
+
           <a routerLink="/admin" (click)="closeMobileMenu()"
              class="px-3 py-2 rounded transition text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark hover:bg-light-bg dark:hover:bg-slate-800">
             ⚙️ Admin
           </a>
+
+          <a routerLink="/profile" (click)="closeMobileMenu()"
+             class="px-3 py-2 rounded transition text-light-paragraph dark:text-dark-paragraph hover:text-primary dark:hover:text-primary-dark hover:bg-light-bg dark:hover:bg-slate-800">
+            {{ currentUserAvatar }} Profile
+          </a>
+
+          <button *ngIf="currentUserEmail" (click)="logout()"
+                  class="px-3 py-2 rounded transition text-secondary dark:text-success hover:opacity-80 w-full text-left">
+            Logout
+          </button>
         </div>
       </div>
     </div>
   </nav>
 
   <!-- Main Content -->
-  <main>
+  <main class="app-main">
     <router-outlet></router-outlet>
   </main>
 
   <!-- Footer (only for authenticated users) -->
   <footer *ngIf="currentUserEmail"
-          class="py-6 mt-12 transition-colors duration-300 bg-light-bg dark:bg-dark-bg text-light-paragraph dark:text-dark-paragraph border-t border-secondary dark:border-success">
+          class="relative z-10 py-6 border-t border-secondary/25 dark:border-success/30 bg-light-bg dark:bg-slate-950 text-light-paragraph dark:text-dark-paragraph">
     <div class="container mx-auto px-4 text-center">
-      <p>Learn Japanese through reading • Minimalist • Systematic • Deep Learning</p>
-      <p class="text-sm mt-2">Spaced Repetition SRS • N5 Focus • Real Context</p>
+      <p class="text-sm font-semibold text-light-headline dark:text-dark-headline mb-1">JLPT Study App</p>
+      <p class="text-xs text-light-paragraph/80 dark:text-dark-paragraph/80">Read • Learn • Review • Play • Repeat</p>
     </div>
   </footer>
 

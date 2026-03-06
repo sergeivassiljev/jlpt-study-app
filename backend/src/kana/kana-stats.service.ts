@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { KanaStats, KanaMasteryLevel } from './kana-stats.entity';
+import { KanaLeaderboardEntity } from './kana-leaderboard.entity';
+import { UserEntity } from '../auth/entities/user.entity';
 
 export interface RecordAttemptDto {
   userId: string;
@@ -24,11 +26,30 @@ export interface UserKanaStatsOverview {
   notPracticedCount: number;
 }
 
+export interface KanaLeaderboardEntry {
+  rank: number;
+  userId: string;
+  email: string;
+  bestScore: number;
+  bestScoreAt: string | null;
+}
+
+export interface MyKanaLeaderboardEntry {
+  userId: string;
+  email: string;
+  bestScore: number;
+  rank: number | null;
+}
+
 @Injectable()
 export class KanaStatsService {
   constructor(
     @InjectRepository(KanaStats)
     private kanaStatsRepository: Repository<KanaStats>,
+    @InjectRepository(KanaLeaderboardEntity)
+    private kanaLeaderboardRepository: Repository<KanaLeaderboardEntity>,
+    @InjectRepository(UserEntity)
+    private userRepository: Repository<UserEntity>,
   ) {}
 
   async recordAttempt(dto: RecordAttemptDto): Promise<KanaStats> {
@@ -305,7 +326,92 @@ export class KanaStatsService {
     }
   }
 
+  async submitBestScore(userId: string, score: number): Promise<MyKanaLeaderboardEntry & { isNewRecord: boolean }> {
+    const normalizedScore = Math.max(0, Math.floor(score));
+
+    let entry = await this.kanaLeaderboardRepository.findOne({ where: { userId } });
+    if (!entry) {
+      entry = this.kanaLeaderboardRepository.create({
+        userId,
+        bestScore: 0,
+        bestScoreAt: null,
+      });
+    }
+
+    let isNewRecord = false;
+    if (normalizedScore > entry.bestScore) {
+      entry.bestScore = normalizedScore;
+      entry.bestScoreAt = new Date();
+      isNewRecord = true;
+      await this.kanaLeaderboardRepository.save(entry);
+    }
+
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    const rank = entry.bestScore > 0 ? await this.getRankForScore(entry.bestScore) : null;
+
+    return {
+      userId,
+      email: user?.email ?? 'unknown@example.com',
+      bestScore: entry.bestScore,
+      rank,
+      isNewRecord,
+    };
+  }
+
+  async getMyBestScore(userId: string): Promise<MyKanaLeaderboardEntry> {
+    const [user, entry] = await Promise.all([
+      this.userRepository.findOne({ where: { id: userId } }),
+      this.kanaLeaderboardRepository.findOne({ where: { userId } }),
+    ]);
+
+    const bestScore = entry?.bestScore ?? 0;
+    const rank = bestScore > 0 ? await this.getRankForScore(bestScore) : null;
+
+    return {
+      userId,
+      email: user?.email ?? 'unknown@example.com',
+      bestScore,
+      rank,
+    };
+  }
+
+  async getLeaderboard(limit = 10): Promise<KanaLeaderboardEntry[]> {
+    const safeLimit = Math.max(1, Math.min(100, Math.floor(limit) || 10));
+
+    const rows = await this.kanaLeaderboardRepository
+      .createQueryBuilder('leaderboard')
+      .innerJoin(UserEntity, 'user', 'user.id = leaderboard.userId')
+      .where('leaderboard.bestScore > 0')
+      .orderBy('leaderboard.bestScore', 'DESC')
+      .addOrderBy('leaderboard.bestScoreAt', 'ASC')
+      .limit(safeLimit)
+      .select([
+        'leaderboard.userId AS userId',
+        'leaderboard.bestScore AS bestScore',
+        'leaderboard.bestScoreAt AS bestScoreAt',
+        'user.email AS email',
+      ])
+      .getRawMany();
+
+    return rows.map((row, index) => ({
+      rank: index + 1,
+      userId: row.userId,
+      email: row.email,
+      bestScore: Number(row.bestScore) || 0,
+      bestScoreAt: row.bestScoreAt ? new Date(row.bestScoreAt).toISOString() : null,
+    }));
+  }
+
   async resetUserStats(userId: string): Promise<void> {
     await this.kanaStatsRepository.delete({ userId });
+  }
+
+  private async getRankForScore(score: number): Promise<number> {
+    const higherScoresCount = await this.kanaLeaderboardRepository
+      .createQueryBuilder('leaderboard')
+      .where('leaderboard.bestScore > :score', { score })
+      .getCount();
+
+    return higherScoresCount + 1;
   }
 }

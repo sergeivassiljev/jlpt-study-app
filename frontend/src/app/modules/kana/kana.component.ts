@@ -8,14 +8,15 @@ import { KanaService, Kana, KanaStats, UserKanaStatsOverview, KanaMasteryLevel }
   standalone: true,
   imports: [CommonModule, RouterLink],
   template: `
-    <div class="min-h-screen bg-light-bg dark:bg-slate-900 transition-colors p-4">
+    <div class="themed-page min-h-screen bg-light-bg dark:bg-slate-900 transition-colors p-4">
       <div class="max-w-4xl mx-auto">
         <!-- Header -->
-        <div class="mb-12 text-center">
-          <h1 class="text-5xl font-bold text-light-headline dark:text-dark-headline mb-4">
+        <div class="mb-8 rounded-3xl border border-secondary/20 dark:border-success/20 bg-white/90 dark:bg-slate-900/90 p-6 sm:p-8 shadow-md text-center">
+          <p class="text-xs uppercase tracking-[0.16em] font-semibold text-secondary dark:text-success">Kana Hub</p>
+          <h1 class="text-4xl sm:text-5xl font-bold text-light-headline dark:text-dark-headline mt-2 mb-3">
             Kana Learning
           </h1>
-          <p class="text-lg text-light-paragraph dark:text-dark-paragraph">
+          <p class="text-base sm:text-lg text-light-paragraph dark:text-dark-paragraph">
             Choose a practice mode to get started
           </p>
         </div>
@@ -24,7 +25,7 @@ import { KanaService, Kana, KanaStats, UserKanaStatsOverview, KanaMasteryLevel }
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <!-- Hiragana Card -->
           <a routerLink="/kana/hiragana"
-             class="group bg-white dark:bg-slate-800 rounded-xl p-8 shadow-lg hover:shadow-2xl transition-all hover:scale-105 border-2 border-transparent hover:border-primary cursor-pointer">
+             class="group bg-white/95 dark:bg-slate-900/90 rounded-2xl p-8 shadow-sm hover:shadow-md transition-all hover:scale-[1.02] border border-secondary/30 dark:border-success/30 hover:border-primary cursor-pointer">
             <div class="text-center">
               <div class="text-6xl font-bold text-primary mb-4">
                 ひらがな
@@ -43,7 +44,7 @@ import { KanaService, Kana, KanaStats, UserKanaStatsOverview, KanaMasteryLevel }
 
           <!-- Katakana Card -->
           <a routerLink="/kana/katakana"
-             class="group bg-white dark:bg-slate-800 rounded-xl p-8 shadow-lg hover:shadow-2xl transition-all hover:scale-105 border-2 border-transparent hover:border-primary cursor-pointer">
+             class="group bg-white/95 dark:bg-slate-900/90 rounded-2xl p-8 shadow-sm hover:shadow-md transition-all hover:scale-[1.02] border border-secondary/30 dark:border-success/30 hover:border-primary cursor-pointer">
             <div class="text-center">
               <div class="text-6xl font-bold text-primary mb-4">
                 カタカナ
@@ -62,7 +63,7 @@ import { KanaService, Kana, KanaStats, UserKanaStatsOverview, KanaMasteryLevel }
 
           <!-- Typing Practice Card -->
           <a routerLink="/kana/typing"
-             class="group bg-white dark:bg-slate-800 rounded-xl p-8 shadow-lg hover:shadow-2xl transition-all hover:scale-105 border-2 border-transparent hover:border-primary cursor-pointer">
+             class="group bg-white/95 dark:bg-slate-900/90 rounded-2xl p-8 shadow-sm hover:shadow-md transition-all hover:scale-[1.02] border border-secondary/30 dark:border-success/30 hover:border-primary cursor-pointer">
             <div class="text-center">
               <div class="text-6xl font-bold text-primary mb-4">
                 ⌨️
@@ -82,27 +83,27 @@ import { KanaService, Kana, KanaStats, UserKanaStatsOverview, KanaMasteryLevel }
 
         <!-- Statistics Section -->
         <div *ngIf="statsOverview" class="mb-8">
-          <div class="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg">
+          <div class="bg-white/95 dark:bg-slate-900/90 rounded-2xl p-6 shadow-sm border border-secondary/30 dark:border-success/30">
             <h2 class="text-2xl font-bold text-light-headline dark:text-dark-headline mb-6">
               📊 Your Progress
             </h2>
 
             <!-- Overall Stats -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              <div class="text-center p-4 bg-light-bg dark:bg-slate-700 rounded-lg">
+              <div class="text-center p-4 bg-light-bg/80 dark:bg-slate-800 rounded-xl border border-secondary/20 dark:border-success/20">
                 <div class="text-3xl font-bold text-primary">{{ statsOverview.totalKanaPracticed }}</div>
                 <div class="text-sm text-light-paragraph dark:text-dark-paragraph">Practiced</div>
               </div>
-              <div class="text-center p-4 bg-light-bg dark:bg-slate-700 rounded-lg">
+              <div class="text-center p-4 bg-light-bg/80 dark:bg-slate-800 rounded-xl border border-secondary/20 dark:border-success/20">
                 <div class="text-3xl font-bold text-green-600">{{ statsOverview.overallAccuracy.toFixed(1) }}%</div>
                 <div class="text-sm text-light-paragraph dark:text-dark-paragraph">Accuracy</div>
               </div>
-              <div class="text-center p-4 bg-light-bg dark:bg-slate-700 rounded-lg">
+              <div class="text-center p-4 bg-light-bg/80 dark:bg-slate-800 rounded-xl border border-secondary/20 dark:border-success/20">
                 <div class="text-3xl font-bold text-blue-600">{{ (statsOverview.avgResponseTime / 1000).toFixed(1) }}s</div>
                 <div class="text-sm text-light-paragraph dark:text-dark-paragraph">Avg Time</div>
               </div>
-              <div class="text-center p-4 bg-light-bg dark:bg-slate-700 rounded-lg">
-                <div class="text-3xl font-bold text-purple-600">{{ statsOverview.totalAttempts }}</div>
+              <div class="text-center p-4 bg-light-bg/80 dark:bg-slate-800 rounded-xl border border-secondary/20 dark:border-success/20">
+                <div class="text-3xl font-bold text-primary">{{ statsOverview.totalAttempts }}</div>
                 <div class="text-sm text-light-paragraph dark:text-dark-paragraph">Total Attempts</div>
               </div>
             </div>
@@ -133,27 +134,27 @@ import { KanaService, Kana, KanaStats, UserKanaStatsOverview, KanaMasteryLevel }
                 (click)="setStatsMode('all')"
                 [class.bg-primary]="statsMode === 'all'"
                 [class.text-white]="statsMode === 'all'"
-                [class.bg-light-surface]="statsMode !== 'all'"
-                [class.dark:bg-slate-700]="statsMode !== 'all'"
-                class="px-4 py-2 rounded-lg transition font-medium">
+                [class.bg-white]="statsMode !== 'all'"
+                [class.dark:bg-slate-800]="statsMode !== 'all'"
+                class="px-4 py-2 rounded-full transition font-medium border border-secondary/20 dark:border-success/20">
                 All Kana
               </button>
               <button
                 (click)="setStatsMode('hiragana')"
                 [class.bg-primary]="statsMode === 'hiragana'"
                 [class.text-white]="statsMode === 'hiragana'"
-                [class.bg-light-surface]="statsMode !== 'hiragana'"
-                [class.dark:bg-slate-700]="statsMode !== 'hiragana'"
-                class="px-4 py-2 rounded-lg transition font-medium">
+                [class.bg-white]="statsMode !== 'hiragana'"
+                [class.dark:bg-slate-800]="statsMode !== 'hiragana'"
+                class="px-4 py-2 rounded-full transition font-medium border border-secondary/20 dark:border-success/20">
                 ひらがな
               </button>
               <button
                 (click)="setStatsMode('katakana')"
                 [class.bg-primary]="statsMode === 'katakana'"
                 [class.text-white]="statsMode === 'katakana'"
-                [class.bg-light-surface]="statsMode !== 'katakana'"
-                [class.dark:bg-slate-700]="statsMode !== 'katakana'"
-                class="px-4 py-2 rounded-lg transition font-medium">
+                [class.bg-white]="statsMode !== 'katakana'"
+                [class.dark:bg-slate-800]="statsMode !== 'katakana'"
+                class="px-4 py-2 rounded-full transition font-medium border border-secondary/20 dark:border-success/20">
                 カタカナ
               </button>
             </div>
@@ -185,7 +186,7 @@ import { KanaService, Kana, KanaStats, UserKanaStatsOverview, KanaMasteryLevel }
         <!-- Future Modes (Coming Soon) -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <!-- Mixed Practice Card (Coming Soon) -->
-          <div class="bg-white dark:bg-slate-800 rounded-xl p-8 shadow-lg border-2 border-secondary dark:border-slate-700 opacity-60 cursor-not-allowed">
+          <div class="bg-white/95 dark:bg-slate-900/90 rounded-2xl p-8 shadow-sm border border-secondary/30 dark:border-success/30 opacity-60 cursor-not-allowed">
             <div class="text-center">
               <div class="text-6xl font-bold text-light-paragraph dark:text-dark-paragraph mb-4">
                 あア
@@ -203,7 +204,7 @@ import { KanaService, Kana, KanaStats, UserKanaStatsOverview, KanaMasteryLevel }
           </div>
 
           <!-- Matching Game Card (Coming Soon) -->
-          <div class="bg-white dark:bg-slate-800 rounded-xl p-8 shadow-lg border-2 border-secondary dark:border-slate-700 opacity-60 cursor-not-allowed">
+          <div class="bg-white/95 dark:bg-slate-900/90 rounded-2xl p-8 shadow-sm border border-secondary/30 dark:border-success/30 opacity-60 cursor-not-allowed">
             <div class="text-center">
               <div class="text-6xl font-bold text-light-paragraph dark:text-dark-paragraph mb-4">
                 🎮

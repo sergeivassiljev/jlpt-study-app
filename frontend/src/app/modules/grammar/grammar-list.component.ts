@@ -9,22 +9,23 @@ import { GrammarItem } from '../../core/models/index';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="min-h-screen transition-colors duration-300 bg-light-bg dark:bg-dark-bg text-light-paragraph dark:text-dark-paragraph">
-      <div class="container mx-auto px-4 py-8">
-        <h1 class="text-4xl font-bold mb-2 transition-colors text-primary dark:text-primary-dark">
-          N5 Grammar
-        </h1>
-        <p class="mb-8 transition-colors text-light-paragraph dark:text-dark-paragraph">
-          Master {{ grammarItems.length }} essential N5 grammar patterns
-        </p>
+    <div class="themed-page min-h-screen transition-colors duration-300 bg-light-bg dark:bg-dark-bg text-light-paragraph dark:text-dark-paragraph">
+      <div class="container mx-auto max-w-6xl px-4 py-8">
+        <section class="rounded-3xl border border-secondary/20 dark:border-success/20 bg-white/90 dark:bg-slate-900/90 p-6 sm:p-8 shadow-md mb-7">
+          <p class="text-xs uppercase tracking-[0.16em] font-semibold text-secondary dark:text-success">Grammar Guide</p>
+          <h1 class="mt-2 text-3xl sm:text-4xl font-bold text-light-headline dark:text-dark-headline">N5 Grammar</h1>
+          <p class="mt-2 text-sm sm:text-base text-light-paragraph dark:text-dark-paragraph">
+            Master {{ grammarItems.length }} essential N5 grammar patterns
+          </p>
+        </section>
 
         <div class="space-y-6">
           <div *ngFor="let item of grammarItems; let i = index"
                (click)="expandedId = expandedId === item.id ? undefined : item.id"
-               class="rounded-lg shadow hover:shadow-lg transition cursor-pointer border border-secondary dark:border-success bg-white dark:bg-slate-800">
+               class="rounded-2xl shadow-sm hover:shadow-md transition cursor-pointer border border-secondary/30 dark:border-success/30 bg-white/95 dark:bg-slate-900/90">
             
             <!-- Header -->
-            <div class="p-6 flex justify-between items-start">
+            <div class="p-6 flex justify-between items-start gap-4">
               <div class="flex-1">
                 <div class="flex items-center gap-3 mb-2">
                   <span class="text-2xl font-bold transition-colors text-primary dark:text-primary-dark">
@@ -46,12 +47,12 @@ import { GrammarItem } from '../../core/models/index';
 
             <!-- Details -->
             <div *ngIf="expandedId == item.id" 
-                 class="px-6 pb-6 border-t border-secondary dark:border-success transition-colors bg-light-bg dark:bg-slate-700">
+                 class="px-6 pb-6 border-t border-secondary/30 dark:border-success/30 transition-colors bg-light-bg/80 dark:bg-slate-800/80">
               <div class="mb-6">
                 <p class="text-sm mb-2 transition-colors text-light-paragraph dark:text-dark-paragraph">
                   Structure
                 </p>
-                <p class="p-3 rounded font-mono text-sm transition-colors bg-white dark:bg-slate-900 text-light-headline dark:text-dark-headline border border-secondary">
+                <p class="p-3 rounded-xl font-mono text-sm transition-colors bg-white dark:bg-slate-900 text-light-headline dark:text-dark-headline border border-secondary/35 dark:border-success/35">
                   {{ item.structure }}
                 </p>
               </div>
@@ -62,7 +63,7 @@ import { GrammarItem } from '../../core/models/index';
                 </p>
                 <div class="space-y-4">
                   <div *ngFor="let example of item.examples" 
-                       class="p-4 rounded border border-secondary bg-white dark:bg-slate-900">
+                       class="p-4 rounded-xl border border-secondary/30 dark:border-success/30 bg-white dark:bg-slate-900">
                     <p class="text-lg font-semibold mb-1 transition-colors text-light-headline dark:text-dark-headline">
                       {{ example.japanese }}
                     </p>
